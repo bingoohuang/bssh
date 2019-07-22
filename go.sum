@@ -6,8 +6,6 @@ github.com/blacknon/go-scplib v0.0.0-20190214025421-eff8fdc20f75 h1:qLncV9WSHR9F
 github.com/blacknon/go-scplib v0.0.0-20190214025421-eff8fdc20f75/go.mod h1:Jg1cVjFuCmnfl3eHU/iz1yuc+R5ZiamqmiToD/tkINE=
 github.com/blacknon/go-scplib v0.1.0 h1:aqOisPQeweqnJ8Fj0shKeIAph0f2YeF78kHQqecQGLw=
 github.com/blacknon/go-scplib v0.1.0/go.mod h1:4C1mtfKx4LurNk74Q1m77WCgICatc8nCw3TI73lrLZc=
-github.com/blacknon/go-sshlib v0.1.0 h1:+WVOauAuig5ThexmNmQYqn2NhaDM2M9O37nmRAKpiUU=
-github.com/blacknon/go-sshlib v0.1.0/go.mod h1:4ykyYiHigKdce31Mxpq4XdZnYCngi7mO97XD9trpIZ4=
 github.com/blacknon/lssh v0.5.6/go.mod h1:9To3eDTG80iV2SW0vCVg3R4zL/0eDFgZog0xKDmDkZ0=
 github.com/c-bata/go-prompt v0.2.3 h1:jjCS+QhG/sULBhAaBdjb2PlMRVaKXQgn+4yzaauvs2s=
 github.com/c-bata/go-prompt v0.2.3/go.mod h1:VzqtzE2ksDBcdln8G7mk2RX9QyGjH+OVqOCSiVIqS34=
@@ -19,8 +17,12 @@ github.com/kevinburke/ssh_config v0.0.0-20180830205328-81db2a75821e h1:RgQk53JHp
 github.com/kevinburke/ssh_config v0.0.0-20180830205328-81db2a75821e/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/mattn/go-colorable v0.1.1 h1:G1f5SKeVxmagw/IyvzvtZE4Gybcc4Tr1tf7I8z0XgOg=
 github.com/mattn/go-colorable v0.1.1/go.mod h1:FuOcm+DKB9mbwrcAfNl7/TZVBZ6rcnceauSikq3lYCQ=
+github.com/mattn/go-colorable v0.1.2 h1:/bC9yWikZXAL9uJdulbSfyVNIR3n3trXl+v8+1sx8mU=
+github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-isatty v0.0.5 h1:tHXDdz1cpzGaovsTB+TVB8q90WEokoVmfMqoVcrLUgw=
 github.com/mattn/go-isatty v0.0.5/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
+github.com/mattn/go-isatty v0.0.8 h1:HLtExJ+uU2HOZ+wI0Tt5DtUDrx8yhUqDcp7fYERX4CE=
+github.com/mattn/go-isatty v0.0.8/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
 github.com/mattn/go-runewidth v0.0.4 h1:2BvfKmzob6Bmd4YsL0zygOqfdFnK7GR4QL06Do4/p7Y=
 github.com/mattn/go-runewidth v0.0.4/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859 h1:smQbSzmT3EHl4EUwtFwFGmGIpiYgIiiPeVv1uguIQEE=
