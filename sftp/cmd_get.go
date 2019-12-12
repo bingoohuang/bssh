@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mitchellh/go-homedir"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
@@ -51,6 +53,10 @@ func (r *RunSftp) get(args []string) {
 		// set path
 		source := c.Args()[0]
 		target := c.Args()[1]
+
+		if t, err := homedir.Expand(target); err == nil {
+			source = t
+		}
 
 		// get target directory abs
 		target, err := filepath.Abs(target)
@@ -186,9 +192,9 @@ func (r *RunSftp) pullPath(client *SftpConnect, path, target string) (err error)
 			}
 
 			// set mode
-			if r.Permission {
-				os.Chmod(localpath, stat.Mode())
-			}
+			//if r.Permission {
+			os.Chmod(localpath, stat.Mode())
+			//}
 		}
 	}
 
