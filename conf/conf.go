@@ -89,6 +89,7 @@ type ServerConfig struct {
 	// Connect auth Setting
 	Pass            string   `toml:"pass"`
 	Passes          []string `toml:"passes"`
+	Passphrase      string   `toml:"passphrase"`
 	Key             string   `toml:"key"`
 	KeyCommand      string   `toml:"keycmd"`
 	KeyCommandPass  string   `toml:"keycmdpass"`
