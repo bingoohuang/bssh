@@ -81,6 +81,9 @@ type IncludesConfig struct {
 
 // Structure for holding SSH connection information
 type ServerConfig struct {
+	// templates, host:port user/pass
+	Tmpl string `toml:"tmpl"`
+
 	// Connect basic Setting
 	Addr string `toml:"addr"`
 	Port string `toml:"port"`
@@ -184,11 +187,21 @@ func ReadConf(confPath string) (config Config) {
 		os.Exit(1)
 	}
 
+	tmplConfigs := make([]tmplConfig, 0)
+
 	// reduce common setting (in .lssh.conf servers)
 	for key, value := range config.Server {
 		setValue := serverConfigReduct(config.Common, value)
 		config.Server[key] = setValue
+
+		if value.Tmpl != "" {
+			delete(config.Server, key)
+			tmplConfigs = append(tmplConfigs, tmplConfig{
+				k: key, c: setValue, t: ParseHosts(setValue.Tmpl)})
+		}
 	}
+
+	tmplServers(tmplConfigs, &config)
 
 	// Read Openssh configs
 	if len(config.SshConfig) == 0 {

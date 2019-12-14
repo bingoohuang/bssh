@@ -18,6 +18,7 @@ require (
 	github.com/pkg/sftp v1.10.1
 	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942 // indirect
 	github.com/sevlyar/go-daemon v0.1.5
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.6.1
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.21.0
