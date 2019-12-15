@@ -1,17 +1,13 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
-
-package main
+package app
 
 import (
 	"fmt"
-	"github.com/blacknon/lssh"
 	"os"
 	"os/user"
 	"sort"
 	"strings"
 
+	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/check"
 	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/lssh/conf"
@@ -19,12 +15,6 @@ import (
 	"github.com/blacknon/lssh/scp"
 	"github.com/urfave/cli"
 )
-
-func main() {
-	app := Lscp()
-	args := common.ParseArgs(app.Flags, os.Args)
-	app.Run(args)
-}
 
 func Lscp() (app *cli.App) {
 	// Default config file path

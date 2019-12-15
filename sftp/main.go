@@ -12,7 +12,7 @@ import (
 	"github.com/blacknon/lssh/conf"
 	"github.com/blacknon/lssh/output"
 	sshl "github.com/blacknon/lssh/ssh"
-	"github.com/c-bata/go-prompt"
+	prompt "github.com/c-bata/go-prompt"
 	"github.com/pkg/sftp"
 	"github.com/vbauerster/mpb"
 )

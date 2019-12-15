@@ -1,24 +1,25 @@
 # Make sure to check the documentation at https://goreleaser.com, https://goreleaser.com/customization/
-project_name: lssh
-builds:
-  - main: cmd/lssh/main.go
-    id: lssh
-  - main: cmd/lscp/main.go
-    id: lscp
-  - main: cmd/lsftp/main.go
-    id: lsftp
-build:
+project_name: logtail
+before:
   hooks:
-    post: ./upx.sh
-  goarch:
-    - amd64
+    # you may remove this if you don't use vgo
+    - go mod download
+builds:
+  -
+    main: ./cmd/lssh/main.go
+    hooks:
+      post: ./upx.sh
+    goos:
+      - darwin
+    goarch:
+      - amd64
 env:
   - CGO_ENABLED=0
 archives:
 - replacements:
     darwin: Darwin
-    #linux: Linux
-    #amd64: x86_64
+    linux: Linux
+    amd64: x86_64
 checksum:
   name_template: 'checksums.txt'
 snapshot:

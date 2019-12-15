@@ -1,4 +1,4 @@
 package lssh
 
 // AppVersion ...
-const AppVersion = "0.6.9"
+const AppVersion = "0.6.10"
