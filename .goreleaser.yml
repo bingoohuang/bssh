@@ -1,0 +1,35 @@
+# Make sure to check the documentation at https://goreleaser.com, https://goreleaser.com/customization/
+project_name: lssh
+before:
+  hooks:
+    # you may remove this if you don't use vgo
+    - go mod download
+builds:
+  - binary: lssh
+    main: cmd/lssh/main.go
+  - binary: lsftp
+    main: cmd/lsftp/main.go
+  - binary: lscp
+    main: cmd/lscp/main.go
+build:
+  hooks:
+    post: ./upx.sh
+  goarch:
+    - amd64
+env:
+  - CGO_ENABLED=0
+archives:
+- replacements:
+    darwin: Darwin
+    linux: Linux
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'

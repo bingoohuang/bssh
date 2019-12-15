@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/blacknon/lssh"
 	"os"
 	"os/user"
 	"sort"
@@ -60,7 +61,7 @@ USAGE:
 	app.Name = "lscp"
 	app.Usage = "TUI list select and parallel scp client command."
 	app.Copyright = "blacknon(blacknon@orebibou.com)"
-	app.Version = "0.6.0"
+	app.Version = lssh.AppVersion
 
 	// options
 	// TODO(blacknon): オプションの追加(0.6.1)

@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/blacknon/lssh"
 	"os"
 	"os/user"
 	"sort"
@@ -60,7 +61,7 @@ USAGE:
 	app.Name = "lssh"
 	app.Usage = "TUI list select and parallel ssh client command."
 	app.Copyright = "blacknon(blacknon@orebibou.com)"
-	app.Version = "0.6.0"
+	app.Version = lssh.AppVersion
 
 	// TODO(blacknon): オプションの追加
 	//     -f       ... バックグラウンドでの接続(X11接続やport forwardingをバックグラウンドで実行する場合など)。

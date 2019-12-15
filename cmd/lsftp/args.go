@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/blacknon/lssh"
 	"os"
 	"os/user"
 	"sort"
@@ -51,7 +52,7 @@ USAGE:
 	app.Name = "lsftp"
 	app.Usage = "TUI list select and parallel sftp client command."
 	app.Copyright = "blacknon(blacknon@orebibou.com)"
-	app.Version = "0.6.0"
+	app.Version = lssh.AppVersion
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "file,f", Value: defConf, Usage: "config file path"},
