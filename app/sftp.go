@@ -51,7 +51,7 @@ USAGE:
 	app.Version = lssh.AppVersion
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "file,f", Value: defConf, Usage: "config file path"},
+		cli.StringFlag{Name: "file,F", Value: defConf, Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
 

@@ -65,7 +65,7 @@ USAGE:
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect servernames"},
 		cli.BoolFlag{Name: "list,l", Usage: "print server list from config"},
-		cli.StringFlag{Name: "file,f", Value: defConf, Usage: "config file path"},
+		cli.StringFlag{Name: "file,F", Value: defConf, Usage: "config file path"},
 		cli.BoolFlag{Name: "permission,p", Usage: "copy file permission"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}

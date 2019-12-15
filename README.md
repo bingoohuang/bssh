@@ -131,7 +131,7 @@ option(lscp)
 	OPTIONS:
 	    --host value, -H value  connect servernames
 	    --list, -l              print server list from config
-	    --file value, -f value  config file path (default: "/Users/blacknon/.lssh.conf")
+	    --file value, -F value  config file path (default: "/Users/blacknon/.lssh.conf")
 	    --permission, -p        copy file permission
 	    --help, -h              print this help
 	    --version, -v           print the version
@@ -167,7 +167,7 @@ option(lsftp)
 	    lsftp [options]
 	
 	OPTIONS:
-	    --file value, -f value  config file path (default: "/Users/blacknon/.lssh.conf")
+	    --file value, -F value  config file path (default: "/Users/blacknon/.lssh.conf")
 	    --help, -h              print this help
 	    --version, -v           print the version
 	

@@ -4,7 +4,7 @@ _lssh() {
         '(- *)'{-h,--help}'[print this help]' \
         '(- *)'{-v,--version}'[print the version]' \
         '(-H --host)'{-H,--host}'[Connect servername]:_message' \
-        '(-f --file)'{-f,--file}'+[Config file path]:include file:_files' \
+        '(-F --file)'{-f,--file}'+[Config file path]:include file:_files' \
         '-L[Local port forward mode.Specify a \[bind_address:\]port:remote_address:port]' \
         '-R[Remote port forward mode.Specify a \[bind_address:\]port:remote_address:port.]' \
         '-D[Dynamic port forward mode(Socks5). Specify a port.]' \

@@ -16,20 +16,22 @@ func main() {
 	// ssh/scp/ftp
 	var ap *cli.App
 	args := os.Args
-	if len(args) > 0 {
-		switch args[0] {
+	if len(args) > 1 {
+		switch args[1] {
 		case "scp":
-			args = args[1:]
+			args = append(args[0:1], args[2:]...)
 			ap = app.Lscp()
 		case "ftp":
-			args = args[1:]
+			args = append(args[0:1], args[2:]...)
 			ap = app.Lsftp()
 		case "ssh":
-			args = args[1:]
-			ap = app.Lssh()
-		default:
+			args = append(args[0:1], args[2:]...)
 			ap = app.Lssh()
 		}
+	}
+
+	if ap == nil {
+		ap = app.Lssh()
 	}
 
 	ap.Run(common.ParseArgs(ap.Flags, args))
