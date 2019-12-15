@@ -1,9 +1,5 @@
 # Make sure to check the documentation at https://goreleaser.com, https://goreleaser.com/customization/
 project_name: lssh
-before:
-  hooks:
-    # you may remove this if you don't use vgo
-    - go mod download
 builds:
   - main: cmd/lssh/main.go
     id: lssh
