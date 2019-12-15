@@ -5,15 +5,12 @@ before:
     # you may remove this if you don't use vgo
     - go mod download
 builds:
-  - main: cmd/lssh/*
+  - main: cmd/lssh/main.go
     id: lssh
-    binary: lssh
-  - main: cmd/lscp/*
+  - main: cmd/lscp/main.go
     id: lscp
-    binary: lscp
-  - main: cmd/lsftp/*
+  - main: cmd/lsftp/main.go
     id: lsftp
-    binary: lsftp
 build:
   hooks:
     post: ./upx.sh
