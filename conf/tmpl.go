@@ -24,13 +24,27 @@ func tmplServers(tmplConfigs []tmplConfig, config *Config) {
 			c.User = t.User
 			c.Pass = t.Password
 
+			fixNote(&c)
+
 			key := tc.k
 			if len(tc.t) > 1 {
-				key = fmt.Sprintf("%s-%d", tc.k, i+1)
+				key += fmt.Sprintf("-%d", i+1)
 			}
+
 			config.Server[key] = c
 		}
 	}
+}
+
+func fixNote(c *ServerConfig) {
+	if strings.Contains(c.Note, c.Addr) {
+		return
+	}
+
+	if c.Note != "" {
+		c.Note += "-"
+	}
+	c.Note += c.User + "@" + c.Addr + ":" + c.Port
 }
 
 // Tmpl represents the structure of remote host information for ssh.
@@ -41,7 +55,8 @@ type Tmpl struct {
 	Password string // empty when using public key
 }
 
-func ParseHosts(tmpl string) []Tmpl {
+// ParseTmpl parses the tmpl.
+func ParseTmpl(tmpl string) []Tmpl {
 	hosts := make([]Tmpl, 0)
 
 	fields := str.FieldsX(tmpl, "(", ")", -1)

@@ -197,7 +197,7 @@ func ReadConf(confPath string) (config Config) {
 		if value.Tmpl != "" {
 			delete(config.Server, key)
 			tmplConfigs = append(tmplConfigs, tmplConfig{
-				k: key, c: setValue, t: ParseHosts(setValue.Tmpl)})
+				k: key, c: setValue, t: ParseTmpl(setValue.Tmpl)})
 		}
 	}
 
