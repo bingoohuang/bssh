@@ -176,6 +176,8 @@ func (r *RunSftp) pushFile(client *SftpConnect, localfile io.Reader, path string
 		return
 	}
 
+	defer remotefile.Close()
+
 	// set tee reader
 	rd := io.TeeReader(localfile, remotefile)
 

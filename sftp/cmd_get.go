@@ -161,28 +161,10 @@ func (r *RunSftp) pullPath(client *SftpConnect, path, target string) (err error)
 			if stat.IsDir() { // is directory
 				os.Mkdir(localpath, 0755)
 			} else { // is not directory
-				// get size
-				size := stat.Size()
-
-				// open remote file
-				remotefile, err := client.Connect.Open(p)
-				if err != nil {
+				if err := pullFile(stat, client, localpath, p, r); err != nil {
 					fmt.Fprintf(ow, "Error: %s\n", err)
 					continue
 				}
-
-				// open local file
-				localfile, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE, 0644)
-				if err != nil {
-					fmt.Fprintf(ow, "Error: %s\n", err)
-					continue
-				}
-
-				// set tee reader
-				rd := io.TeeReader(remotefile, localfile)
-
-				r.ProgressWG.Add(1)
-				client.Output.ProgressPrinter(size, rd, p)
 			}
 
 			// set mode
@@ -193,4 +175,31 @@ func (r *RunSftp) pullPath(client *SftpConnect, path, target string) (err error)
 	}
 
 	return
+}
+
+func pullFile(stat os.FileInfo, client *SftpConnect, localpath, p string, r *RunSftp) error {
+	// get size
+	size := stat.Size()
+
+	// open remote file
+	remotefile, err := client.Connect.Open(p)
+	if err != nil {
+		return err
+	}
+
+	defer remotefile.Close()
+
+	// open local file
+	localfile, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer localfile.Close()
+
+	// set tee reader
+	rd := io.TeeReader(remotefile, localfile)
+
+	r.ProgressWG.Add(1)
+	client.Output.ProgressPrinter(size, rd, p)
 }
