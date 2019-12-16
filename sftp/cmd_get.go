@@ -202,4 +202,6 @@ func pullFile(stat os.FileInfo, client *SftpConnect, localpath, p string, r *Run
 
 	r.ProgressWG.Add(1)
 	client.Output.ProgressPrinter(size, rd, p)
+
+	return nil
 }
