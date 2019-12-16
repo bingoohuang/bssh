@@ -12,7 +12,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
-	"os/user"
 	"strings"
 	"time"
 
@@ -168,8 +167,7 @@ type OpenSshConfig struct {
 // ReadConf load configuration file and return Config structure
 // TODO(blacknon): リファクタリング！(v0.6.1) 外出しや処理のまとめなど
 func ReadConf(confPath string) (config Config) {
-	// user path
-	usr, _ := user.Current()
+	confPath = common.ExpandHomeDir(confPath)
 
 	if !common.IsExist(confPath) {
 		fmt.Printf("Config file(%s) Not Found.\nPlease create file.\n\n", confPath)
@@ -240,10 +238,10 @@ func ReadConf(confPath string) (config Config) {
 			// key to md5
 			hasher := md5.New()
 			hasher.Write([]byte(keyString))
-			key := string(hex.EncodeToString(hasher.Sum(nil)))
+			key := hex.EncodeToString(hasher.Sum(nil))
 
 			// append config.Include[key]
-			config.Include[key] = IncludeConfig{strings.Replace(includePath, "~", usr.HomeDir, 1)}
+			config.Include[key] = IncludeConfig{common.ExpandHomeDir(includePath)}
 		}
 	}
 
@@ -253,7 +251,7 @@ func ReadConf(confPath string) (config Config) {
 			var includeConf Config
 
 			// user path
-			path := strings.Replace(v.Path, "~", usr.HomeDir, 1)
+			path := common.ExpandHomeDir(v.Path)
 
 			// Read include config file
 			_, err := toml.DecodeFile(path, &includeConf)

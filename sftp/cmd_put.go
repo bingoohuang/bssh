@@ -13,8 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
-
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
@@ -52,15 +50,11 @@ func (r *RunSftp) put(args []string) {
 		r.Progress = mpb.New(mpb.WithWaitGroup(r.ProgressWG))
 
 		// set path
-		source := c.Args()[0]
+		source := common.ExpandHomeDir(c.Args()[0])
 		target := c.Args()[1]
 
-		if s, err := homedir.Expand(source); err == nil {
-			source = s
-		}
-
 		// get local host directory walk data
-		pathset := []PathSet{}
+		var pathset []PathSet
 		data, err := common.WalkDir(source)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
