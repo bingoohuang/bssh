@@ -13,7 +13,6 @@ import (
 	"github.com/bingoohuang/gou/pbe"
 	"github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/common"
-	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -44,13 +43,13 @@ func (r *Run) CreateAuthMethodMap() {
 
 		// Password
 		if config.Pass != "" {
-			r.registAuthMapPassword(server, config.Pass, config.Passphrase)
+			r.registAuthMapPassword(server, config.Pass)
 		}
 
 		// Multiple Password
 		if len(config.Passes) > 0 {
 			for _, pass := range config.Passes {
-				r.registAuthMapPassword(server, pass, config.Passphrase)
+				r.registAuthMapPassword(server, pass)
 			}
 		}
 
@@ -125,8 +124,8 @@ func (r *Run) SetupSshAgent() {
 }
 
 //
-func (r *Run) registAuthMapPassword(server, password, passphrase string) {
-	password = decodePassword(passphrase, password)
+func (r *Run) registAuthMapPassword(server, password string) {
+	password = decodePassword(password)
 
 	authKey := AuthKey{AUTHKEY_PASSWORD, password}
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -140,9 +139,7 @@ func (r *Run) registAuthMapPassword(server, password, passphrase string) {
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 }
 
-func decodePassword(passphrase string, password string) string {
-	viper.Set(pbe.PbePwd, passphrase)
-
+func decodePassword(password string) string {
 	if pwd, err := pbe.Ebp(password); err != nil {
 		panic(err)
 	} else {

@@ -11,6 +11,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/bingoohuang/gou/pbe"
+	"github.com/spf13/viper"
 	"os"
 	"strings"
 	"time"
@@ -21,6 +23,7 @@ import (
 
 // Config is Struct that stores the entire configuration file
 type Config struct {
+	Extra    ExtraConfig
 	Log      LogConfig
 	Shell    ShellConfig
 	Include  map[string]IncludeConfig
@@ -30,6 +33,12 @@ type Config struct {
 	Proxy    map[string]ProxyConfig
 
 	SshConfig map[string]OpenSshConfig
+}
+
+// ExtraConfig store extra configs
+type ExtraConfig struct {
+	// Passphrase used to decrypt {PBE}xxx
+	Passphrase string `toml:"passphrase"`
 }
 
 // LogConfig store the contents about the terminal log.
@@ -91,7 +100,6 @@ type ServerConfig struct {
 	// Connect auth Setting
 	Pass            string   `toml:"pass"`
 	Passes          []string `toml:"passes"`
-	Passphrase      string   `toml:"passphrase"`
 	Key             string   `toml:"key"`
 	KeyCommand      string   `toml:"keycmd"`
 	KeyCommandPass  string   `toml:"keycmdpass"`
@@ -183,6 +191,10 @@ func ReadConf(confPath string) (config Config) {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	if config.Extra.Passphrase != "" {
+		viper.Set(pbe.PbePwd, config.Extra.Passphrase)
 	}
 
 	tmplConfigs := make([]tmplConfig, 0)
