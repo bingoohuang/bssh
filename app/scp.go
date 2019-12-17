@@ -125,36 +125,35 @@ USAGE:
 		switch {
 		// connectHost is set
 		case len(hosts) != 0:
-			if check.ExistServer(hosts, names) == false {
+			if !check.ExistServer(hosts, names) {
 				fmt.Fprintln(os.Stderr, "Input Server not found from list.")
 				os.Exit(1)
-			} else {
-				toServer = hosts
 			}
 
+			toServer = hosts
 		// remote to remote scp
 		case isFromInRemote && isToRemote:
 			// View From list
-			from_l := new(list.ListInfo)
-			from_l.Prompt = "lscp(from)>>"
-			from_l.NameList = names
-			from_l.DataList = data
-			from_l.MultiFlag = false
-			from_l.View()
-			fromServer = from_l.SelectName
+			fromL := new(list.ListInfo)
+			fromL.Prompt = "lscp(from)>>"
+			fromL.NameList = names
+			fromL.DataList = data
+			fromL.MultiFlag = false
+			fromL.View()
+			fromServer = fromL.SelectName
 			if fromServer[0] == "ServerName" {
 				fmt.Fprintln(os.Stderr, "Server not selected.")
 				os.Exit(1)
 			}
 
 			// View to list
-			to_l := new(list.ListInfo)
-			to_l.Prompt = "lscp(to)>>"
-			to_l.NameList = names
-			to_l.DataList = data
-			to_l.MultiFlag = true
-			to_l.View()
-			toServer = to_l.SelectName
+			toL := new(list.ListInfo)
+			toL.Prompt = "lscp(to)>>"
+			toL.NameList = names
+			toL.DataList = data
+			toL.MultiFlag = true
+			toL.View()
+			toServer = toL.SelectName
 			if toServer[0] == "ServerName" {
 				fmt.Fprintln(os.Stderr, "Server not selected.")
 				os.Exit(1)

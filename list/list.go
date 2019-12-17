@@ -67,9 +67,10 @@ func arrayContains(arr []string, str string) bool {
 
 // Toggle the selected state of cursor line.
 func (l *ListInfo) toggle(newLine string) {
-	tmpList := []string{}
+	var tmpList []string
 
 	addFlag := true
+
 	for _, selectedLine := range l.SelectName {
 		if selectedLine != newLine {
 			tmpList = append(tmpList, selectedLine)
@@ -77,41 +78,34 @@ func (l *ListInfo) toggle(newLine string) {
 			addFlag = false
 		}
 	}
-	if addFlag == true {
+
+	if addFlag {
 		tmpList = append(tmpList, newLine)
 	}
-	l.SelectName = []string{}
+
 	l.SelectName = tmpList
 }
 
 // Toggle the selected state of the currently displayed list
 func (l *ListInfo) allToggle(allFlag bool) {
-	SelectedList := []string{}
-	allSelectedList := []string{} // WARN: is not used
-	// selectedList in allSelectedList
-	for _, selectedLine := range l.SelectName {
-		SelectedList = append(SelectedList, selectedLine)
-	}
-
 	// allFlag is False
-	if allFlag == false {
+	if !allFlag {
 		// On each lines that except a header line and are not selected line,
 		// toggles left end fields
 		for _, addLine := range l.ViewText[1:] {
 			addName := strings.Fields(addLine)[0]
-			if !arrayContains(SelectedList, addName) {
-				allSelectedList = append(allSelectedList, addName)
+			if !arrayContains(l.SelectName, addName) {
 				l.toggle(addName)
 			}
 		}
+
 		return
-	} else {
-		// On each lines that except a header line, toggles left end fields
-		for _, addLine := range l.ViewText[1:] {
-			addName := strings.Fields(addLine)[0]
-			l.toggle(addName)
-		}
-		return
+	}
+
+	// On each lines that except a header line, toggles left end fields
+	for _, addLine := range l.ViewText[1:] {
+		addName := strings.Fields(addLine)[0]
+		l.toggle(addName)
 	}
 }
 
@@ -150,7 +144,7 @@ func (l *ListInfo) getFilterText() {
 	keywords := strings.Fields(l.Keyword)
 	r := l.DataText[1:]
 	line := ""
-	tmpText := []string{}
+	var tmpText []string
 	l.ViewText = append(l.ViewText, l.DataText[0])
 
 	// if No words
@@ -159,13 +153,13 @@ func (l *ListInfo) getFilterText() {
 		return
 	}
 
-	for i := 0; i < len(keywords); i += 1 {
+	for i := 0; i < len(keywords); i++ {
 		lowKeyword := regexp.QuoteMeta(strings.ToLower(keywords[i]))
 		re := regexp.MustCompile(lowKeyword)
 		tmpText = []string{}
 
-		for j := 0; j < len(r); j += 1 {
-			line += string(r[j])
+		for j := 0; j < len(r); j++ {
+			line += r[j]
 			if re.MatchString(strings.ToLower(line)) {
 				tmpText = append(tmpText, line)
 			}

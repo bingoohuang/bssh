@@ -59,7 +59,7 @@ func (r *RunSftp) cd(args []string) {
 			continue
 		}
 
-		okcounter += 1
+		okcounter++
 	}
 
 	// check count okcounter
@@ -71,8 +71,6 @@ func (r *RunSftp) cd(args []string) {
 	for _, c := range r.Client {
 		c.Pwd = path
 	}
-
-	return
 }
 
 // lcd

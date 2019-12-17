@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/blacknon/go-sshlib"
+	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/conf"
 	"golang.org/x/net/proxy"
 )
 
-// CreateSshConnect return *sshlib.Connect
+// CreateSSHConnect return *sshlib.Connect
 // this vaule in ssh.Client with proxy.
-func (r *Run) CreateSshConnect(server string) (connect *sshlib.Connect, err error) {
+func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err error) {
 	// create proxyRoute
 	proxyRoute, err := getProxyRoute(server, r.Conf)
 	if err != nil {
@@ -66,6 +66,10 @@ func (r *Run) CreateSshConnect(server string) (connect *sshlib.Connect, err erro
 
 			dialer = pxy.Client
 		}
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	// server conf
@@ -127,7 +131,6 @@ proxyLoop:
 
 			// If ProxyCommand is set, give priority to that
 			if conConf.ProxyCommand != "" && conConf.ProxyCommand != "none" {
-
 				proxyName = expansionProxyCommand(conConf.ProxyCommand, conConf)
 				proxyType = "command"
 				proxyPort = ""
@@ -145,7 +148,7 @@ proxyLoop:
 
 		//
 		if !isOk {
-			err = fmt.Errorf("Not Found proxy : %s", server)
+			err = fmt.Errorf("not Found proxy : %s", server)
 			return nil, err
 		}
 

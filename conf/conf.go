@@ -11,11 +11,12 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/bingoohuang/gou/pbe"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/gou/pbe"
+	"github.com/spf13/viper"
 
 	"github.com/BurntSushi/toml"
 	"github.com/blacknon/lssh/common"
@@ -336,11 +337,11 @@ func checkFormatServerConfAuth(c ServerConfig) (isFormat bool) {
 		isFormat = true
 	}
 
-	if c.AgentAuth == true {
+	if c.AgentAuth {
 		isFormat = true
 	}
 
-	if c.PKCS11Use == true {
+	if c.PKCS11Use {
 		_, err := os.Stat(c.PKCS11Provider)
 		if err == nil {
 			isFormat = true

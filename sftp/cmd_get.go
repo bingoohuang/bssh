@@ -118,12 +118,9 @@ func (r *RunSftp) get(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }
 
-//
-func (r *RunSftp) pullPath(client *SftpConnect, path, target string) (err error) {
+func (r *RunSftp) pullPath(client *Connect, path, target string) (err error) {
 	// set arg path
 	var rpath string
 	switch {
@@ -160,24 +157,19 @@ func (r *RunSftp) pullPath(client *SftpConnect, path, target string) (err error)
 			//
 			if stat.IsDir() { // is directory
 				os.Mkdir(localpath, 0755)
-			} else { // is not directory
-				if err := pullFile(stat, client, localpath, p, r); err != nil {
-					fmt.Fprintf(ow, "Error: %s\n", err)
-					continue
-				}
+			} else if err := pullFile(stat, client, localpath, p, r); err != nil { // is not directory
+				fmt.Fprintf(ow, "Error: %s\n", err)
+				continue
 			}
 
-			// set mode
-			//if r.Permission {
 			os.Chmod(localpath, stat.Mode())
-			//}
 		}
 	}
 
-	return
+	return nil
 }
 
-func pullFile(stat os.FileInfo, client *SftpConnect, localpath, p string, r *RunSftp) error {
+func pullFile(stat os.FileInfo, client *Connect, localpath, p string, r *RunSftp) error {
 	// get size
 	size := stat.Size()
 

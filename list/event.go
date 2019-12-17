@@ -50,15 +50,16 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 			// AllowUp Key
 			case termbox.KeyArrowUp:
 				if l.CursorLine > 0 {
-					l.CursorLine -= 1
+					l.CursorLine --
 				}
 				l.draw()
 
 			// AllowDown Key
 			case termbox.KeyArrowDown:
 				if l.CursorLine < len(l.ViewText)-headLine {
-					l.CursorLine += 1
+					l.CursorLine++
 				}
+
 				l.draw()
 
 			// AllowRight Key
@@ -67,6 +68,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if nextPosition+2 <= len(l.ViewText) {
 					l.CursorLine = nextPosition
 				}
+
 				l.draw()
 
 			// AllowLeft Key
@@ -75,29 +77,28 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if beforePosition >= 0 {
 					l.CursorLine = beforePosition
 				}
+
 				l.draw()
 
 			// Tab Key(select)
 			case termbox.KeyTab:
-				if l.MultiFlag == true {
+				if l.MultiFlag {
 					l.toggle(strings.Fields(l.ViewText[l.CursorLine+1])[0])
 				}
 				if l.CursorLine < len(l.ViewText)-headLine {
-					l.CursorLine += 1
+					l.CursorLine++
 				}
+
 				l.draw()
 
 			// Ctrl + a Key(all select)
 			case termbox.KeyCtrlA:
-				if l.MultiFlag == true {
+				if l.MultiFlag {
 					l.allToggle(allFlag)
 					// allFlag Toggle
-					if allFlag == false {
-						allFlag = true
-					} else {
-						allFlag = false
-					}
+					allFlag = !allFlag
 				}
+
 				l.draw()
 
 			// Ctrl + h Key(Help Window)
@@ -123,6 +124,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 						l.CursorLine = 0
 					}
 					allFlag = false
+
 					l.draw()
 				}
 
@@ -140,6 +142,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 						l.CursorLine = len(l.ViewText) - headLine
 					}
 					allFlag = false
+
 					l.draw()
 				}
 			}

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blacknon/go-sshlib"
+	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/common"
 	"golang.org/x/crypto/ssh"
 )
@@ -68,7 +68,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	// Craete sshlib.Connect (Connect Proxy loop)
-	connect, err := r.CreateSshConnect(server)
+	connect, err := r.CreateSSHConnect(server)
 	if err != nil {
 		return
 	}
@@ -138,7 +138,7 @@ func (r *Run) shell() (err error) {
 		}
 	}
 
-	return
+	return err
 }
 
 // getLogPath return log file path.
@@ -208,11 +208,9 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 
 // noneExecute is not execute command and shell.
 func (r *Run) noneExecute() (err error) {
-loop:
-	for {
-		select {
-		case <-time.After(500 * time.Millisecond):
-			continue loop
-		}
+	for range time.After(500 * time.Millisecond) {
+
 	}
+
+	return
 }

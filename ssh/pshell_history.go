@@ -48,7 +48,7 @@ func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r *io.Pi
 
 	var result string
 	sc := bufio.NewScanner(r)
-loop:
+
 	for {
 		for sc.Scan() {
 			text := sc.Text()
@@ -56,13 +56,10 @@ loop:
 		}
 
 		if sc.Err() == io.ErrClosedPipe {
-			break loop
+			break
 		}
 
-		select {
-		case <-time.After(50 * time.Millisecond):
-			continue
-		}
+		<-time.After(50 * time.Millisecond)
 	}
 
 	// Add Result

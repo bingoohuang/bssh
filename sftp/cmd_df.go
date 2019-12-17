@@ -15,7 +15,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/blacknon/lssh/common"
-	"github.com/dustin/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )
@@ -53,6 +53,7 @@ func (r *RunSftp) df(args []string) {
 
 			// set path
 			path := client.Pwd
+
 			if len(argpath) > 0 {
 				if !filepath.IsAbs(argpath) {
 					path = filepath.Join(path, argpath)
@@ -67,6 +68,7 @@ func (r *RunSftp) df(args []string) {
 				fmt.Println(err)
 				continue
 			}
+
 			stats[server] = stat
 		}
 
@@ -79,6 +81,7 @@ func (r *RunSftp) df(args []string) {
 		if c.Bool("i") {
 			headerTotal = "Inodes"
 		}
+
 		fmt.Fprintf(tabw, "%s\t%s\t%s\t%s\t%s\t\n", "Server", headerTotal, "Used", "(root)", "Capacity")
 
 		// print stat
@@ -132,6 +135,4 @@ func (r *RunSftp) df(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

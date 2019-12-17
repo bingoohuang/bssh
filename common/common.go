@@ -56,7 +56,7 @@ func MapReduce(map1, map2 map[string]interface{}) map[string]interface{} {
 			}
 		case bool:
 			map2Value := reflect.ValueOf(map2[ia])
-			if value == true && map2Value.Bool() == false {
+			if value && !map2Value.Bool() {
 				map2[ia] = value
 			}
 		}
@@ -136,7 +136,6 @@ func GetMaxLength(list []string) (MaxLength int) {
 func GetFilesBase64(paths []string) (result string, err error) {
 	var data []byte
 	for _, path := range paths {
-
 		fullPath := GetFullPath(path)
 
 		// open file
@@ -161,7 +160,7 @@ func GetFilesBase64(paths []string) (result string, err error) {
 
 // GetPassPhrase gets the passphrase from virtual terminal input and returns the result. Works only on UNIX-based OS.
 func GetPassPhrase(msg string) (input string, err error) {
-	fmt.Printf(msg)
+	fmt.Print(msg)
 
 	// Open /dev/tty
 	tty, err := os.Open("/dev/tty")

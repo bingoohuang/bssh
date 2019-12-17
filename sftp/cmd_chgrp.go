@@ -87,10 +87,10 @@ func (r *RunSftp) chgrp(args []string) {
 
 					gid = int(gid32)
 				} else {
-					gid = int(groupid)
+					gid = groupid
 				}
 
-				// get current uid
+				// ge`t current uid
 				stat, err := client.Connect.Lstat(path)
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
@@ -113,7 +113,6 @@ func (r *RunSftp) chgrp(args []string) {
 
 				fmt.Fprintf(w, "chgrp: set %s's group as %s\n", path, group)
 				exit <- true
-				return
 			}()
 		}
 
@@ -127,6 +126,4 @@ func (r *RunSftp) chgrp(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

@@ -117,7 +117,7 @@ func (o *Output) NewWriter() (writer *io.PipeWriter) {
 // Printer output stdout from reader.
 func (o *Output) Printer(reader io.ReadCloser) {
 	sc := bufio.NewScanner(reader)
-loop:
+
 	for {
 		for sc.Scan() {
 			text := sc.Text()
@@ -130,13 +130,10 @@ loop:
 		}
 
 		if sc.Err() == io.ErrClosedPipe {
-			break loop
+			break
 		}
 
-		select {
-		case <-time.After(50 * time.Millisecond):
-			continue
-		}
+		<-time.After(50 * time.Millisecond)
 	}
 }
 
@@ -193,8 +190,6 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 			break
 		}
 	}
-
-	return
 }
 
 func OutColorStrings(num int, inStrings string) (str string) {

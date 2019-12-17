@@ -57,7 +57,6 @@ func (r *RunSftp) rename(args []string) {
 
 				fmt.Fprintf(w, "rename: %s => %s\n", oldname, newname)
 				exit <- true
-				return
 			}()
 		}
 
@@ -71,6 +70,4 @@ func (r *RunSftp) rename(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

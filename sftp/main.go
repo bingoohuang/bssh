@@ -25,7 +25,7 @@ type RunSftp struct {
 	Config conf.Config
 
 	// Client
-	Client map[string]*SftpConnect
+	Client map[string]*Connect
 
 	// ssh Run
 	Run *sshl.Run
@@ -42,7 +42,7 @@ type RunSftp struct {
 	LocalComplete  []prompt.Suggest
 }
 
-type SftpConnect struct {
+type Connect struct {
 	// ssh connect
 	Connect *sftp.Client
 
@@ -77,9 +77,9 @@ func (r *RunSftp) Start() {
 }
 
 //
-func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*SftpConnect) {
+func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connect) {
 	// init
-	result = map[string]*SftpConnect{}
+	result = map[string]*Connect{}
 
 	ch := make(chan bool)
 	m := new(sync.Mutex)
@@ -87,7 +87,7 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*SftpCo
 		server := target
 		go func() {
 			// ssh connect
-			conn, err := r.Run.CreateSshConnect(server)
+			conn, err := r.Run.CreateSSHConnect(server)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s connect error: %s\n", server, err)
 				ch <- true
@@ -111,7 +111,7 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*SftpCo
 			}
 
 			// create SftpConnect
-			sftpCon := &SftpConnect{
+			sftpCon := &Connect{
 				Connect: ftp,
 				Output:  o,
 				Pwd:     "./",

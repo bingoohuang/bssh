@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blacknon/go-sshlib"
+	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/output"
 )
 
@@ -48,7 +48,7 @@ func (r *Run) cmd() (err error) {
 		}
 
 		// Create sshlib.Connect
-		conn, err := r.CreateSshConnect(server)
+		conn, err := r.CreateSSHConnect(server)
 		if err != nil {
 			log.Printf("Error: %s:%s\n", server, err)
 			continue

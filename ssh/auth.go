@@ -11,12 +11,10 @@ import (
 	"strings"
 
 	"github.com/bingoohuang/gou/pbe"
-	"github.com/blacknon/go-sshlib"
+	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/common"
 	"golang.org/x/crypto/ssh"
 )
-
-const SSH_AUTH_SOCK = "SSH_AUTH_SOCK"
 
 // CreateAuthMethodMap Create ssh.AuthMethod, into r.AuthMethodMap.
 func (r *Run) CreateAuthMethodMap() {
@@ -127,7 +125,7 @@ func (r *Run) SetupSshAgent() {
 func (r *Run) registAuthMapPassword(server, password string) {
 	password = decodePassword(password)
 
-	authKey := AuthKey{AUTHKEY_PASSWORD, password}
+	authKey := AuthKey{AuthkeyPassword, password}
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		authMethod := sshlib.CreateAuthMethodPassword(password)
 
@@ -149,7 +147,7 @@ func decodePassword(password string) string {
 
 //
 func (r *Run) registAuthMapPublicKey(server, key, password string) (err error) {
-	authKey := AuthKey{AUTHKEY_KEY, key}
+	authKey := AuthKey{AuthkeyKey, key}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		// Create signer with key input
@@ -173,7 +171,7 @@ func (r *Run) registAuthMapPublicKey(server, key, password string) (err error) {
 
 //
 func (r *Run) registAuthMapPublicKeyCommand(server, command, password string) (err error) {
-	authKey := AuthKey{AUTHKEY_KEY, command}
+	authKey := AuthKey{AuthkeyKey, command}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		// Run key command
@@ -204,7 +202,7 @@ func (r *Run) registAuthMapPublicKeyCommand(server, command, password string) (e
 
 //
 func (r *Run) registAuthMapCertificate(server, cert string, signer ssh.Signer) (err error) {
-	authKey := AuthKey{AUTHKEY_CERT, cert}
+	authKey := AuthKey{AuthkeyCert, cert}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		authMethod, err := sshlib.CreateAuthMethodCertificate(cert, signer)
@@ -222,30 +220,8 @@ func (r *Run) registAuthMapCertificate(server, cert string, signer ssh.Signer) (
 	return
 }
 
-//
-func (r *Run) registAuthMapAgent(server string) (err error) {
-	authKey := AuthKey{AUTHKEY_AGENT, SSH_AUTH_SOCK}
-	if _, ok := r.authMethodMap[authKey]; !ok {
-		signers, err := sshlib.CreateSignerAgent(r.agent)
-		if err != nil {
-			return err
-		}
-
-		for _, signer := range signers {
-			authMethod := ssh.PublicKeys(signer)
-			r.authMethodMap[authKey] = append(r.authMethodMap[authKey], authMethod)
-		}
-	}
-
-	// Regist AuthMethod to serverAuthMethodMap from authMethodMap
-	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
-
-	return
-}
-
-//
 func (r *Run) registAuthMapPKCS11(server, provider, pin string) (err error) {
-	authKey := AuthKey{AUTHKEY_PKCS11, provider}
+	authKey := AuthKey{AuthkeyPkcs11, provider}
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		// Create Signer with key input
 		signers, err := sshlib.CreateSignerPKCS11Prompt(provider, pin)

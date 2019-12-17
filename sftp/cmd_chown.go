@@ -87,7 +87,7 @@ func (r *RunSftp) chown(args []string) {
 
 					uid = int(uid32)
 				} else {
-					uid = int(userid)
+					uid = userid
 				}
 
 				// get current uid
@@ -113,7 +113,6 @@ func (r *RunSftp) chown(args []string) {
 
 				fmt.Fprintf(w, "chown: set %s's user as %s\n", path, user)
 				exit <- true
-				return
 			}()
 		}
 
@@ -127,6 +126,4 @@ func (r *RunSftp) chown(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

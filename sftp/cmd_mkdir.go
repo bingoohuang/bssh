@@ -89,8 +89,6 @@ func (r *RunSftp) mkdir(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }
 
 //
@@ -140,6 +138,4 @@ func (r *RunSftp) lmkdir(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

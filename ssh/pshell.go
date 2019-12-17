@@ -13,9 +13,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/blacknon/go-sshlib"
+	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/output"
-	"github.com/c-bata/go-prompt"
+	prompt "github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 )
 
@@ -108,7 +108,7 @@ func (r *Run) pshell() (err error) {
 	var cons []*psConnect
 	for _, server := range r.ServerList {
 		// Create *sshlib.Connect
-		con, err := r.CreateSshConnect(server)
+		con, err := r.CreateSSHConnect(server)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -181,7 +181,7 @@ func (r *Run) pshell() (err error) {
 	// start go-prompt
 	p.Run()
 
-	return
+	return nil
 }
 
 // CreatePrompt is create shell prompt.

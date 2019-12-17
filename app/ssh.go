@@ -162,7 +162,7 @@ USAGE:
 		r.ServerList = selected
 		r.Conf = data
 		switch {
-		case c.Bool("pshell") == true && !c.Bool("not-execute"):
+		case c.Bool("pshell") && !c.Bool("not-execute"):
 			r.Mode = "pshell"
 		case len(c.Args()) > 0 && !c.Bool("not-execute"):
 			// Becomes a shell when not-execute is given.
@@ -213,7 +213,6 @@ USAGE:
 
 		default:
 			r.PortForwardMode = ""
-
 		}
 
 		// if err
@@ -235,5 +234,6 @@ USAGE:
 		r.Start()
 		return nil
 	}
-	return app
+
+		return app
 }

@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/blacknon/lssh/conf"
-	"github.com/sevlyar/go-daemon"
+	daemon "github.com/sevlyar/go-daemon"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -118,11 +118,10 @@ type PathSet struct {
 }
 
 const (
-	AUTHKEY_PASSWORD = "password"
-	AUTHKEY_AGENT    = "agent"
-	AUTHKEY_KEY      = "key"
-	AUTHKEY_CERT     = "cert"
-	AUTHKEY_PKCS11   = "pkcs11"
+	AuthkeyPassword = "password"
+	AuthkeyKey      = "key"
+	AuthkeyCert     = "cert"
+	AuthkeyPkcs11   = "pkcs11"
 )
 
 // Start ssh connect
@@ -185,6 +184,7 @@ func (r *Run) printRunCommand() {
 func (r *Run) printPortForward(m, forwardLocal, forwardRemote string) {
 	if forwardLocal != "" && forwardRemote != "" {
 		var mode, arrow string
+
 		switch m {
 		case "L", "":
 			mode = "LOCAL "
@@ -258,7 +258,7 @@ func (r *Run) printProxy(server string) {
 // Mainly used in r.shell().
 func execLocalCommand(cmd string) {
 	out, _ := exec.Command("sh", "-c", cmd).CombinedOutput()
-	fmt.Printf(string(out))
+	fmt.Print(string(out))
 }
 
 // startBackgroundMode run deamon mode
@@ -279,6 +279,4 @@ func startBackgroundMode() {
 			log.Printf("error encountered while killing daemon: %v", err)
 		}
 	}()
-
-	return
 }

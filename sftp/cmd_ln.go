@@ -57,5 +57,5 @@ func (r *RunSftp) ln(args []string) (err error) {
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
 
-	return
+	return err
 }

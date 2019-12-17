@@ -14,7 +14,7 @@ import (
 )
 
 // pwd
-func (r *RunSftp) pwd(args []string) {
+func (r *RunSftp) pwd() {
 	exit := make(chan bool)
 
 	go func() {
@@ -31,7 +31,6 @@ func (r *RunSftp) pwd(args []string) {
 				} else {
 					pwd = filepath.Join(pwd, client.Pwd)
 				}
-
 			}
 
 			fmt.Fprintf(w, "%s\n", pwd)
@@ -43,12 +42,10 @@ func (r *RunSftp) pwd(args []string) {
 	for i := 0; i < len(r.Client); i++ {
 		<-exit
 	}
-
-	return
 }
 
 // lpwd
-func (r *RunSftp) lpwd(args []string) {
+func (r *RunSftp) lpwd() {
 	pwd, err := os.Getwd()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

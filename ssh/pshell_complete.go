@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/c-bata/go-prompt"
+	prompt "github.com/c-bata/go-prompt"
 )
 
 // TODO(blacknon): `!!`や`!$`についても実装を行う
@@ -129,6 +129,7 @@ func (ps *pShell) GetCommandComplete() {
 	local, _ := exec.Command("bash", "-c", command).Output()
 	rd := strings.NewReader(string(local))
 	sc := bufio.NewScanner(rd)
+
 	for sc.Scan() {
 		suggest := prompt.Suggest{
 			Text:        "!" + sc.Text(),
@@ -198,12 +199,13 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 		// append path to m
 		for _, c := range ps.Connects {
 			con := c
+
 			go func() {
 				// Create buffer
 				buf := new(bytes.Buffer)
 
 				// Create session, and output to buffer
-				session, _ := c.CreateSession()
+				session, _ := con.CreateSession()
 				session.Stdout = buf
 
 				// Run get complete command
@@ -245,6 +247,7 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 		sgt, _ := exec.Command("bash", "-c", command).Output()
 		rd := strings.NewReader(string(sgt))
 		sc := bufio.NewScanner(rd)
+
 		for sc.Scan() {
 			suggest := prompt.Suggest{
 				Text: filepath.Base(sc.Text()),

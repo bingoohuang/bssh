@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/c-bata/go-prompt"
+	prompt "github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 )
 
@@ -39,8 +39,6 @@ func (r *RunSftp) shell() {
 
 	// start go-prompt
 	p.Run()
-
-	return
 }
 
 // sftp Shell mode function
@@ -84,7 +82,7 @@ func (r *RunSftp) Executor(command string) {
 	// case "ln":
 
 	case "lpwd":
-		r.lpwd(cmdline)
+		r.lpwd()
 	case "ls":
 		r.ls(cmdline)
 
@@ -95,7 +93,7 @@ func (r *RunSftp) Executor(command string) {
 	case "put":
 		r.put(cmdline)
 	case "pwd":
-		r.pwd(cmdline)
+		r.pwd()
 	case "rename":
 		r.rename(cmdline)
 	case "rm":
@@ -323,7 +321,6 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 			r.GetLocalComplete(t.GetWordBeforeCursor())
 		}
 		suggest = r.LocalComplete
-
 	}
 
 	return prompt.FilterHasPrefix(suggest, word, false)
@@ -363,9 +360,9 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 			}
 
 			if stat.IsDir() {
-				rpath = rpath + "/*"
+				rpath += "/*"
 			} else {
-				rpath = rpath + "*"
+				rpath += "*"
 			}
 
 			// get path list

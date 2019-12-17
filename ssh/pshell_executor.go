@@ -35,8 +35,6 @@ func (ps *pShell) Executor(command string) {
 
 	// exec pipeline
 	ps.parseExecuter(pslice)
-
-	return
 }
 
 // parseExecuter assemble and execute the parsed command line.
@@ -94,7 +92,7 @@ func (ps *pShell) parseExecuter(pslice [][]pipeLine) {
 				out = pipes[n].out
 
 				// add pipe num
-				n += 1
+				n++
 			}
 
 			// exec pipeline
@@ -104,6 +102,7 @@ func (ps *pShell) parseExecuter(pslice [][]pipeLine) {
 		// get and send kill
 		killExit := make(chan bool)
 		defer close(killExit)
+
 		go func() {
 			select {
 			case <-ps.Signal:
@@ -135,7 +134,7 @@ func (ps *pShell) parseExecuter(pslice [][]pipeLine) {
 	}
 
 	if !isBuildInOnly {
-		ps.Count += 1
+		ps.Count++
 	}
 }
 
@@ -143,7 +142,7 @@ func (ps *pShell) parseExecuter(pslice [][]pipeLine) {
 func countPipeSet(pline []pipeLine, del string) (count int) {
 	for _, p := range pline {
 		if p.Oprator == del {
-			count += 1
+			count++
 		}
 	}
 

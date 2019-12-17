@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacknon/go-sshlib"
+	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/output"
 	"golang.org/x/crypto/ssh"
 )
@@ -96,12 +96,12 @@ func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch 
 
 	// %history
 	case "%history":
-		ps.buildin_history(out, ch)
+		ps.buildinHistory(out, ch)
 		return
 
 	// %outlist
 	case "%outlist":
-		ps.buildin_outlist(out, ch)
+		ps.buildinOutlist(out, ch)
 		return
 
 	// %out [num]
@@ -114,7 +114,7 @@ func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch 
 			}
 		}
 
-		ps.buildin_out(num, out, ch)
+		ps.buildinOut(num, out, ch)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch 
 		ps.executeRemotePipeLine(pline, in, out, ch, kill)
 	}
 
-	return
+	return nil
 }
 
 // localCmd_set is set pshll option.
@@ -143,8 +143,8 @@ func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch 
 // func (ps *pShell) buildin_save(args []string, out *io.PipeWriter, ch chan<- bool) {
 // }
 
-// localCmd_history is printout history (shell history)
-func (ps *pShell) buildin_history(out *io.PipeWriter, ch chan<- bool) {
+// buildinHistory is printout history (shell history)
+func (ps *pShell) buildinHistory(out *io.PipeWriter, ch chan<- bool) {
 	stdout := setOutput(out)
 
 	// read history file
@@ -168,8 +168,8 @@ func (ps *pShell) buildin_history(out *io.PipeWriter, ch chan<- bool) {
 	ch <- true
 }
 
-// localcmd_outlit is print exec history list.
-func (ps *pShell) buildin_outlist(out *io.PipeWriter, ch chan<- bool) {
+// buildinOutlist is print exec history list.
+func (ps *pShell) buildinOutlist(out *io.PipeWriter, ch chan<- bool) {
 	stdout := setOutput(out)
 
 	for i := 0; i < len(ps.History); i++ {
@@ -190,11 +190,11 @@ func (ps *pShell) buildin_outlist(out *io.PipeWriter, ch chan<- bool) {
 	ch <- true
 }
 
-// localCmd_out is print exec history at number
+// buildinOut is print exec history at number
 // example:
 //     - %out
 //     - %out <num>
-func (ps *pShell) buildin_out(num int, out *io.PipeWriter, ch chan<- bool) {
+func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 	stdout := setOutput(out)
 	histories := ps.History[num]
 
@@ -204,7 +204,7 @@ func (ps *pShell) buildin_out(num int, out *io.PipeWriter, ch chan<- bool) {
 		if i == 0 {
 			fmt.Fprintf(os.Stderr, "[History:%s ]\n", h.Command)
 		}
-		i += 1
+		i++
 
 		// print out result
 		if len(histories) > 1 && stdout == os.Stdout && h.Output != nil {
@@ -323,12 +323,10 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in *io.PipeReader, out *
 
 	// kill
 	go func() {
-		select {
-		case <-kill:
-			for _, s := range sessions {
-				s.Signal(ssh.SIGINT)
-				s.Close()
-			}
+		<-kill
+		for _, s := range sessions {
+			s.Signal(ssh.SIGINT)
+			s.Close()
 		}
 	}()
 
@@ -353,8 +351,6 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in *io.PipeReader, out *
 	case *io.PipeWriter:
 		out.CloseWithError(io.ErrClosedPipe)
 	}
-
-	return
 }
 
 // executePipeLineLocal is exec command in local machine.
@@ -401,10 +397,8 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in *io.PipeReader, out *i
 	// get signal and kill
 	p := cmd.Process
 	go func() {
-		select {
-		case <-kill:
-			p.Kill()
-		}
+		<-kill
+		p.Kill()
 	}()
 
 	// wait command
@@ -419,7 +413,7 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in *io.PipeReader, out *i
 	// send exit
 	ch <- true
 
-	return
+	return nil
 }
 
 // ps.wait

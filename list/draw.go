@@ -28,14 +28,14 @@ func drawFilterLine(x, y int, str string, colorNum int, backColorNum int, keywor
 	// SearchText Bounds Space
 	searchWords := strings.Fields(searchText)
 
-	for i := 0; i < len(searchWords); i += 1 {
+	for i := 0; i < len(searchWords); i++ {
 		searchLowLine := strings.ToLower(str)
 		searchKeyword := strings.ToLower(searchWords[i])
 		searchKeywordLen := len(searchKeyword)
 		searchKeywordCount := strings.Count(searchLowLine, searchKeyword)
 
 		charLocation := 0
-		for j := 0; j < searchKeywordCount; j += 1 {
+		for j := 0; j < searchKeywordCount; j++ {
 			searchLineData := ""
 
 			// Countermeasure "slice bounds out of range"
@@ -122,7 +122,7 @@ func (l *ListInfo) draw() {
 
 		// Keyword Highlight
 		drawFilterLine(l.Term.LeftMargin, listKey+l.Term.Headline, paddingData, cursorColor, cursorBackColor, keywordColor, l.Keyword)
-		listKey += 1
+		listKey++
 	}
 
 	// Multi-Byte SetCursor

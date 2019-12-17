@@ -31,8 +31,8 @@ type Scp struct {
 	Run *sshl.Run
 
 	// From and To data
-	From ScpInfo
-	To   ScpInfo
+	From Info
+	To   Info
 
 	Config  conf.Config
 	AuthMap map[sshl.AuthKey][]ssh.AuthMethod
@@ -49,7 +49,7 @@ type Scp struct {
 	ProgressWG *sync.WaitGroup
 }
 
-type ScpInfo struct {
+type Info struct {
 	// is remote flag
 	IsRemote bool
 
@@ -60,7 +60,7 @@ type ScpInfo struct {
 	Path []string
 }
 
-type ScpConnect struct {
+type Connect struct {
 	// server name
 	Server string
 
@@ -215,7 +215,7 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow *io.PipeWriter, output *output.Outp
 		ftp.Chmod(rpath, fInfo.Mode())
 	}
 
-	return
+	return err
 }
 
 // pushfile put file to path.
@@ -275,7 +275,7 @@ func (cp *Scp) viaPush() {
 }
 
 //
-func (cp *Scp) viaPushPath(path string, fclient *ScpConnect, tclients []*ScpConnect) {
+func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 	// from ftp client
 	ftp := fclient.Connect
 
@@ -365,7 +365,7 @@ func (cp *Scp) pull() {
 }
 
 // walk return file path list ([]string).
-func (cp *Scp) pullPath(client *ScpConnect) {
+func (cp *Scp) pullPath(client *Connect) {
 	// set ftp client
 	ftp := client.Connect
 
@@ -442,19 +442,17 @@ func (cp *Scp) pullPath(client *ScpConnect) {
 			}
 		}
 	}
-
-	return
 }
 
 // createScpConnects return []*ScpConnect.
-func (cp *Scp) createScpConnects(targets []string) (result []*ScpConnect) {
+func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 	ch := make(chan bool)
 	m := new(sync.Mutex)
 	for _, target := range targets {
 		server := target
 		go func() {
 			// ssh connect
-			conn, err := cp.Run.CreateSshConnect(server)
+			conn, err := cp.Run.CreateSSHConnect(server)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s connect error: %s\n", server, err)
 				ch <- true
@@ -480,7 +478,7 @@ func (cp *Scp) createScpConnects(targets []string) (result []*ScpConnect) {
 			}
 
 			// create ScpConnect
-			scpCon := &ScpConnect{
+			scpCon := &Connect{
 				Server:  server,
 				Connect: ftp,
 				Output:  o,

@@ -20,21 +20,21 @@ import (
 
 	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/textcol"
-	"github.com/dustin/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )
 
 // sftpLs
 type sftpLs struct {
-	Client *SftpConnect
+	Client *Connect
 	Files  []os.FileInfo
 	Passwd string
 	Groups string
 }
 
 // getRemoteLsData
-func (r *RunSftp) getRemoteLsData(client *SftpConnect, path string) (lsdata sftpLs, err error) {
+func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, err error) {
 	// get symlink
 	p, err := client.Connect.ReadLink(path)
 	if err == nil {
@@ -89,7 +89,7 @@ func (r *RunSftp) getRemoteLsData(client *SftpConnect, path string) (lsdata sftp
 		Groups: groups,
 	}
 
-	return
+	return lsdata, err
 }
 
 // ls exec and print out remote ls data.
@@ -221,7 +221,6 @@ func (r *RunSftp) ls(args []string) (err error) {
 				prompt := data.Client.Output.GetPrompt()
 
 				// for get data
-				datas := []*sftpLsData{}
 				for _, f := range lsdata[server].Files {
 					sys := f.Sys()
 
@@ -262,9 +261,6 @@ func (r *RunSftp) ls(args []string) (err error) {
 					data.Size = sizestr
 					data.Time = timestr
 					data.Path = f.Name()
-
-					// append data
-					datas = append(datas, data)
 
 					if len(lsdata) == 1 {
 						// set print format
@@ -321,5 +317,5 @@ func (r *RunSftp) ls(args []string) (err error) {
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
 
-	return
+	return err
 }

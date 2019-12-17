@@ -18,7 +18,7 @@ import (
 
 	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/textcol"
-	"github.com/dustin/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/urfave/cli"
 )
 
@@ -99,8 +99,6 @@ func (r *RunSftp) lls(args []string) (err error) {
 				}
 			}
 
-			//
-			datas := []*sftpLsData{}
 			for _, f := range data {
 				var uid, gid uint32
 				var size int64
@@ -143,9 +141,6 @@ func (r *RunSftp) lls(args []string) (err error) {
 				lsdata.Time = timestr
 				lsdata.Path = f.Name()
 
-				// append data
-				datas = append(datas, lsdata)
-
 				// set print format
 				format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
 
@@ -178,5 +173,5 @@ func (r *RunSftp) lls(args []string) (err error) {
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
 
-	return
+	return err
 }

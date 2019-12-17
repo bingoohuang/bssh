@@ -88,7 +88,6 @@ func (r *RunSftp) rm(args []string) {
 							return
 						}
 					}
-
 				} else {
 					err := client.Connect.Remove(path)
 					if err != nil {
@@ -113,6 +112,4 @@ func (r *RunSftp) rm(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

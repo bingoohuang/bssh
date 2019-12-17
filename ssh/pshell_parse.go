@@ -28,7 +28,7 @@ func (p *pipeLine) String() string {
 func joinPipeLineSlice(pslice []pipeLine) string {
 	var result string
 	for _, pline := range pslice {
-		result = result + pline.String()
+		result += pline.String()
 	}
 
 	return result
@@ -111,9 +111,10 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 
 				break stmtCmdLoop
 			case *syntax.BinaryCmd:
-				switch c.X.Cmd.(type) {
+				cmd := c.X.Cmd
+				switch cmd.(type) {
 				case *syntax.CallExpr:
-					cx := c.X.Cmd.(*syntax.CallExpr)
+					cx := cmd.(*syntax.CallExpr)
 					cxr := c.X.Redirs
 
 					args := parseCallExpr(cx)
@@ -137,7 +138,7 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 		pslice = append(pslice, cmdLine)
 	}
 
-	return
+	return pslice, err
 }
 
 // parseCallExpr return pipeline element ([]string).
@@ -149,7 +150,6 @@ func parseCallExpr(cmd *syntax.CallExpr) (pLine []string) {
 			buf := new(bytes.Buffer)
 			printer.Print(buf, part)
 			pLine = append(pLine, buf.String())
-
 		}
 	}
 	return
@@ -168,7 +168,7 @@ func parseRedirect(redir []*syntax.Redirect) (rs []string) {
 		for _, part := range r.Word.Parts {
 			buf := new(bytes.Buffer)
 			printer.Print(buf, part)
-			rr = rr + buf.String()
+			rr += buf.String()
 		}
 
 		rs = append(rs, rr)

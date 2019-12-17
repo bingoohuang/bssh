@@ -66,7 +66,6 @@ func (r *RunSftp) symlink(args []string) {
 				}
 
 				exit <- true
-				return
 			}()
 		}
 
@@ -80,6 +79,4 @@ func (r *RunSftp) symlink(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }

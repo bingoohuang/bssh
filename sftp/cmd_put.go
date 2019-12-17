@@ -114,12 +114,10 @@ func (r *RunSftp) put(args []string) {
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
-
-	return
 }
 
 //
-func (r *RunSftp) pushPath(client *SftpConnect, target, base, path string) (err error) {
+func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err error) {
 	// set arg path
 	rpath, _ := filepath.Rel(base, path)
 	switch {
@@ -153,16 +151,12 @@ func (r *RunSftp) pushPath(client *SftpConnect, target, base, path string) (err 
 		}
 	}
 
-	// set mode
-	//if r.Permission {
 	client.Connect.Chmod(rpath, fInfo.Mode())
-	//}
-
-	return
+	return nil
 }
 
 // pushfile put file to path.
-func (r *RunSftp) pushFile(client *SftpConnect, localfile io.Reader, path string, size int64) (err error) {
+func (r *RunSftp) pushFile(client *Connect, localfile io.Reader, path string, size int64) (err error) {
 	// mkdir all
 	dir := filepath.Dir(path)
 	err = client.Connect.MkdirAll(dir)
@@ -185,5 +179,5 @@ func (r *RunSftp) pushFile(client *SftpConnect, localfile io.Reader, path string
 	r.ProgressWG.Add(1)
 	client.Output.ProgressPrinter(size, rd, path)
 
-	return
+	return nil
 }

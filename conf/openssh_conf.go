@@ -61,7 +61,7 @@ func getOpenSshConfig(path, command string) (config map[string]ServerConfig, err
 	hostList := []string{}
 	for _, h := range cfg.Hosts {
 		// not supported wildcard host
-		re := regexp.MustCompile("\\*")
+		re := regexp.MustCompile(`\*`)
 		for _, pattern := range h.Patterns {
 			if !re.MatchString(pattern.String()) {
 				hostList = append(hostList, pattern.String())
