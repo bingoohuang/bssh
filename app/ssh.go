@@ -235,5 +235,5 @@ USAGE:
 		return nil
 	}
 
-		return app
+	return app
 }

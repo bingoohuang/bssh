@@ -50,7 +50,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 			// AllowUp Key
 			case termbox.KeyArrowUp:
 				if l.CursorLine > 0 {
-					l.CursorLine --
+					l.CursorLine--
 				}
 				l.draw()
 
