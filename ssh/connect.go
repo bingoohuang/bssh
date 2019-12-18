@@ -175,7 +175,7 @@ proxyLoop:
 		proxyRoute[i], proxyRoute[j] = proxyRoute[j], proxyRoute[i]
 	}
 
-	return
+	return proxyRoute, err
 }
 
 func expansionProxyCommand(proxyCommand string, config conf.ServerConfig) string {

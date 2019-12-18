@@ -22,7 +22,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var (
+const (
 	oprompt = "${SERVER} :: "
 )
 

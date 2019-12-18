@@ -58,7 +58,7 @@ type PathSet struct {
 	PathSlice []string
 }
 
-var (
+const (
 	oprompt = "${SERVER} :: "
 )
 

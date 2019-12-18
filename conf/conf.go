@@ -34,6 +34,8 @@ type Config struct {
 	Proxy    map[string]ProxyConfig
 
 	SshConfig map[string]OpenSshConfig
+
+	grouping map[string]map[string]ServerConfig
 }
 
 // ExtraConfig store extra configs
@@ -91,7 +93,8 @@ type IncludesConfig struct {
 // Structure for holding SSH connection information
 type ServerConfig struct {
 	// templates, host:port user/pass
-	Tmpl string `toml:"tmpl"`
+	Tmpl  string `toml:"tmpl"`
+	Group string `toml:"group"`
 
 	// Connect basic Setting
 	Addr string `toml:"addr"`
@@ -198,96 +201,26 @@ func ReadConf(confPath string) (config Config) {
 		viper.Set(pbe.PbePwd, config.Extra.Passphrase)
 	}
 
-	tmplConfigs := make([]tmplConfig, 0)
-
 	// reduce common setting (in .lssh.conf servers)
-	for key, value := range config.Server {
-		setValue := serverConfigReduct(config.Common, value)
-		config.Server[key] = setValue
-
-		if value.Tmpl != "" {
-			delete(config.Server, key)
-			tmplConfigs = append(tmplConfigs, tmplConfig{
-				k: key, c: setValue, t: ParseTmpl(setValue.Tmpl)})
-		}
-	}
-
-	tmplServers(tmplConfigs, &config)
+	config.parseConfigServers(config.Server, config.Common)
 
 	// Read Openssh configs
 	if len(config.SshConfig) == 0 {
-		openSshServerConfig, err := getOpenSshConfig("~/.ssh/config", "")
-		if err == nil {
-			// append data
-			for key, value := range openSshServerConfig {
-				value := serverConfigReduct(config.Common, value)
-				config.Server[key] = value
-			}
+		if v, err := getOpenSshConfig("~/.ssh/config", ""); err == nil {
+			config.parseConfigServers(v, config.Common)
 		}
 	} else {
 		for _, sshConfig := range config.SshConfig {
-			openSshServerConfig, err := getOpenSshConfig(sshConfig.Path, sshConfig.Command)
-			if err == nil {
-				// append data
-				for key, value := range openSshServerConfig {
-					setCommon := serverConfigReduct(config.Common, sshConfig.ServerConfig)
-					value = serverConfigReduct(setCommon, value)
-					config.Server[key] = value
-				}
+			setCommon := serverConfigReduct(config.Common, sshConfig.ServerConfig)
+
+			if v, err := getOpenSshConfig(sshConfig.Path, sshConfig.Command); err == nil {
+				config.parseConfigServers(v, setCommon)
 			}
 		}
 	}
 
-	// for append includes to include.path
-	if config.Includes.Path != nil {
-		if config.Include == nil {
-			config.Include = map[string]IncludeConfig{}
-		}
-
-		for _, includePath := range config.Includes.Path {
-			unixTime := time.Now().Unix()
-			keyString := strings.Join([]string{string(unixTime), includePath}, "_")
-
-			// key to md5
-			hasher := md5.New()
-			hasher.Write([]byte(keyString))
-			key := hex.EncodeToString(hasher.Sum(nil))
-
-			// append config.Include[key]
-			config.Include[key] = IncludeConfig{common.ExpandHomeDir(includePath)}
-		}
-	}
-
-	// Read include files
-	if config.Include != nil {
-		for _, v := range config.Include {
-			var includeConf Config
-
-			// user path
-			path := common.ExpandHomeDir(v.Path)
-
-			// Read include config file
-			_, err := toml.DecodeFile(path, &includeConf)
-			if err != nil {
-				panic(err)
-			}
-
-			// reduce common setting
-			setCommon := serverConfigReduct(config.Common, includeConf.Common)
-
-			// map init
-			if len(config.Server) == 0 {
-				config.Server = map[string]ServerConfig{}
-			}
-
-			// add include file serverconf
-			for key, value := range includeConf.Server {
-				// reduce common setting
-				setValue := serverConfigReduct(setCommon, value)
-				config.Server[key] = setValue
-			}
-		}
-	}
+	config.appendIncludePaths()
+	config.readIncludeFiles()
 
 	// Check Config Parameter
 	checkAlertFlag := checkFormatServerConf(config)
@@ -295,7 +228,127 @@ func ReadConf(confPath string) (config Config) {
 		os.Exit(1)
 	}
 
+	config.parseGroups()
+
 	return
+}
+
+func (cf *Config) appendIncludePaths() {
+	// for append includes to include.path
+	if len(cf.Includes.Path) == 0 {
+		return
+	}
+
+	if cf.Include == nil {
+		cf.Include = map[string]IncludeConfig{}
+	}
+
+	for _, includePath := range cf.Includes.Path {
+		unixTime := time.Now().Unix()
+		keyString := strings.Join([]string{string(unixTime), includePath}, "_")
+
+		// key to md5
+		hasher := md5.New()
+		hasher.Write([]byte(keyString))
+		key := hex.EncodeToString(hasher.Sum(nil))
+
+		// append config.Include[key]
+		cf.Include[key] = IncludeConfig{common.ExpandHomeDir(includePath)}
+	}
+}
+
+func (cf *Config) readIncludeFiles() {
+	if len(cf.Include) == 0 {
+		return
+	}
+
+	for _, v := range cf.Include {
+		var includeConf Config
+
+		// user path
+		path := common.ExpandHomeDir(v.Path)
+
+		// Read include config file
+		_, err := toml.DecodeFile(path, &includeConf)
+		if err != nil {
+			panic(err)
+		}
+
+		// reduce common setting
+		setCommon := serverConfigReduct(cf.Common, includeConf.Common)
+
+		// map init
+		if len(cf.Server) == 0 {
+			cf.Server = map[string]ServerConfig{}
+		}
+
+		// add include file serverconf
+		cf.parseConfigServers(includeConf.Server, setCommon)
+	}
+}
+
+func (cf *Config) parseGroups() {
+	cf.grouping = make(map[string]map[string]ServerConfig)
+
+	for k, v := range cf.Server {
+		if _, ok := cf.grouping[v.Group]; ok {
+			cf.grouping[v.Group][k] = v
+		} else {
+			m := make(map[string]ServerConfig)
+			m[k] = v
+			cf.grouping[v.Group] = m
+		}
+	}
+}
+
+func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setCommon ServerConfig) {
+	tmplConfigs := make([]tmplConfig, 0)
+
+	for key, value := range configServers {
+		setValue := serverConfigReduct(setCommon, value)
+		cf.Server[key] = setValue
+
+		if value.Tmpl != "" {
+			delete(cf.Server, key)
+			tmplConfigs = append(tmplConfigs, tmplConfig{
+				k: key, c: setValue, t: ParseTmpl(setValue.Tmpl)})
+		}
+	}
+
+	cf.tmplServers(tmplConfigs)
+}
+
+func (cf *Config) FilterGroupNames(group string, names []string) []string {
+	if group == "" {
+		return names
+	}
+
+	x := make([]string, 0, len(names))
+	for _, name := range names {
+		if strings.HasPrefix(cf.Server[name].Group, group) {
+			x = append(x, name)
+		}
+	}
+
+	return x
+}
+
+func (cf *Config) GroupsNames() []string {
+	names := make([]string, 0)
+
+	for k, _ := range cf.grouping {
+		if k == "" {
+			k = "Others"
+		}
+
+		names = append(names, k)
+	}
+
+	return names
+}
+
+func (cf *Config) GetGrouping() map[string]map[string]ServerConfig {
+	return cf.grouping
 }
 
 // checkFormatServerConf checkes format of server config.

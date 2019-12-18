@@ -66,7 +66,7 @@ type psConnect struct {
 }
 
 // variable
-var (
+const (
 	// Default PROMPT
 	defaultPrompt = "[${COUNT}] <<< "
 

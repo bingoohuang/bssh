@@ -14,7 +14,6 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/blacknon/lssh/conf"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -31,14 +30,16 @@ type ListInfo struct {
 	// Incremental search line prompt string
 	Prompt string
 
+	Title string
+	RowFn func(name string) string
+
 	NameList   []string
 	SelectName []string
-	DataList   conf.Config // original config data(struct)
-	DataText   []string    // all data text list
-	ViewText   []string    // filtered text list
-	MultiFlag  bool        // multi select flag
-	Keyword    string      // input keyword
-	CursorLine int         // cursor line
+	DataText   []string // all data text list
+	ViewText   []string // filtered text list
+	MultiFlag  bool     // multi select flag
+	Keyword    string   // input keyword
+	CursorLine int      // cursor line
 	Term       TermInfo
 }
 
@@ -67,7 +68,7 @@ func arrayContains(arr []string, str string) bool {
 
 // Toggle the selected state of cursor line.
 func (l *ListInfo) toggle(newLine string) {
-	var tmpList []string
+	tmpList := make([]string, 0)
 
 	addFlag := true
 
@@ -109,20 +110,25 @@ func (l *ListInfo) allToggle(allFlag bool) {
 	}
 }
 
+func (l *ListInfo) SetTitle(titleColumns []string) {
+	s := ""
+	for _, col := range titleColumns {
+		s += col + "\t"
+	}
+
+	l.Title = s
+}
+
 // Create view text (use text/tabwriter)
 func (l *ListInfo) getText() {
 	buffer := &bytes.Buffer{}
 	tabWriterBuffer := new(tabwriter.Writer)
 	tabWriterBuffer.Init(buffer, 0, 4, 8, ' ', 0)
-	fmt.Fprintln(tabWriterBuffer, "ServerName \tConnect Information \tNote \t")
+	fmt.Fprintln(tabWriterBuffer, l.Title)
 
 	// Create list table
 	for _, key := range l.NameList {
-		name := key
-		conInfo := l.DataList.Server[key].User + "@" + l.DataList.Server[key].Addr
-		note := l.DataList.Server[key].Note
-
-		fmt.Fprintln(tabWriterBuffer, name+"\t"+conInfo+"\t"+note)
+		fmt.Fprintln(tabWriterBuffer, l.RowFn(key))
 	}
 
 	tabWriterBuffer.Flush()

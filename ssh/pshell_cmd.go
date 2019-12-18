@@ -79,9 +79,9 @@ func checkLocalBuildInCommand(cmd string) (result bool) {
 }
 
 // runBuildInCommand is run buildin or local machine command.
-func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch chan<- bool, kill chan bool) (err error) {
+func (ps *pShell) run(pl pipeLine, in *io.PipeReader, out *io.PipeWriter, ch chan<- bool, kill chan bool) (err error) {
 	// get 1st element
-	command := pline.Args[0]
+	command := pl.Args[0]
 
 	// check and exec build-in command
 	switch command {
@@ -107,8 +107,8 @@ func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch 
 	// %out [num]
 	case "%out":
 		num := ps.Count - 1
-		if len(pline.Args) > 1 {
-			num, err = strconv.Atoi(pline.Args[1])
+		if len(pl.Args) > 1 {
+			num, err = strconv.Atoi(pl.Args[1])
 			if err != nil {
 				return
 			}
@@ -123,10 +123,10 @@ func (ps *pShell) run(pline pipeLine, in *io.PipeReader, out *io.PipeWriter, ch 
 	switch {
 	case buildinRegex.MatchString(command):
 		// exec local machine
-		ps.executeLocalPipeLine(pline, in, out, ch, kill)
+		ps.executeLocalPipeLine(pl, in, out, ch, kill)
 	default:
 		// exec remote machine
-		ps.executeRemotePipeLine(pline, in, out, ch, kill)
+		ps.executeRemotePipeLine(pl, in, out, ch, kill)
 	}
 
 	return nil

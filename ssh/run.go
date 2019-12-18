@@ -59,6 +59,13 @@ type Run struct {
 	IsBashrc    bool
 	IsNotBashrc bool
 
+	// enable/disable print header in command mode
+	EnableHeader  bool
+	DisableHeader bool
+
+	// StdinData from pipe flag
+	isStdinPipe bool
+
 	// local/remote Port Forwarding
 	PortForwardMode   string // L or R
 	PortForwardLocal  string
@@ -71,16 +78,9 @@ type Run struct {
 	// Exec command
 	ExecCmd []string
 
-	// enable/disable print header in command mode
-	EnableHeader  bool
-	DisableHeader bool
-
 	// Agent is ssh-agent.
 	// In agent.Agent or agent.ExtendedAgent.
 	agent interface{}
-
-	// StdinData from pipe flag
-	isStdinPipe bool
 
 	// AuthMethodMap is
 	// map of AuthMethod summarized in Run overall

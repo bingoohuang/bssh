@@ -55,7 +55,7 @@ func (fi ByTime) Less(i, j int) bool {
 	return fi.FileInfos[j].ModTime().Unix() > fi.FileInfos[i].ModTime().Unix()
 }
 
-var (
+const (
 	helptext = `{{.Name}} - {{.Usage}}
 
 	{{.HelpName}} {{if .VisibleFlags}}[options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}

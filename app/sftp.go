@@ -1,14 +1,14 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"os/user"
 	"sort"
 
+	"github.com/blacknon/lssh/list"
+
 	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/list"
 	"github.com/blacknon/lssh/sftp"
 	"github.com/urfave/cli"
 )
@@ -75,20 +75,8 @@ USAGE:
 		names := conf.GetNameList(data)
 		sort.Strings(names)
 
-		// create select list
-		l := new(list.ListInfo)
-		l.Prompt = "lsftp>>"
-		l.NameList = names
-		l.DataList = data
-		l.MultiFlag = true
-		l.View()
-
-		// selected check
-		selected := l.SelectName
-		if selected[0] == "ServerName" {
-			fmt.Fprintln(os.Stderr, "Server not selected.")
-			os.Exit(1)
-		}
+		selectedGroup := list.ShowGroupsView(&data)
+		selected := list.ShowServersView(&data, "lsftp>>", selectedGroup, names, true)
 
 		// scp struct
 		runSftp := new(sftp.RunSftp)

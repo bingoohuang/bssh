@@ -7,11 +7,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/blacknon/lssh/list"
+
 	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/check"
 	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/list"
 	"github.com/blacknon/lssh/scp"
 	"github.com/urfave/cli"
 )
@@ -134,45 +135,15 @@ USAGE:
 		// remote to remote scp
 		case isFromInRemote && isToRemote:
 			// View From list
-			fromL := new(list.ListInfo)
-			fromL.Prompt = "lscp(from)>>"
-			fromL.NameList = names
-			fromL.DataList = data
-			fromL.MultiFlag = false
-			fromL.View()
-			fromServer = fromL.SelectName
-			if fromServer[0] == "ServerName" {
-				fmt.Fprintln(os.Stderr, "Server not selected.")
-				os.Exit(1)
-			}
-
+			selectedGroup := list.ShowGroupsView(&data)
+			fromServer = list.ShowServersView(&data, "lscp(from)>>", selectedGroup, names, false)
 			// View to list
-			toL := new(list.ListInfo)
-			toL.Prompt = "lscp(to)>>"
-			toL.NameList = names
-			toL.DataList = data
-			toL.MultiFlag = true
-			toL.View()
-			toServer = toL.SelectName
-			if toServer[0] == "ServerName" {
-				fmt.Fprintln(os.Stderr, "Server not selected.")
-				os.Exit(1)
-			}
-
+			selectedGroup = list.ShowGroupsView(&data)
+			toServer = list.ShowServersView(&data, "lscp(to)>>", selectedGroup, names, true)
 		default:
 			// View List And Get Select Line
-			l := new(list.ListInfo)
-			l.Prompt = "lscp>>"
-			l.NameList = names
-			l.DataList = data
-			l.MultiFlag = true
-			l.View()
-
-			selected = l.SelectName
-			if selected[0] == "ServerName" {
-				fmt.Fprintln(os.Stderr, "Server not selected.")
-				os.Exit(1)
-			}
+			selectedGroup := list.ShowGroupsView(&data)
+			selected = list.ShowServersView(&data, "lscp>>", selectedGroup, names, true)
 
 			if isFromInRemote {
 				fromServer = selected
@@ -189,7 +160,7 @@ USAGE:
 			// parse args
 			isFromRemote, fromPath := check.ParseScpPath(from)
 
-			// Check local file exisits
+			// Check local file exists
 			if !isFromRemote {
 				_, err := os.Stat(common.GetFullPath(fromPath))
 				if err != nil {

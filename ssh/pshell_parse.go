@@ -162,9 +162,9 @@ func parseRedirect(redir []*syntax.Redirect) (rs []string) {
 	for _, r := range redir {
 		var rr string
 		if r.N != nil {
-			rr = rr + r.N.Value
+			rr += r.N.Value
 		}
-		rr = rr + r.Op.String()
+		rr += r.Op.String()
 		for _, part := range r.Word.Parts {
 			buf := new(bytes.Buffer)
 			printer.Print(buf, part)

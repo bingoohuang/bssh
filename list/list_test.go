@@ -115,68 +115,97 @@ func TestGetText(t *testing.T) {
 		l      ListInfo
 		expect []string
 	}
+
+	cf1 := conf.Config{
+		Server: map[string]conf.ServerConfig{
+			"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
+			"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
+		},
+	}
+
+	cf2 := conf.Config{
+		Server: map[string]conf.ServerConfig{
+			"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
+			"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
+		},
+	}
+
+	cf3 := conf.Config{
+		Server: map[string]conf.ServerConfig{
+			"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
+			"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
+		},
+	}
+
+	cf4 := conf.Config{
+		Server: map[string]conf.ServerConfig{
+			"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
+			"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
+		},
+	}
+
 	tds := []TestData{
 		{
 			desc: "Get 1 server",
 			l: ListInfo{
 				NameList: []string{"dev_web1"},
-				DataList: conf.Config{
-					Server: map[string]conf.ServerConfig{
-						"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
-						"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
-					},
+				Title:    "ServerName\tConnect Information\tNote\t",
+				RowFn: func(name string) string {
+					s := cf1.Server[name]
+
+					return name + "\t" + s.User + "@" + s.Addr + "\t" + s.Note
 				},
 			},
 			expect: []string{
-				"ServerName         Connect Information        Note         \n",
-				"dev_web1           user1@192.168.101.1        WebServer\n",
+				"ServerName        Connect Information        Note        \n",
+				"dev_web1          user1@192.168.101.1        WebServer\n",
 			},
 		},
 		{
 			desc: "Get 2 server",
 			l: ListInfo{
 				NameList: []string{"dev_web1", "dev_web2"},
-				DataList: conf.Config{
-					Server: map[string]conf.ServerConfig{
-						"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
-						"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
-					},
+				Title:    "ServerName\tConnect Information\tNote\t",
+				RowFn: func(name string) string {
+					s := cf2.Server[name]
+
+					return name + "\t" + s.User + "@" + s.Addr + "\t" + s.Note
 				},
 			},
 			expect: []string{
-				"ServerName         Connect Information        Note         \n",
-				"dev_web1           user1@192.168.101.1        WebServer\n",
-				"dev_web2           user1@192.168.101.2        WebServer\n",
+				"ServerName        Connect Information        Note        \n",
+				"dev_web1          user1@192.168.101.1        WebServer\n",
+				"dev_web2          user1@192.168.101.2        WebServer\n",
 			},
 		},
 		{
 			desc: "No NameList",
 			l: ListInfo{
 				NameList: []string{},
-				DataList: conf.Config{
-					Server: map[string]conf.ServerConfig{
-						"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
-						"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
-					},
+				Title:    "ServerName\tConnect Information\tNote\t",
+				RowFn: func(name string) string {
+					s := cf3.Server[name]
+
+					return name + "\t" + s.User + "@" + s.Addr + "\t" + s.Note
 				},
 			},
 			expect: []string{
-				"ServerName         Connect Information        Note         \n",
+				"ServerName        Connect Information        Note        \n",
 			},
 		},
 		{
 			desc: "NameList is nil",
 			l: ListInfo{
 				NameList: nil,
-				DataList: conf.Config{
-					Server: map[string]conf.ServerConfig{
-						"dev_web1": {User: "user1", Addr: "192.168.101.1", Note: "WebServer"},
-						"dev_web2": {User: "user1", Addr: "192.168.101.2", Note: "WebServer"},
-					},
+				Title:    "ServerName\tConnect Information\tNote\t",
+				RowFn: func(name string) string {
+					s := cf4.Server[name]
+
+					return name + "\t" + s.User + "@" + s.Addr + "\t" + s.Note
 				},
 			},
 			expect: []string{
-				"ServerName         Connect Information        Note         \n",
+				"ServerName        Connect Information        Note        \n",
 			},
 		},
 	}

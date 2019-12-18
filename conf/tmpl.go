@@ -15,7 +15,7 @@ type tmplConfig struct {
 	t []Tmpl
 }
 
-func tmplServers(tmplConfigs []tmplConfig, config *Config) {
+func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 	for _, tc := range tmplConfigs {
 		for i, t := range tc.t {
 			c := tc.c
@@ -31,7 +31,7 @@ func tmplServers(tmplConfigs []tmplConfig, config *Config) {
 				key += fmt.Sprintf("-%d", i+1)
 			}
 
-			config.Server[key] = c
+			cf.Server[key] = c
 		}
 	}
 }

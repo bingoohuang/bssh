@@ -6,11 +6,12 @@ import (
 	"os/user"
 	"sort"
 
+	"github.com/blacknon/lssh/list"
+
 	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/check"
 	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/list"
 	sshcmd "github.com/blacknon/lssh/ssh"
 	"github.com/urfave/cli"
 )
@@ -79,11 +80,13 @@ USAGE:
 		cli.StringFlag{Name: "file,F", Value: defConf, Usage: "config `filepath`."},
 
 		// port forward option
-		cli.StringFlag{Name: "L", Usage: "Local port forward mode.Specify a `[bind_address:]port:remote_address:port`."},
-		cli.StringFlag{Name: "R", Usage: "Remote port forward mode.Specify a `[bind_address:]port:remote_address:port`."},
+		cli.StringFlag{Name: "L", Usage: "Local port forward mode.Specify a `[bind_address:]port:remote_addr:port`."},
+		cli.StringFlag{Name: "R", Usage: "Remote port forward mode.Specify a `[bind_address:]port:remote_addr:port`."},
 		cli.StringFlag{Name: "D", Usage: "Dynamic port forward mode(Socks5). Specify a `port`."},
-		// cli.StringFlag{Name: "portforward-local", Usage: "port forwarding parameter, `address:port`. use local-forward or reverse-forward. (local port(ex. 127.0.0.1:8080))."},
-		// cli.StringFlag{Name: "portforward-remote", Usage: "port forwarding parameter, `address:port`. use local-forward or reverse-forward. (remote port(ex. 127.0.0.1:80))."},
+		// cli.StringFlag{Name: "portforward-local", Usage: "port forwarding parameter,
+		//			`address:port`. use local-forward or reverse-forward. (local port(ex. 127.0.0.1:8080))."},
+		// cli.StringFlag{Name: "portforward-remote", Usage: "port forwarding parameter,
+		//			`address:port`. use local-forward or reverse-forward. (remote port(ex. 127.0.0.1:80))."},
 
 		// Other bool
 		cli.BoolFlag{Name: "w", Usage: "Displays the server header when in command execution mode."},
@@ -134,7 +137,7 @@ USAGE:
 			os.Exit(0)
 		}
 
-		selected := []string{}
+		var selected []string
 		if len(hosts) > 0 {
 			if !check.ExistServer(hosts, names) {
 				fmt.Fprintln(os.Stderr, "Input Server not found from list.")
@@ -143,19 +146,8 @@ USAGE:
 				selected = hosts
 			}
 		} else {
-			// View List And Get Select Line
-			l := new(list.ListInfo)
-			l.Prompt = "lssh>>"
-			l.NameList = names
-			l.DataList = data
-			l.MultiFlag = isMulti
-
-			l.View()
-			selected = l.SelectName
-			if selected[0] == "ServerName" {
-				fmt.Fprintln(os.Stderr, "Server not selected.")
-				os.Exit(1)
-			}
+			selectedGroup := list.ShowGroupsView(&data)
+			selected = list.ShowServersView(&data, "lssh>>", selectedGroup, names, isMulti)
 		}
 
 		r := new(sshcmd.Run)

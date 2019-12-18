@@ -116,7 +116,7 @@ func (r *Run) CreateAuthMethodMap() {
 }
 
 //
-func (r *Run) SetupSshAgent() {
+func (r *Run) SetupSSHAgent() {
 	// Connect ssh-agent
 	r.agent = sshlib.ConnectSshAgent()
 }

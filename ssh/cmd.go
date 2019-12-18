@@ -18,7 +18,7 @@ import (
 	"github.com/blacknon/lssh/output"
 )
 
-var cmdOPROMPT = "${SERVER} :: "
+const cmdOPROMPT = "${SERVER} :: "
 
 // cmd is run command.
 func (r *Run) cmd() (err error) {
@@ -118,11 +118,9 @@ func (r *Run) cmd() (err error) {
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
 			}
-		} else {
-			if r.IsParallel {
-				w, _ := c.Session.StdinPipe()
-				writers = append(writers, w)
-			}
+		} else if r.IsParallel {
+			w, _ := c.Session.StdinPipe()
+			writers = append(writers, w)
 		}
 	}
 
