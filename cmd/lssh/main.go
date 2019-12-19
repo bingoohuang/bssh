@@ -13,9 +13,10 @@ import (
 )
 
 func main() {
-	// ssh/scp/ftp
 	var ap *cli.App
+
 	args := os.Args
+
 	if len(args) > 1 {
 		switch args[1] {
 		case "scp":
@@ -27,6 +28,9 @@ func main() {
 		case "ssh":
 			args = append(args[0:1], args[2:]...)
 			ap = app.Lssh()
+		case "pbe":
+			args = append(args[0:1], args[2:]...)
+			ap = app.Lpbe()
 		}
 	}
 
@@ -34,5 +38,5 @@ func main() {
 		ap = app.Lssh()
 	}
 
-	ap.Run(common.ParseArgs(ap.Flags, args))
+	_ = ap.Run(common.ParseArgs(ap.Flags, args))
 }

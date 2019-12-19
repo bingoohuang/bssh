@@ -115,7 +115,7 @@ func (o *Output) NewWriter() (writer *io.PipeWriter) {
 }
 
 // Printer output stdout from reader.
-func (o *Output) Printer(reader io.ReadCloser) {
+func (o *Output) Printer(reader io.Reader) {
 	sc := bufio.NewScanner(reader)
 
 	for {

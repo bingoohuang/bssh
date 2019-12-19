@@ -35,6 +35,7 @@ func drawFilterLine(x, y int, str string, backColorNum, keywordColorNum int, sea
 		searchKeywordCount := strings.Count(searchLowLine, searchKeyword)
 
 		charLocation := 0
+
 		for j := 0; j < searchKeywordCount; j++ {
 			searchLineData := ""
 

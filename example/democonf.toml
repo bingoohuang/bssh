@@ -4,6 +4,9 @@ enable = true
 timestamp = true
 dirpath = "~/.lssh.log"
 
+[extra]
+# passphrase = "your passphrase"
+
 # 机房测试环境 -- start ---
 [server.mysqlm]
 tmpl = "192.168.136.(217 218):8022 app/{PBE}tLFzF-dKX4wmJFG9wnxnia7PjepL4pzC"
@@ -27,12 +30,12 @@ tmpl = "192.168.27.3:60022 huangjinbing/{PBE}1D4HK2qEipX3DsmxkDQCmZAE-pas8Whh"
 note = "aliyun-jumper"
 [server.C-api-gateway]
 # group = ["aliyun"]
-tmpl = "192.168.(29.11 37.82) footstone/empty"
+tmpl = "192.168.(29.11 37.82) footstone/na"
 note = "C区-api-gateway"
 proxy = "aliyun-jumper"
 [server.A-gw-test]
 # group = ["aliyun"]
-tmpl = "192.168.8.(22-26):22 footstone/empty"
+tmpl = "192.168.8.(22-26):22 footstone/na"
 note = "A区-API网关测试"
 proxy = "aliyun-jumper"
 # 阿里云环境 -- end ---

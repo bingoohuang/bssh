@@ -28,7 +28,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 	headLine := 2
 
 	_, height := termbox.Size()
-	height = height - headLine
+	height -= headLine
 
 	l.Keyword = ""
 	allFlag := false // input Ctrl + A flag
@@ -129,7 +129,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 
 			// Space Key
 			case termbox.KeySpace:
-				l.Keyword = l.Keyword + " "
+				l.Keyword += " "
 				l.draw()
 
 			// Other Key

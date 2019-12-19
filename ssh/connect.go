@@ -72,14 +72,8 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 		return nil, err
 	}
 
-	// server conf
-	s := r.Conf.Server[server]
-
-	// set x11
-	var x11 bool
-	if s.X11 || r.X11 {
-		x11 = true
-	}
+	s := r.Conf.Server[server] // server conf
+	x11 := s.X11 || r.X11      // set x11
 
 	// connect target server
 	connect = &sshlib.Connect{
@@ -95,7 +89,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 
 	err = connect.CreateClient(s.Addr, s.Port, s.User, r.serverAuthMethodMap[server])
 
-	return
+	return connect, err
 }
 
 // proxy struct

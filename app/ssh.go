@@ -3,8 +3,11 @@ package app
 import (
 	"fmt"
 	"os"
-	"os/user"
 	"sort"
+
+	"github.com/bingoohuang/gou/str"
+
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/blacknon/lssh/list"
 	"github.com/blacknon/lssh/misc"
@@ -17,13 +20,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-func Lssh() (app *cli.App) {
-	// Default config file path
-	usr, _ := user.Current()
-	defConf := usr.HomeDir + "/.lssh.conf"
-
-	// Set help templete
-	cli.AppHelpTemplate = `NAME:
+// nolint
+const sshAppHelpTemplate = `NAME:
     {{.Name}} - {{.Usage}}
 USAGE:
     {{.HelpName}} {{if .VisibleFlags}}[options]{{end}} [commands...]
@@ -53,7 +51,10 @@ USAGE:
     {{.Name}} -s
 `
 
-	// Create app
+// Lssh ssh ...
+func Lssh() (app *cli.App) {
+	cli.AppHelpTemplate = sshAppHelpTemplate
+
 	app = cli.NewApp()
 	// app.UseShortOptionHandling = true
 	app.Name = "lssh"
@@ -78,7 +79,8 @@ USAGE:
 	app.Flags = []cli.Flag{
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
-		cli.StringFlag{Name: "file,F", Value: defConf, Usage: "config `filepath`."},
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
+			Usage: "config `filepath`."},
 
 		// port forward option
 		cli.StringFlag{Name: "L", Usage: "Local port forward mode.Specify a `[bind_address:]port:remote_addr:port`."},
@@ -106,127 +108,139 @@ USAGE:
 	app.HideHelp = true
 
 	// Run command action
-	app.Action = func(c *cli.Context) error {
-		// show help messages
-		if c.Bool("help") {
-			cli.ShowAppHelp(c)
-			os.Exit(0)
-		}
-
-		hosts := c.StringSlice("host")
-		confpath := c.String("file")
-
-		// Get config data
-		data := conf.ReadConf(confpath)
-
-		// Set `exec command` or `shell` flag
-		isMulti := false
-		if (len(c.Args()) > 0 || c.Bool("pshell")) && !c.Bool("not-execute") {
-			isMulti = true
-		}
-
-		// Extraction server name list from 'data'
-		names := conf.GetNameList(data)
-		sort.Strings(names)
-
-		// Check list flag
-		if c.Bool("list") {
-			fmt.Fprintf(os.Stdout, "lssh Server List:\n")
-			for v := range names {
-				fmt.Fprintf(os.Stdout, "  %s\n", names[v])
-			}
-			os.Exit(0)
-		}
-
-		var selected []string
-		if len(hosts) > 0 {
-			if !check.ExistServer(hosts, names) {
-				fmt.Fprintln(os.Stderr, "Input Server not found from list.")
-				os.Exit(1)
-			} else {
-				selected = hosts
-			}
-		} else {
-			selectedGroup := list.ShowGroupsView(&data)
-			selected = list.ShowServersView(&data, "lssh>>", selectedGroup, names, isMulti)
-		}
-
-		r := new(sshcmd.Run)
-		r.ServerList = selected
-		r.Conf = data
-		switch {
-		case c.Bool("pshell") && !c.Bool("not-execute"):
-			r.Mode = "pshell"
-		case len(c.Args()) > 0 && !c.Bool("not-execute"):
-			// Becomes a shell when not-execute is given.
-			r.Mode = "cmd"
-		default:
-			r.Mode = "shell"
-		}
-
-		// exec command
-		r.ExecCmd = c.Args()
-		r.IsParallel = c.Bool("parallel")
-
-		// x11 forwarding
-		r.X11 = c.Bool("x11")
-
-		// is tty
-		r.IsTerm = c.Bool("term")
-
-		// local bashrc use
-		r.IsBashrc = c.Bool("localrc")
-		r.IsNotBashrc = c.Bool("not-localrc")
-
-		// set w/W flag
-		if c.Bool("w") {
-			fmt.Println("enable w")
-			r.EnableHeader = true
-		}
-		if c.Bool("W") {
-			fmt.Println("enable W")
-			r.DisableHeader = true
-		}
-
-		// local/remote port forwarding mode
-		var err error
-		var forwardlocal, forwardremote string
-		switch {
-		case c.String("L") != "":
-			r.PortForwardMode = "L"
-			forwardlocal, forwardremote, err = common.ParseForwardPort(c.String("L"))
-
-		case c.String("R") != "":
-			r.PortForwardMode = "R"
-			forwardlocal, forwardremote, err = common.ParseForwardPort(c.String("R"))
-
-		case c.String("L") != "" && c.String("R") != "":
-			r.PortForwardMode = "R"
-			forwardlocal, forwardremote, err = common.ParseForwardPort(c.String("R"))
-
-		default:
-			r.PortForwardMode = ""
-		}
-
-		// if err
-		if err != nil {
-			fmt.Printf("Error: %s \n", err)
-		}
-
-		// is not execute
-		r.IsNone = c.Bool("not-execute")
-
-		// local/remote port forwarding address
-
-		r.PortForwardLocal = forwardlocal
-		r.PortForwardRemote = forwardremote
-
-		// Dynamic port forwarding port
-		r.DynamicPortForward = c.String("D")
-
-		r.Start()
-		return nil
-	}
+	app.Action = lsshAction
 
 	return app
+}
+
+// lsshAction actions ssh functions.
+func lsshAction(c *cli.Context) error {
+	if c.Bool("help") {
+		_ = cli.ShowAppHelp(c)
+
+		os.Exit(0)
+	}
+
+	hosts := c.StringSlice("host")
+	confpath := c.String("file")
+
+	// Get config data
+	data := conf.ReadConf(confpath)
+
+	isMulti := parseMultiFlag(c)
+
+	// Extraction server name list from 'data'
+	names := conf.GetNameList(data)
+	sort.Strings(names)
+
+	processList(c, names)
+
+	r := new(sshcmd.Run)
+	r.ServerList = parseSelected(hosts, names, data, isMulti)
+	r.Conf = data
+
+	r.Mode = parseMode(c)
+	r.ExecCmd = c.Args() // exec command
+	r.IsParallel = c.Bool("parallel")
+	r.X11 = c.Bool("x11")          // x11 forwarding
+	r.IsTerm = c.Bool("term")      // is tty
+	r.IsBashrc = c.Bool("localrc") // local bashrc use
+	r.IsNotBashrc = c.Bool("not-localrc")
+
+	// set w/W flag
+	if c.Bool("w") {
+		fmt.Println("enable w")
+		r.EnableHeader = true
+	}
+
+	if c.Bool("W") {
+		fmt.Println("enable W")
+		r.DisableHeader = true
+	}
+
+	err := dealPortForward(c, r)
+
+	if err != nil {
+		fmt.Printf("Error: %s \n", err)
+	}
+
+	// is not execute
+	r.IsNone = c.Bool("not-execute")
+
+	// Dynamic port forwarding port
+	r.DynamicPortForward = c.String("D")
+
+	r.Start()
+	return nil
+}
+
+func dealPortForward(c *cli.Context, r *sshcmd.Run) error {
+	var err error
+
+	switch {
+	case c.String("L") != "":
+		r.PortForwardMode = "L"
+		r.PortForwardLocal, r.PortForwardRemote, err = common.ParseForwardPort(c.String("L"))
+
+	case c.String("R") != "":
+		r.PortForwardMode = "R"
+		r.PortForwardLocal, r.PortForwardRemote, err = common.ParseForwardPort(c.String("R"))
+
+	case c.String("L") != "" && c.String("R") != "":
+		r.PortForwardMode = "R"
+		r.PortForwardLocal, r.PortForwardRemote, err = common.ParseForwardPort(c.String("R"))
+
+	default:
+		r.PortForwardMode = ""
+	}
+
+	return err
+}
+
+func parseMultiFlag(c *cli.Context) bool {
+	// Set `exec command` or `shell` flag
+	return (len(c.Args()) > 0 || c.Bool("pshell")) && !c.Bool("not-execute")
+}
+
+func processList(c *cli.Context, names []string) {
+	// Check list flag
+	if !c.Bool("list") {
+		return
+	}
+
+	_, _ = fmt.Fprintf(os.Stdout, "lssh Server List:\n")
+	for v := range names {
+		_, _ = fmt.Fprintf(os.Stdout, "  %s\n", names[v])
+	}
+
+	os.Exit(0)
+}
+
+func parseMode(c *cli.Context) string {
+	switch {
+	case c.Bool("pshell") && !c.Bool("not-execute"):
+		return "pshell"
+	case len(c.Args()) > 0 && !c.Bool("not-execute"):
+		// Becomes a shell when not-execute is given.
+		return "cmd"
+	default:
+		return "shell"
+	}
+}
+
+func parseSelected(hosts []string, names []string, data conf.Config, isMulti bool) []string {
+	var selected []string
+	if len(hosts) > 0 {
+		if !check.ExistServer(hosts, names) {
+			_, _ = fmt.Fprintln(os.Stderr, "Input Server not found from list.")
+			os.Exit(1)
+		} else {
+			selected = hosts
+		}
+	} else {
+		selectedGroup := list.ShowGroupsView(&data)
+		selected = list.ShowServersView(&data, "lssh>>", selectedGroup, names, isMulti)
+	}
+
+	return selected
 }

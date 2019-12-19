@@ -181,5 +181,5 @@ func (r *Run) cmd() (err error) {
 	// sleep
 	time.Sleep(300 * time.Millisecond)
 
-	return
+	return err
 }

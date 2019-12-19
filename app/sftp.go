@@ -2,8 +2,10 @@ package app
 
 import (
 	"os"
-	"os/user"
 	"sort"
+
+	"github.com/bingoohuang/gou/str"
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/blacknon/lssh/list"
 	"github.com/blacknon/lssh/misc"
@@ -15,11 +17,7 @@ import (
 )
 
 func Lsftp() (app *cli.App) {
-	// Default config file path
-	usr, _ := user.Current()
-	defConf := usr.HomeDir + "/.lssh.conf"
-
-	// Set help templete
+	// nolint
 	cli.AppHelpTemplate = `NAME:
     {{.Name}} - {{.Usage}}
 USAGE:
@@ -52,7 +50,8 @@ USAGE:
 	app.Version = lssh.AppVersion
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "file,F", Value: defConf, Usage: "config file path"},
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
+			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
 
@@ -62,7 +61,8 @@ USAGE:
 	app.Action = func(c *cli.Context) error {
 		// show help messages
 		if c.Bool("help") {
-			cli.ShowAppHelp(c)
+			_ = cli.ShowAppHelp(c)
+
 			os.Exit(0)
 		}
 
@@ -86,6 +86,7 @@ USAGE:
 
 		// start lsftp shell
 		runSftp.Start()
+
 		return nil
 	}
 
