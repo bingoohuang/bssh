@@ -21,14 +21,8 @@ import (
 )
 
 // TODO(blacknon): リファクタリング(v0.6.1)
-
-//
 func (r *RunSftp) put(args []string) {
-	// create app
 	app := cli.NewApp()
-	// app.UseShortOptionHandling = true
-
-	// set help message
 	app.CustomAppHelpTemplate = helptext
 
 	// set parameter
@@ -124,25 +118,20 @@ func (r *RunSftp) put(args []string) {
 	app.Run(args)
 }
 
-//
 func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err error) {
-	// set arg path
 	rpath, _ := filepath.Rel(base, path)
 
-	switch {
-	case filepath.IsAbs(target):
+	if filepath.IsAbs(target) {
 		rpath = filepath.Join(target, rpath)
-	case !filepath.IsAbs(target):
+	} else {
 		target = filepath.Join(client.Pwd, target)
 		rpath = filepath.Join(target, rpath)
 	}
 
-	// get local file info
 	fInfo, _ := os.Lstat(path)
 	if fInfo.IsDir() { // directory
-		client.Connect.Mkdir(rpath)
+		_ = client.Connect.Mkdir(rpath)
 	} else { //file
-		// open local file
 		localfile, err := os.Open(path)
 		if err != nil {
 			return err

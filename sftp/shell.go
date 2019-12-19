@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/lssh/misc"
 
 	prompt "github.com/c-bata/go-prompt"
@@ -178,10 +179,10 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
 		case misc.Get:
 			// TODO(blacknon): オプションを追加したら引数の数から減らす処理が必要
-			switch {
-			case strings.Count(t.CurrentLineBeforeCursor(), " ") == 1: // remote
+			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
+			case 1: // remote
 				return r.PathComplete(true, 1, t)
-			case strings.Count(t.CurrentLineBeforeCursor(), " ") == 2: // local
+			case 2: // local
 				return r.PathComplete(false, 2, t)
 			}
 
@@ -256,10 +257,11 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 
 		case misc.Put:
 			// TODO(blacknon): オプションを追加したら引数の数から減らす処理が必要
-			switch {
-			case strings.Count(t.CurrentLineBeforeCursor(), " ") == 1: // local
+			// TODO（blacknon）：添加选项后，有必要减少参数数量
+			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
+			case 1: // local
 				return r.PathComplete(false, 1, t)
-			case strings.Count(t.CurrentLineBeforeCursor(), " ") == 2: // remote
+			case 2: // remote
 				return r.PathComplete(true, 2, t)
 			}
 		case "pwd":
@@ -284,7 +286,6 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 
 // PathComplete ...
 func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt.Suggest {
-	// suggest
 	var suggest []prompt.Suggest
 
 	// Get cursor left
@@ -304,22 +305,18 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 		word = word[sp+1:]
 	}
 
-	switch remote {
-	case true:
-		// update r.RemoteComplete
+	if remote {
 		switch {
-		case contains([]string{"/"}, char): // char is slach or
+		case contains([]string{"/"}, char): // char is slash or
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
 		case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
 		}
 
 		suggest = r.RemoteComplete
-
-	case false:
-		// update r.RemoteComplete
+	} else {
 		switch {
-		case contains([]string{"/"}, char): // char is slach or
+		case contains([]string{"/"}, char): // char is slash or
 			r.GetLocalComplete(t.GetWordBeforeCursor())
 		case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetLocalComplete(t.GetWordBeforeCursor())
@@ -346,12 +343,16 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 		client := c
 
 		go func() {
-			// set rpath
+			defer func() {
+				exit <- true
+			}()
+
 			var rpath string
-			switch {
-			case filepath.IsAbs(path):
+			if filepath.IsAbs(path) {
 				rpath = path
-			case !filepath.IsAbs(path):
+			} else if strings.HasPrefix(path, "~/") {
+				rpath = filepath.Join(client.Pwd, path[2:])
+			} else {
 				rpath = filepath.Join(client.Pwd, path)
 			}
 
@@ -380,11 +381,10 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 				m[p] = append(m[p], server)
 				sm.Unlock()
 			}
-			exit <- true
+
 		}()
 	}
 
-	// wait
 	for i := 0; i < len(r.Client); i++ {
 		<-exit
 	}
@@ -415,6 +415,7 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 
 // GetLocalComplete ...
 func (r *RunSftp) GetLocalComplete(path string) {
+	path = common.ExpandHomeDir(path)
 	stat, err := os.Lstat(path)
 	if err != nil {
 		return
@@ -423,7 +424,7 @@ func (r *RunSftp) GetLocalComplete(path string) {
 	// dir check
 	var lpath string
 	if stat.IsDir() {
-		lpath = path + "/*"
+		lpath = filepath.Join(path, "*")
 	} else {
 		lpath = path + "*"
 	}
