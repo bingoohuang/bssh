@@ -105,9 +105,9 @@ func (r *Run) pshell() (err error) {
 	defer execLocalCommand(config.PostCmd)
 
 	// Connect
-	var cons []*psConnect
-	for _, server := range r.ServerList {
-		// Create *sshlib.Connect
+	cons := make([]*psConnect, len(r.ServerList))
+
+	for i, server := range r.ServerList {
 		con, err := r.CreateSSHConnect(server)
 		if err != nil {
 			log.Println(err)
@@ -128,12 +128,11 @@ func (r *Run) pshell() (err error) {
 		// Create output prompt
 		o.Create(server)
 
-		psCon := &psConnect{
+		cons[i] = &psConnect{
 			Name:    server,
 			Output:  o,
 			Connect: con,
 		}
-		cons = append(cons, psCon)
 	}
 
 	// count sshlib.Connect.
@@ -156,7 +155,9 @@ func (r *Run) pshell() (err error) {
 
 	// old history list
 	var historyCommand []string
+
 	oldHistory, err := ps.GetHistoryFromFile()
+
 	if err == nil {
 		for _, h := range oldHistory {
 			historyCommand = append(historyCommand, h.Command)

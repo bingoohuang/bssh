@@ -38,8 +38,10 @@ func joinPipeLineSlice(pslice []pipeLine) string {
 // local command as a command to be executed on a remote machine as a string.
 func joinPipeLine(pslice []pipeLine) []pipeLine {
 	beforeLocal := false
+
 	var bpline pipeLine // before pipeLine
-	result := []pipeLine{}
+
+	var result []pipeLine
 
 	for _, pline := range pslice {
 		// get command
@@ -47,17 +49,20 @@ func joinPipeLine(pslice []pipeLine) []pipeLine {
 
 		// check in local or build-in command
 		isLocal := checkLocalBuildInCommand(cmd)
+
 		switch {
 		case isLocal:
 			if len(bpline.Args) > 0 {
 				result = append(result, bpline)
 			}
+
 			bpline = pline
 			beforeLocal = true
 		case !isLocal && beforeLocal: // RemoteCommand で前がLocalの場合
 			if len(bpline.Args) > 0 {
 				result = append(result, bpline)
 			}
+
 			bpline = pline
 			beforeLocal = false
 		case !isLocal && !beforeLocal: // RemoteCommandで前がRemoteの場合
@@ -70,6 +75,7 @@ func joinPipeLine(pslice []pipeLine) []pipeLine {
 	}
 
 	result = append(result, bpline)
+
 	return result
 }
 
@@ -81,6 +87,7 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 	// Create parser
 	in := strings.NewReader(command)
 	f, err := syntax.NewParser().Parse(in, " ")
+
 	if err != nil {
 		return
 	}
@@ -92,7 +99,9 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 
 		// create stmtCmd, stmtRedirs
 		var stmtCmd syntax.Command
+
 		var stmtRedirs []*syntax.Redirect
+
 		stmtCmd = stmt.Cmd
 		stmtRedirs = stmt.Redirs
 
@@ -111,10 +120,8 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 
 				break stmtCmdLoop
 			case *syntax.BinaryCmd:
-				cmd := c.X.Cmd
-				switch cmd.(type) {
+				switch cx := c.X.Cmd.(type) {
 				case *syntax.CallExpr:
-					cx := cmd.(*syntax.CallExpr)
 					cxr := c.X.Redirs
 
 					args := parseCallExpr(cx)
@@ -129,7 +136,7 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 					stmtRedirs = c.Y.Redirs
 
 				case *syntax.BinaryCmd: // TODO(blacknon): &&や||に対応させる(対処方法がわからん…)
-					stmtCmd = c.X.Cmd
+					stmtCmd = cx
 					stmtRedirs = c.X.Redirs
 				}
 			}
@@ -152,6 +159,7 @@ func parseCallExpr(cmd *syntax.CallExpr) (pLine []string) {
 			pLine = append(pLine, buf.String())
 		}
 	}
+
 	return
 }
 
@@ -164,7 +172,9 @@ func parseRedirect(redir []*syntax.Redirect) (rs []string) {
 		if r.N != nil {
 			rr += r.N.Value
 		}
+
 		rr += r.Op.String()
+
 		for _, part := range r.Word.Parts {
 			buf := new(bytes.Buffer)
 			printer.Print(buf, part)

@@ -35,6 +35,7 @@ func (r *Run) cmd() (err error) {
 	// print header
 	r.PrintSelectServer()
 	r.printRunCommand()
+
 	if len(r.ServerList) == 1 {
 		r.printProxy(r.ServerList[0])
 	}
@@ -43,7 +44,7 @@ func (r *Run) cmd() (err error) {
 	for _, server := range r.ServerList {
 		// check count AuthMethod
 		if len(r.serverAuthMethodMap[server]) == 0 {
-			fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
+			_, _ = fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
 			continue
 		}
 
@@ -59,6 +60,7 @@ func (r *Run) cmd() (err error) {
 
 	// Run command and print loop
 	writers := []io.WriteCloser{}
+
 	for s, c := range connmap {
 		// set session
 		c.Session, _ = c.CreateSession()
@@ -101,14 +103,15 @@ func (r *Run) cmd() (err error) {
 			// Port Forwarding
 			switch config.PortForwardMode {
 			case "L", "":
-				c.TCPLocalForward(config.PortForwardLocal, config.PortForwardRemote)
+				_ = c.TCPLocalForward(config.PortForwardLocal, config.PortForwardRemote)
 			case "R":
-				c.TCPRemoteForward(config.PortForwardLocal, config.PortForwardRemote)
+				_ = c.TCPRemoteForward(config.PortForwardLocal, config.PortForwardRemote)
 			}
 
 			// Dynamic Port Forwarding
 			if config.DynamicPortForward != "" {
 				r.printDynamicPortForward(config.DynamicPortForward)
+
 				go c.TCPDynamicForward("localhost", config.DynamicPortForward)
 			}
 
@@ -127,6 +130,7 @@ func (r *Run) cmd() (err error) {
 	// if parallel flag true, and select server is not single,
 	// set send stdin.
 	var stdinData []byte
+
 	switch {
 	case r.IsParallel && len(r.ServerList) > 1:
 		if r.isStdinPipe {
@@ -143,9 +147,10 @@ func (r *Run) cmd() (err error) {
 	// run command
 	for _, c := range connmap {
 		conn := c
+
 		if r.IsParallel {
 			go func() {
-				conn.Command(command)
+				_ = conn.Command(command)
 				finished <- true
 			}()
 		} else {
@@ -156,16 +161,16 @@ func (r *Run) cmd() (err error) {
 
 				// run command
 				go func() {
-					conn.Command(command)
+					_ = conn.Command(command)
 					finished <- true
 				}()
 
 				// send stdin
-				io.Copy(w, rd)
-				w.Close()
+				_, _ = io.Copy(w, rd)
+				_ = w.Close()
 			} else {
 				// run command
-				conn.Command(command)
+				_ = conn.Command(command)
 				go func() { finished <- true }()
 			}
 		}

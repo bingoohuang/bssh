@@ -7,6 +7,8 @@ package sftp
 import (
 	"fmt"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 )
@@ -19,7 +21,7 @@ func (r *RunSftp) rename(args []string) {
 
 	// set help message
 	app.CustomAppHelpTemplate = helptext
-	app.Name = "rename"
+	app.Name = misc.Rename
 	app.Usage = "lsftp build-in command: rename [remote machine rename]"
 	app.ArgsUsage = "[path path]"
 	app.HideHelp = true
@@ -31,10 +33,12 @@ func (r *RunSftp) rename(args []string) {
 		if len(c.Args()) != 2 {
 			fmt.Println("Requires two arguments")
 			fmt.Println("rename [old] [new]")
+
 			return nil
 		}
 
 		exit := make(chan bool)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl

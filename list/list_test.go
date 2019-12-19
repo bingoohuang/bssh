@@ -18,6 +18,7 @@ func TestArrayContains(t *testing.T) {
 		str    string
 		expect bool
 	}
+
 	tds := []TestData{
 		{desc: "Contains word", arr: []string{"あ", "い"}, str: "あ", expect: true},
 		{desc: "Contains word", arr: []string{"あ", "い"}, str: "い", expect: true},
@@ -27,6 +28,7 @@ func TestArrayContains(t *testing.T) {
 		{desc: "arr is nil", arr: nil, str: "c", expect: false},
 		{desc: "str is empty", arr: []string{"a", "b"}, str: "", expect: false},
 	}
+
 	for _, v := range tds {
 		got := arrayContains(v.arr, v.str)
 		assert.Equal(t, v.expect, got, v.desc)
@@ -36,17 +38,19 @@ func TestArrayContains(t *testing.T) {
 func TestToggle(t *testing.T) {
 	type TestData struct {
 		desc    string
-		l       ListInfo
+		l       Info
 		newLine string
 		expect  []string
 	}
+
 	tds := []TestData{
-		{desc: "Existing word", l: ListInfo{SelectName: []string{"a", "b"}}, newLine: "a", expect: []string{"b"}},
-		{desc: "Not existing word", l: ListInfo{SelectName: []string{"b"}}, newLine: "a", expect: []string{"b", "a"}},
-		{desc: "Duplicated word", l: ListInfo{SelectName: []string{"a", "a"}}, newLine: "a", expect: []string{}},
-		{desc: "SelectName is empty", l: ListInfo{SelectName: []string{}}, newLine: "a", expect: []string{"a"}},
-		{desc: "SelectName is nil", l: ListInfo{SelectName: nil}, newLine: "a", expect: []string{"a"}},
+		{desc: "Existing word", l: Info{SelectName: []string{"a", "b"}}, newLine: "a", expect: []string{"b"}},
+		{desc: "Not existing word", l: Info{SelectName: []string{"b"}}, newLine: "a", expect: []string{"b", "a"}},
+		{desc: "Duplicated word", l: Info{SelectName: []string{"a", "a"}}, newLine: "a", expect: []string{}},
+		{desc: "SelectName is empty", l: Info{SelectName: []string{}}, newLine: "a", expect: []string{"a"}},
+		{desc: "SelectName is nil", l: Info{SelectName: nil}, newLine: "a", expect: []string{"a"}},
 	}
+
 	for _, v := range tds {
 		v.l.toggle(v.newLine)
 		assert.Equal(t, v.expect, v.l.SelectName, v.desc)
@@ -70,39 +74,44 @@ func TestAllToggle(t *testing.T) {
 
 	type TestData struct {
 		desc    string
-		l       ListInfo
+		l       Info
 		allFlag bool
 		expect  []string
 	}
+
 	tds := []TestData{
 		{
 			desc: "Toggle all",
-			l: ListInfo{
+			l: Info{
 				SelectName: []string{"dev_web1"},
 				ViewText:   texts,
 			},
 			allFlag: true,
-			expect:  []string{"prd_web1", "prd_web2", "prd_app1", "prd_app2", "prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
+			expect: []string{"prd_web1", "prd_web2", "prd_app1", "prd_app2",
+				"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
 		},
 		{
 			desc: "Toggle all",
-			l: ListInfo{
-				SelectName: []string{"prd_web1", "prd_web2", "prd_app1", "prd_app2", "prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
-				ViewText:   texts,
+			l: Info{
+				SelectName: []string{"prd_web1", "prd_web2", "prd_app1", "prd_app2",
+					"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
+				ViewText: texts,
 			},
 			allFlag: true,
 			expect:  []string{"dev_web1"},
 		},
 		{
 			desc: "Select 1",
-			l: ListInfo{
+			l: Info{
 				SelectName: []string{"dev_web1"},
 				ViewText:   texts,
 			},
 			allFlag: false,
-			expect:  []string{"dev_web1", "prd_web1", "prd_web2", "prd_app1", "prd_app2", "prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
+			expect: []string{"dev_web1", "prd_web1", "prd_web2", "prd_app1", "prd_app2",
+				"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
 		},
 	}
+
 	for _, v := range tds {
 		v.l.allToggle(v.allFlag)
 		assert.Equal(t, v.expect, v.l.SelectName, v.desc)
@@ -112,7 +121,7 @@ func TestAllToggle(t *testing.T) {
 func TestGetText(t *testing.T) {
 	type TestData struct {
 		desc   string
-		l      ListInfo
+		l      Info
 		expect []string
 	}
 
@@ -147,7 +156,7 @@ func TestGetText(t *testing.T) {
 	tds := []TestData{
 		{
 			desc: "Get 1 server",
-			l: ListInfo{
+			l: Info{
 				NameList: []string{"dev_web1"},
 				Title:    "ServerName\tConnect Information\tNote\t",
 				RowFn: func(name string) string {
@@ -163,7 +172,7 @@ func TestGetText(t *testing.T) {
 		},
 		{
 			desc: "Get 2 server",
-			l: ListInfo{
+			l: Info{
 				NameList: []string{"dev_web1", "dev_web2"},
 				Title:    "ServerName\tConnect Information\tNote\t",
 				RowFn: func(name string) string {
@@ -180,7 +189,7 @@ func TestGetText(t *testing.T) {
 		},
 		{
 			desc: "No NameList",
-			l: ListInfo{
+			l: Info{
 				NameList: []string{},
 				Title:    "ServerName\tConnect Information\tNote\t",
 				RowFn: func(name string) string {
@@ -195,7 +204,7 @@ func TestGetText(t *testing.T) {
 		},
 		{
 			desc: "NameList is nil",
-			l: ListInfo{
+			l: Info{
 				NameList: nil,
 				Title:    "ServerName\tConnect Information\tNote\t",
 				RowFn: func(name string) string {
@@ -209,6 +218,7 @@ func TestGetText(t *testing.T) {
 			},
 		},
 	}
+
 	for _, v := range tds {
 		v.l.getText()
 		assert.Equal(t, v.expect, v.l.DataText, v.desc)
@@ -218,13 +228,14 @@ func TestGetText(t *testing.T) {
 func TestGetFilterText(t *testing.T) {
 	type TestData struct {
 		desc   string
-		l      ListInfo
+		l      Info
 		expect []string
 	}
+
 	tds := []TestData{
 		{
 			desc: "Expect is DataText if keyword is empty",
-			l: ListInfo{
+			l: Info{
 				Keyword: "",
 				DataText: []string{
 					"ServerName         Connect Information        Note",
@@ -238,7 +249,7 @@ func TestGetFilterText(t *testing.T) {
 		},
 		{
 			desc: "ServerName (text)",
-			l: ListInfo{
+			l: Info{
 				Keyword: "dev_web",
 				DataText: []string{
 					"ServerName         Connect Information        Note",
@@ -255,7 +266,7 @@ func TestGetFilterText(t *testing.T) {
 		},
 		{
 			desc: "Connect Information",
-			l: ListInfo{
+			l: Info{
 				Keyword: "33",
 				DataText: []string{
 					"ServerName         Connect Information        Note",
@@ -271,7 +282,7 @@ func TestGetFilterText(t *testing.T) {
 		},
 		{
 			desc: "Note (ignore case)",
-			l: ListInfo{
+			l: Info{
 				Keyword: "webserver",
 				DataText: []string{
 					"ServerName         Connect Information        Note",
@@ -288,7 +299,7 @@ func TestGetFilterText(t *testing.T) {
 		},
 		// { // Can't use regexp
 		// 	desc: "Regexp \\d",
-		// 	l: ListInfo{
+		// 	l: Info{
 		// 		Keyword: `dev_web\d+`,
 		// 		DataText: []string{
 		// 			"ServerName         Connect Information        Note",
@@ -305,6 +316,7 @@ func TestGetFilterText(t *testing.T) {
 		// 	},
 		// },
 	}
+
 	for _, v := range tds {
 		v.l.getFilterText()
 		assert.Equal(t, v.expect, v.l.ViewText, v.desc)

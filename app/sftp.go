@@ -16,9 +16,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-func Lsftp() (app *cli.App) {
-	// nolint
-	cli.AppHelpTemplate = `NAME:
+// nolint
+const appHelpTemplate = `NAME:
     {{.Name}} - {{.Usage}}
 USAGE:
     {{.HelpName}} {{if .VisibleFlags}}[options]{{end}}
@@ -41,9 +40,11 @@ USAGE:
 	# start lsftp shell
 	{{.Name}}
 `
-	// Create app
+
+// Lsftp sftp ...
+func Lsftp() (app *cli.App) {
+	cli.AppHelpTemplate = appHelpTemplate
 	app = cli.NewApp()
-	// app.UseShortOptionHandling = true
 	app.Name = "lsftp"
 	app.Usage = "TUI list select and parallel sftp client command."
 	app.Copyright = misc.Copyright
@@ -58,37 +59,36 @@ USAGE:
 	app.EnableBashCompletion = true
 	app.HideHelp = true
 
-	app.Action = func(c *cli.Context) error {
-		// show help messages
-		if c.Bool("help") {
-			_ = cli.ShowAppHelp(c)
-
-			os.Exit(0)
-		}
-
-		// hosts := c.StringSlice("host")
-		confpath := c.String("file")
-
-		// Get config data
-		data := conf.ReadConf(confpath)
-
-		// Get Server Name List (and sort List)
-		names := conf.GetNameList(data)
-		sort.Strings(names)
-
-		selectedGroup := list.ShowGroupsView(&data)
-		selected := list.ShowServersView(&data, "lsftp>>", selectedGroup, names, true)
-
-		// scp struct
-		runSftp := new(sftp.RunSftp)
-		runSftp.Config = data
-		runSftp.SelectServer = selected
-
-		// start lsftp shell
-		runSftp.Start()
-
-		return nil
-	}
+	app.Action = lsftpAction
 
 	return app
+}
+
+func lsftpAction(c *cli.Context) error {
+	if c.Bool("help") {
+		_ = cli.ShowAppHelp(c)
+
+		os.Exit(0)
+	}
+
+	confpath := c.String("file")
+
+	// Get config data
+	data := conf.ReadConf(confpath)
+
+	// Get Server Name List (and sort List)
+	names := conf.GetNameList(data)
+	sort.Strings(names)
+
+	selectedGroup := list.ShowGroupsView(&data)
+	selected := list.ShowServersView(&data, "lsftp>>", selectedGroup, names, true)
+
+	// scp struct
+	runSftp := new(sftp.RunSftp)
+	runSftp.Config = data
+	runSftp.SelectServer = selected
+
+	runSftp.Start()
+
+	return nil
 }

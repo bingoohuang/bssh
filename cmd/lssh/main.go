@@ -7,6 +7,8 @@ package main
 import (
 	"os"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/app"
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
@@ -25,7 +27,7 @@ func main() {
 		case "ftp":
 			args = append(args[0:1], args[2:]...)
 			ap = app.Lsftp()
-		case "ssh":
+		case misc.SSH:
 			args = append(args[0:1], args[2:]...)
 			ap = app.Lssh()
 		case "pbe":

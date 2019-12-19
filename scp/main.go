@@ -26,6 +26,7 @@ const (
 	oprompt = "${SERVER} :: "
 )
 
+// Scp ...
 type Scp struct {
 	// ssh Run
 	Run *sshl.Run
@@ -37,9 +38,6 @@ type Scp struct {
 	Config  conf.Config
 	AuthMap map[sshl.AuthKey][]ssh.AuthMethod
 
-	// copy with permission flag
-	Permission bool
-
 	// send parallel flag
 	Parallel    bool
 	ParallelNum int
@@ -49,6 +47,7 @@ type Scp struct {
 	ProgressWG *sync.WaitGroup
 }
 
+// Info ...
 type Info struct {
 	// is remote flag
 	IsRemote bool
@@ -60,6 +59,7 @@ type Info struct {
 	Path []string
 }
 
+// Connect ...
 type Connect struct {
 	// server name
 	Server string
@@ -71,6 +71,7 @@ type Connect struct {
 	Output *output.Output
 }
 
+// PathSet ...
 type PathSet struct {
 	Base      string
 	PathSlice []string
@@ -122,25 +123,26 @@ func (cp *Scp) push() {
 	}
 
 	// get local host directory walk data
-	pathset := []PathSet{}
-	for _, p := range cp.From.Path {
+	pathset := make([]PathSet, len(cp.From.Path))
+
+	for i, p := range cp.From.Path {
 		data, err := common.WalkDir(p)
 		if err != nil {
 			continue
 		}
 
 		sort.Strings(data)
-		dataset := PathSet{
+
+		pathset[i] = PathSet{
 			Base:      filepath.Dir(p),
 			PathSlice: data,
 		}
-
-		pathset = append(pathset, dataset)
 	}
 
 	// parallel push data
 	for _, c := range clients {
 		client := c
+
 		go func() {
 			// TODO(blacknon): Parallelで指定した数までは同時コピーできるようにする
 
@@ -210,10 +212,7 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow *io.PipeWriter, output *output.Outp
 		}
 	}
 
-	// set mode
-	if cp.Permission {
-		ftp.Chmod(rpath, fInfo.Mode())
-	}
+	_ = ftp.Chmod(rpath, fInfo.Mode())
 
 	return err
 }
@@ -226,6 +225,7 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 	// mkdir all
 	dir := filepath.Dir(path)
 	err = ftp.MkdirAll(dir)
+
 	if err != nil {
 		fmt.Fprintf(ow, "%s\n", err)
 		return
@@ -257,6 +257,7 @@ func (cp *Scp) viaPush() {
 	// create client
 	fclient := cp.createScpConnects([]string{from})
 	tclient := cp.createScpConnects(to)
+
 	if len(fclient) == 0 || len(tclient) == 0 {
 		fmt.Fprintf(os.Stderr, "There is no host to connect to\n")
 		return
@@ -295,6 +296,7 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 
 		p := walker.Path()
 		stat := walker.Stat()
+
 		if stat.IsDir() { // is directory
 			for _, tc := range tclients {
 				tc.Connect.Mkdir(p)
@@ -344,6 +346,7 @@ func (cp *Scp) pull() {
 	// parallel push data
 	for _, c := range clients {
 		client := c
+
 		go func() {
 			// pull data
 			cp.pullPath(client)
@@ -381,6 +384,7 @@ func (cp *Scp) pullPath(client *Connect) {
 		baseDir = filepath.Join(baseDir, client.Server)
 		os.MkdirAll(baseDir, 0755)
 	}
+
 	baseDir, _ = filepath.Abs(baseDir)
 
 	// walk remote path
@@ -435,10 +439,7 @@ func (cp *Scp) pullPath(client *Connect) {
 					client.Output.ProgressPrinter(size, rd, p)
 				}
 
-				// set mode
-				if cp.Permission {
-					os.Chmod(lpath, stat.Mode())
-				}
+				_ = os.Chmod(lpath, stat.Mode())
 			}
 		}
 	}
@@ -448,8 +449,10 @@ func (cp *Scp) pullPath(client *Connect) {
 func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 	ch := make(chan bool)
 	m := new(sync.Mutex)
+
 	for _, target := range targets {
 		server := target
+
 		go func() {
 			// ssh connect
 			conn, err := cp.Run.CreateSSHConnect(server)

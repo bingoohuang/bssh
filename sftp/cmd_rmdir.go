@@ -32,6 +32,7 @@ func (r *RunSftp) rmdir(args []string) {
 		if len(c.Args()) != 1 {
 			fmt.Println("Requires one arguments")
 			fmt.Println("rmdir [path]")
+
 			return nil
 		}
 

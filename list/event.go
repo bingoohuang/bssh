@@ -12,18 +12,18 @@ import (
 )
 
 // Add Rune to search keywords(l.Keyword)
-func (l *ListInfo) insertRune(inputRune rune) {
-	l.Keyword = l.Keyword + string(inputRune)
+func (l *Info) insertRune(inputRune rune) {
+	l.Keyword += string(inputRune)
 }
 
 // Delete Rune at search keywords(l.Keyword)
-func (l *ListInfo) deleteRune() {
+func (l *Info) deleteRune() {
 	sc := []rune(l.Keyword)
 	l.Keyword = string(sc[:(len(sc) - 1)])
 }
 
 // keyEvent wait for keyboard events
-func (l *ListInfo) keyEvent() (lineData []string) {
+func (l *Info) keyEvent() {
 	l.CursorLine = 0
 	headLine := 2
 
@@ -51,6 +51,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if l.CursorLine > 0 {
 					l.CursorLine--
 				}
+
 				l.draw()
 
 			// AllowDown Key
@@ -84,6 +85,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if l.MultiFlag {
 					l.toggle(strings.Fields(l.ViewText[l.CursorLine+1])[0])
 				}
+
 				if l.CursorLine < len(l.ViewText)-headLine {
 					l.CursorLine++
 				}
@@ -108,20 +110,23 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if len(l.SelectName) == 0 {
 					l.SelectName = append(l.SelectName, strings.Fields(l.ViewText[l.CursorLine+1])[0])
 				}
+
 				return
 
 			// BackSpace Key
 			case termbox.KeyBackspace, termbox.KeyBackspace2:
 				if len(l.Keyword) > 0 {
 					l.deleteRune()
-
 					l.getFilterText()
+
 					if l.CursorLine > len(l.ViewText) {
 						l.CursorLine = len(l.ViewText)
 					}
+
 					if l.CursorLine < 0 {
 						l.CursorLine = 0
 					}
+
 					allFlag = false
 
 					l.draw()
@@ -137,9 +142,11 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if ev.Ch != 0 {
 					l.insertRune(ev.Ch)
 					l.getFilterText()
+
 					if l.CursorLine > len(l.ViewText)-headLine {
 						l.CursorLine = len(l.ViewText) - headLine
 					}
+
 					allFlag = false
 
 					l.draw()
@@ -155,6 +162,7 @@ func (l *ListInfo) keyEvent() (lineData []string) {
 				if mouseSelectLine <= len(l.ViewText)-headLine {
 					l.CursorLine = mouseSelectLine
 				}
+
 				l.draw()
 			}
 

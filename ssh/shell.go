@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/blacknon/lssh/misc"
+
 	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/common"
 	"golang.org/x/crypto/ssh"
@@ -21,14 +23,14 @@ import (
 
 // run shell
 func (r *Run) shell() (err error) {
-	// server config
 	server := r.ServerList[0]
 	config := r.Conf.Server[server]
 
 	// check count AuthMethod
 	if len(r.serverAuthMethodMap[server]) == 0 {
-		msg := fmt.Sprintf("Error: %s is No AuthMethod.\n", server)
+		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", server)
 		err = errors.New(msg)
+
 		return
 	}
 
@@ -50,7 +52,7 @@ func (r *Run) shell() (err error) {
 
 	// OverWrite local bashrc use
 	if r.IsBashrc {
-		config.LocalRcUse = "yes"
+		config.LocalRcUse = misc.Yes
 	}
 
 	// OverWrite local bashrc not use
@@ -64,11 +66,11 @@ func (r *Run) shell() (err error) {
 	r.printDynamicPortForward(config.DynamicPortForward)
 	r.printProxy(server)
 
-	if config.LocalRcUse == "yes" {
+	if config.LocalRcUse == misc.Yes {
 		fmt.Fprintf(os.Stderr, "Information   :This connect use local bashrc.\n")
 	}
 
-	// Craete sshlib.Connect (Connect Proxy loop)
+	// Create sshlib.Connect (Connect Proxy loop)
 	connect, err := r.CreateSSHConnect(server)
 	if err != nil {
 		return
@@ -131,7 +133,7 @@ func (r *Run) shell() (err error) {
 		}
 
 		// TODO(blacknon): local rc file add
-		if config.LocalRcUse == "yes" {
+		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
 			err = connect.Shell(session)
@@ -194,7 +196,8 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 	}
 
 	// command
-	cmd := fmt.Sprintf("bash --noprofile --rcfile <(echo %s|((base64 --help | grep -q coreutils) && base64 -d <(cat) || base64 -D <(cat) ))", rcData)
+	s := "bash --noprofile --rcfile<(echo %s|((base64 --help|grep -q coreutils)&&base64 -d<(cat)||base64 -D<(cat) ))"
+	cmd := fmt.Sprintf(s, rcData)
 
 	// decode command
 	if decoder != "" {

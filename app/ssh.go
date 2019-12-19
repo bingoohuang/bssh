@@ -150,11 +150,13 @@ func lsshAction(c *cli.Context) error {
 	// set w/W flag
 	if c.Bool("w") {
 		fmt.Println("enable w")
+
 		r.EnableHeader = true
 	}
 
 	if c.Bool("W") {
 		fmt.Println("enable W")
+
 		r.DisableHeader = true
 	}
 
@@ -171,6 +173,7 @@ func lsshAction(c *cli.Context) error {
 	r.DynamicPortForward = c.String("D")
 
 	r.Start()
+
 	return nil
 }
 
@@ -230,6 +233,7 @@ func parseMode(c *cli.Context) string {
 
 func parseSelected(hosts []string, names []string, data conf.Config, isMulti bool) []string {
 	var selected []string
+
 	if len(hosts) > 0 {
 		if !check.ExistServer(hosts, names) {
 			_, _ = fmt.Fprintln(os.Stderr, "Input Server not found from list.")

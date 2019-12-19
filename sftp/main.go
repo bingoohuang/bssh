@@ -17,6 +17,7 @@ import (
 	"github.com/vbauerster/mpb"
 )
 
+// RunSftp ...
 type RunSftp struct {
 	// select server
 	SelectServer []string
@@ -42,6 +43,7 @@ type RunSftp struct {
 	LocalComplete  []prompt.Suggest
 }
 
+// Connect ...
 type Connect struct {
 	// ssh connect
 	Connect *sftp.Client
@@ -53,6 +55,7 @@ type Connect struct {
 	Pwd string
 }
 
+// PathSet ...
 type PathSet struct {
 	Base      string
 	PathSlice []string
@@ -62,6 +65,7 @@ const (
 	oprompt = "${SERVER} :: "
 )
 
+// Start starts the sftp app
 func (r *RunSftp) Start() {
 	// Create AuthMap
 	r.Run = new(sshl.Run)
@@ -76,15 +80,17 @@ func (r *RunSftp) Start() {
 	r.shell()
 }
 
-//
+// createSftpConnect ...
 func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connect) {
 	// init
 	result = map[string]*Connect{}
 
 	ch := make(chan bool)
 	m := new(sync.Mutex)
+
 	for _, target := range targets {
 		server := target
+
 		go func() {
 			// ssh connect
 			conn, err := r.Run.CreateSSHConnect(server)

@@ -44,6 +44,7 @@ func fixNote(c *ServerConfig) {
 	if c.Note != "" {
 		c.Note += "-"
 	}
+
 	c.Note += c.User + "@" + c.Addr + ":" + c.Port
 }
 
@@ -105,5 +106,6 @@ func parseHostPort(addr string) (string, string) {
 	}
 
 	pos := strings.Index(addr, ":")
+
 	return addr[0:pos], addr[pos+1:]
 }

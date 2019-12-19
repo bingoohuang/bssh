@@ -8,20 +8,19 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 )
 
 // TODO(blacknon): 転送時の進捗状況を表示するプログレスバーの表示はさせること
 func (r *RunSftp) symlink(args []string) {
-	// create app
 	app := cli.NewApp()
 	// app.UseShortOptionHandling = true
 
-	// set help message
 	app.CustomAppHelpTemplate = helptext
-
-	app.Name = "symlink"
+	app.Name = misc.Symlink
 	app.Usage = "lsftp build-in command: symlink [remote machine symlink]"
 	app.ArgsUsage = "[source target]"
 	app.HideHelp = true
@@ -33,10 +32,12 @@ func (r *RunSftp) symlink(args []string) {
 		if len(c.Args()) != 2 {
 			fmt.Println("Requires two arguments")
 			fmt.Println("symlink source target")
+
 			return nil
 		}
 
 		exit := make(chan bool)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl

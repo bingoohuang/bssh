@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
@@ -29,7 +31,7 @@ func (r *RunSftp) get(args []string) {
 	app.CustomAppHelpTemplate = helptext
 
 	// set parameter
-	app.Name = "get"
+	app.Name = misc.Get
 	app.Usage = "lsftp build-in command: get"
 	app.ArgsUsage = "[source(remote) target(local)]"
 	app.HideHelp = true
@@ -41,6 +43,7 @@ func (r *RunSftp) get(args []string) {
 		if len(c.Args()) != 2 {
 			fmt.Println("Requires two arguments")
 			fmt.Println("get source(remote) target(local)")
+
 			return nil
 		}
 
@@ -68,6 +71,7 @@ func (r *RunSftp) get(args []string) {
 
 		// get directory data, copy remote to local
 		exit := make(chan bool)
+
 		for s, c := range r.Client {
 			server := s
 			client := c
@@ -123,12 +127,14 @@ func (r *RunSftp) get(args []string) {
 func (r *RunSftp) pullPath(client *Connect, path, target string) (err error) {
 	// set arg path
 	var rpath string
+
 	switch {
 	case filepath.IsAbs(path):
 		rpath = path
 	case !filepath.IsAbs(path):
 		rpath = filepath.Join(client.Pwd, path)
 	}
+
 	base := filepath.Dir(rpath)
 
 	// get writer

@@ -2,9 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-/*
-list package creates a TUI list based on the contents specified in a structure, and returns the selected row.
-*/
+// Package list creates a TUI list based on the contents specified in a structure, and returns the selected row.
 package list
 
 import (
@@ -26,7 +24,8 @@ import (
 //         - 項目について、更新や閲覧ができるようにする
 //     - キーバインドの設定変更
 
-type ListInfo struct {
+// Info ...
+type Info struct {
 	// Incremental search line prompt string
 	Prompt string
 
@@ -43,6 +42,7 @@ type ListInfo struct {
 	Term       TermInfo
 }
 
+// TermInfo ...
 type TermInfo struct {
 	Headline        int
 	LeftMargin      int
@@ -50,7 +50,8 @@ type TermInfo struct {
 	BackgroundColor int
 }
 
-type ListArrayInfo struct {
+// ArrayInfo ...
+type ArrayInfo struct {
 	Name    string
 	Connect string
 	Note    string
@@ -63,11 +64,12 @@ func arrayContains(arr []string, str string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
-// Toggle the selected state of cursor line.
-func (l *ListInfo) toggle(newLine string) {
+// toggle the selected state of cursor line.
+func (l *Info) toggle(newLine string) {
 	tmpList := make([]string, 0)
 
 	addFlag := true
@@ -87,8 +89,8 @@ func (l *ListInfo) toggle(newLine string) {
 	l.SelectName = tmpList
 }
 
-// Toggle the selected state of the currently displayed list
-func (l *ListInfo) allToggle(allFlag bool) {
+// allToggle the selected state of the currently displayed list
+func (l *Info) allToggle(allFlag bool) {
 	// allFlag is False
 	if !allFlag {
 		// On each lines that except a header line and are not selected line,
@@ -110,7 +112,8 @@ func (l *ListInfo) allToggle(allFlag bool) {
 	}
 }
 
-func (l *ListInfo) SetTitle(titleColumns []string) {
+// SetTitle sets the view's title columns
+func (l *Info) SetTitle(titleColumns []string) {
 	s := ""
 	for _, col := range titleColumns {
 		s += col + "\t"
@@ -120,7 +123,7 @@ func (l *ListInfo) SetTitle(titleColumns []string) {
 }
 
 // Create view text (use text/tabwriter)
-func (l *ListInfo) getText() {
+func (l *Info) getText() {
 	buffer := &bytes.Buffer{}
 	tabWriterBuffer := new(tabwriter.Writer)
 	tabWriterBuffer.Init(buffer, 0, 4, 8, ' ', 0)
@@ -132,7 +135,9 @@ func (l *ListInfo) getText() {
 	}
 
 	tabWriterBuffer.Flush()
+
 	line, err := buffer.ReadString('\n')
+
 	for err == nil {
 		str := strings.Replace(line, "\t", " ", -1)
 		l.DataText = append(l.DataText, str)
@@ -142,15 +147,16 @@ func (l *ListInfo) getText() {
 
 // getFilterText updates l.ViewText with matching keyword (ignore case).
 // DataText sets ViewText if keyword is empty.
-func (l *ListInfo) getFilterText() {
+func (l *Info) getFilterText() {
 	// Initialization ViewText
 	l.ViewText = []string{}
 
 	// SearchText Bounds Space
 	keywords := strings.Fields(l.Keyword)
 	r := l.DataText[1:]
-	line := ""
+
 	var tmpText []string
+
 	l.ViewText = append(l.ViewText, l.DataText[0])
 
 	// if No words
@@ -165,23 +171,24 @@ func (l *ListInfo) getFilterText() {
 		tmpText = []string{}
 
 		for j := 0; j < len(r); j++ {
-			line += r[j]
+			line := r[j]
 			if re.MatchString(strings.ToLower(line)) {
 				tmpText = append(tmpText, line)
 			}
-			line = ""
 		}
+
 		r = tmpText
 	}
+
 	l.ViewText = append(l.ViewText, tmpText...)
-	return
 }
 
-// View() display the list in TUI
-func (l *ListInfo) View() {
+// View displays the list in TUI
+func (l *Info) View() {
 	if err := termbox.Init(); err != nil {
 		panic(err)
 	}
+
 	defer termbox.Close()
 
 	// enable termbox mouse input

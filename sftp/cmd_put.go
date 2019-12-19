@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
@@ -30,7 +32,7 @@ func (r *RunSftp) put(args []string) {
 	app.CustomAppHelpTemplate = helptext
 
 	// set parameter
-	app.Name = "put"
+	app.Name = misc.Put
 	app.Usage = "lsftp build-in command: put"
 	app.ArgsUsage = "[source(local) target(remote)]"
 	app.HideHelp = true
@@ -42,6 +44,7 @@ func (r *RunSftp) put(args []string) {
 		if len(c.Args()) != 2 {
 			fmt.Println("Requires two arguments")
 			fmt.Println("put source(local) target(remote)")
+
 			return nil
 		}
 
@@ -55,13 +58,16 @@ func (r *RunSftp) put(args []string) {
 
 		// get local host directory walk data
 		var pathset []PathSet
+
 		data, err := common.WalkDir(source)
+
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 			return nil
 		}
 
 		sort.Strings(data)
+
 		dataset := PathSet{
 			Base:      filepath.Dir(source),
 			PathSlice: data,
@@ -70,9 +76,11 @@ func (r *RunSftp) put(args []string) {
 
 		// parallel push data
 		exit := make(chan bool)
+
 		for s, c := range r.Client {
 			server := s
 			client := c
+
 			go func() {
 				// set Progress
 				client.Output.Progress = r.Progress
@@ -120,6 +128,7 @@ func (r *RunSftp) put(args []string) {
 func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err error) {
 	// set arg path
 	rpath, _ := filepath.Rel(base, path)
+
 	switch {
 	case filepath.IsAbs(target):
 		rpath = filepath.Join(target, rpath)
@@ -152,6 +161,7 @@ func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err erro
 	}
 
 	client.Connect.Chmod(rpath, fInfo.Mode())
+
 	return nil
 }
 
@@ -160,6 +170,7 @@ func (r *RunSftp) pushFile(client *Connect, localfile io.Reader, path string, si
 	// mkdir all
 	dir := filepath.Dir(path)
 	err = client.Connect.MkdirAll(dir)
+
 	if err != nil {
 		return
 	}

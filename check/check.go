@@ -19,6 +19,7 @@ func ExistServer(inputServer []string, nameList []string) bool {
 			}
 		}
 	}
+
 	return false
 }
 
@@ -42,11 +43,11 @@ func ParseScpPath(arg string) (isRemote bool, path string) {
 	if len(argArray) < 2 {
 		isRemote = false
 		path = argArray[0]
+
 		return
 	}
 
-	pathType := strings.ToLower(argArray[0])
-	switch pathType {
+	switch pathType := strings.ToLower(argArray[0]); pathType {
 	// local
 	case "local", "l":
 		isRemote = false
@@ -76,11 +77,12 @@ func EscapePath(str string) (escapeStr string) {
 	str = strings.Replace(str, ";", "\\;", -1)
 	str = strings.Replace(str, " ", "\\ ", -1)
 	escapeStr = str
+
 	return
 }
 
-// CheckTypeError validates from-remote, from-local, to-remote and host-counts.
-func CheckTypeError(isFromInRemote, isFromInLocal, isToRemote bool, countHosts int) {
+// TypeError validates from-remote, from-local, to-remote and host-counts.
+func TypeError(isFromInRemote, isFromInLocal, isToRemote bool, countHosts int) {
 	// from in local and remote
 	if isFromInRemote && isFromInLocal {
 		fmt.Fprintln(os.Stderr, "Can not set LOCAL and REMOTE to FROM path.")

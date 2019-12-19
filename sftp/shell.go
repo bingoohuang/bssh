@@ -20,7 +20,7 @@ import (
 
 // TODO(blacknon): catコマンド相当の機能を追加する
 
-// sftp Shell mode function
+// shell Shell mode function
 func (r *RunSftp) shell() {
 	// start message
 	fmt.Println("Start lsftp...")
@@ -43,7 +43,7 @@ func (r *RunSftp) shell() {
 	p.Run()
 }
 
-// sftp Shell mode function
+// Executor sftp Shell mode function
 func (r *RunSftp) Executor(command string) {
 	// trim space
 	command = strings.TrimSpace(command)
@@ -61,7 +61,7 @@ func (r *RunSftp) Executor(command string) {
 
 	case "cd": // change remote directory
 		r.cd(cmdline)
-	case "chgrp":
+	case misc.Chgrp:
 		r.chgrp(cmdline)
 	case "chmod":
 		r.chmod(cmdline)
@@ -72,13 +72,13 @@ func (r *RunSftp) Executor(command string) {
 
 	case "df":
 		r.df(cmdline)
-	case "get":
+	case misc.Get:
 		r.get(cmdline)
 	case "lcd":
 		r.lcd(cmdline)
 	case misc.Lls:
 		r.lls(cmdline)
-	case "lmkdir":
+	case misc.Lmkdir:
 		r.lmkdir(cmdline)
 
 	// case "ln":
@@ -90,19 +90,19 @@ func (r *RunSftp) Executor(command string) {
 
 	// case "lumask":
 
-	case "mkdir":
+	case misc.Mkdir:
 		r.mkdir(cmdline)
-	case "put":
+	case misc.Put:
 		r.put(cmdline)
 	case "pwd":
 		r.pwd()
-	case "rename":
+	case misc.Rename:
 		r.rename(cmdline)
 	case "rm":
 		r.rm(cmdline)
 	case misc.Rmdir:
 		r.rmdir(cmdline)
-	case "symlink":
+	case misc.Symlink:
 		r.symlink(cmdline)
 	// case "tree":
 	// case "!": // ! or !command...
@@ -112,7 +112,7 @@ func (r *RunSftp) Executor(command string) {
 	}
 }
 
-// sftp Shell mode function
+// Completer sftp Shell mode function
 func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 	// result
 	var suggest []prompt.Suggest
@@ -132,31 +132,31 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			{Text: "bye", Description: "Quit lsftp"},
 			// {Text: "cat", Description: "Open file"},
 			{Text: "cd", Description: "Change remote directory to 'path'"},
-			{Text: "chgrp", Description: "Change group of file 'path' to 'grp'"},
+			{Text: misc.Chgrp, Description: "Change group of file 'path' to 'grp'"},
 			{Text: misc.Chown, Description: "Change owner of file 'path' to 'own'"},
 			// {Text: "copy", Description: "Copy to file from 'remote' or 'local' to 'remote' or 'local'"},
 			{Text: "df", Description: "Display statistics for current directory or filesystem containing 'path'"},
 			{Text: "exit", Description: "Quit lsftp"},
-			{Text: "get", Description: "Download file"},
+			{Text: misc.Get, Description: "Download file"},
 			// {Text: "reget", Description: "Resume download file"},
 			// {Text: "reput", Description: "Resume upload file"},
 			{Text: "help", Description: "Display this help text"},
 			{Text: "lcd", Description: "Change local directory to 'path'"},
 			{Text: misc.Lls, Description: "Display local directory listing"},
-			{Text: "lmkdir", Description: "Create local directory"},
+			{Text: misc.Lmkdir, Description: "Create local directory"},
 			// {Text: "ln", Description: "Link remote file (-s for symlink)"},
 			{Text: "lpwd", Description: "Print local working directory"},
 			{Text: "ls", Description: "Display remote directory listing"},
 			// {Text: "lumask", Description: "Set local umask to 'umask'"},
-			{Text: "mkdir", Description: "Create remote directory"},
+			{Text: misc.Mkdir, Description: "Create remote directory"},
 			// {Text: "progress", Description: "Toggle display of progress meter"},
-			{Text: "put", Description: "Upload file"},
+			{Text: misc.Put, Description: "Upload file"},
 			{Text: "pwd", Description: "Display remote working directory"},
 			{Text: "quit", Description: "Quit sftp"},
-			{Text: "rename", Description: "Rename remote file"},
+			{Text: misc.Rename, Description: "Rename remote file"},
 			{Text: "rm", Description: "Delete remote file"},
 			{Text: misc.Rmdir, Description: "Remove remote directory"},
-			{Text: "symlink", Description: "Create symbolic link"},
+			{Text: misc.Symlink, Description: "Create symbolic link"},
 			// {Text: "tree", Description: "Tree view remote directory"},
 			// {Text: "!command", Description: "Execute 'command' in local shell"},
 			{Text: "!", Description: "Escape to local shell"},
@@ -166,7 +166,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		switch cmdline[0] {
 		case "cd":
 			return r.PathComplete(true, 1, t)
-		case "chgrp":
+		case misc.Chgrp:
 			// TODO(blacknon): そのうち追加 ver0.6.1
 		case misc.Chown:
 			// TODO(blacknon): そのうち追加 ver0.6.1
@@ -176,7 +176,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 				{Text: "-i", Description: "list inode information instead of block usage"},
 			}
 			return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
-		case "get":
+		case misc.Get:
 			// TODO(blacknon): オプションを追加したら引数の数から減らす処理が必要
 			switch {
 			case strings.Count(t.CurrentLineBeforeCursor(), " ") == 1: // remote
@@ -207,7 +207,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			default:
 				return r.PathComplete(false, 1, t)
 			}
-		case "lmkdir":
+		case misc.Lmkdir:
 			switch {
 			case contains([]string{"-"}, char):
 				suggest = []prompt.Suggest{
@@ -243,7 +243,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			}
 
 		// case "lumask":
-		case "mkdir":
+		case misc.Mkdir:
 			switch {
 			case contains([]string{"-"}, char):
 				suggest = []prompt.Suggest{
@@ -254,7 +254,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 				return r.PathComplete(true, 1, t)
 			}
 
-		case "put":
+		case misc.Put:
 			// TODO(blacknon): オプションを追加したら引数の数から減らす処理が必要
 			switch {
 			case strings.Count(t.CurrentLineBeforeCursor(), " ") == 1: // local
@@ -264,13 +264,13 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			}
 		case "pwd":
 		case "quit":
-		case "rename":
+		case misc.Rename:
 			return r.PathComplete(true, 1, t)
 		case "rm":
 			return r.PathComplete(true, 1, t)
 		case misc.Rmdir:
 			return r.PathComplete(true, 1, t)
-		case "symlink":
+		case misc.Symlink:
 			// TODO(blacknon): そのうち追加 ver0.6.1
 		// case "tree":
 
@@ -282,7 +282,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
 }
 
-//
+// PathComplete ...
 func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt.Suggest {
 	// suggest
 	var suggest []prompt.Suggest
@@ -299,6 +299,7 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 	// get last slash place
 	word := t.GetWordBeforeCursor()
 	sp := strings.LastIndex(word, "/")
+
 	if len(word) > 0 {
 		word = word[sp+1:]
 	}
@@ -312,6 +313,7 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 		case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
 		}
+
 		suggest = r.RemoteComplete
 
 	case false:
@@ -322,20 +324,18 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 		case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetLocalComplete(t.GetWordBeforeCursor())
 		}
+
 		suggest = r.LocalComplete
 	}
 
 	return prompt.FilterHasPrefix(suggest, word, false)
 }
 
-//
+// GetRemoteComplete ...
 func (r *RunSftp) GetRemoteComplete(path string) {
 	// create map
 	m := map[string][]string{}
 	exit := make(chan bool)
-
-	// create suggest slice
-	var p []prompt.Suggest
 
 	// create sync mutex
 	sm := new(sync.Mutex)
@@ -389,6 +389,8 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 		<-exit
 	}
 
+	// create suggest slice
+	p := make([]prompt.Suggest, 0, len(m))
 	// create suggest
 	for path, hosts := range m {
 		// join hosts
@@ -411,10 +413,8 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 	r.RemoteComplete = p
 }
 
-//
+// GetLocalComplete ...
 func (r *RunSftp) GetLocalComplete(path string) {
-	// create suggest slice
-	var p []prompt.Suggest
 	stat, err := os.Lstat(path)
 	if err != nil {
 		return
@@ -434,20 +434,21 @@ func (r *RunSftp) GetLocalComplete(path string) {
 		return
 	}
 
+	// create suggest slice
+	p := make([]prompt.Suggest, len(globlist))
 	// set path
-	for _, lp := range globlist {
+	for i, lp := range globlist {
 		lp = filepath.Base(lp)
-		suggest := prompt.Suggest{
+		p[i] = prompt.Suggest{
 			Text:        lp,
 			Description: "local path.",
 		}
-
-		p = append(p, suggest)
 	}
 
 	r.LocalComplete = p
 }
 
+// CreatePrompt creates prompt.
 func (r *RunSftp) CreatePrompt() (p string, result bool) {
 	p = "lsftp>> "
 	return p, true
@@ -459,5 +460,6 @@ func contains(s []string, e string) bool {
 			return true
 		}
 	}
+
 	return false
 }

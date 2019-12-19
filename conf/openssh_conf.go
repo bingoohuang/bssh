@@ -13,13 +13,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/kevinburke/ssh_config"
 )
 
-// openOpenSshConfig open the OpenSsh configuration file, return *ssh_config.Config.
-func openOpenSshConfig(path, command string) (cfg *ssh_config.Config, err error) {
+// openOpenSSHConfig open the OpenSsh configuration file, return *ssh_config.Config.
+func openOpenSSHConfig(path, command string) (cfg *ssh_config.Config, err error) {
 	var rd io.Reader
+
 	switch {
 	case path != "": // 1st
 		// Read Openssh Config
@@ -27,6 +30,7 @@ func openOpenSshConfig(path, command string) (cfg *ssh_config.Config, err error)
 		rd, err = os.Open(sshConfigFile)
 	case command != "": // 2nd
 		var data []byte
+
 		cmd := exec.Command("sh", "-c", command)
 		data, err = cmd.Output()
 		rd = bytes.NewReader(data)
@@ -38,15 +42,16 @@ func openOpenSshConfig(path, command string) (cfg *ssh_config.Config, err error)
 	}
 
 	cfg, err = ssh_config.Decode(rd)
+
 	return
 }
 
-// getOpenSshConfig loads the specified OpenSsh configuration file and returns it in conf.ServerConfig format
-func getOpenSshConfig(path, command string) (config map[string]ServerConfig, err error) {
+// getOpenSSHConfig loads the specified OpenSsh configuration file and returns it in conf.ServerConfig format
+func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err error) {
 	config = map[string]ServerConfig{}
 
 	// open openssh config
-	cfg, err := openOpenSshConfig(path, command)
+	cfg, err := openOpenSSHConfig(path, command)
 	if err != nil {
 		return
 	}
@@ -58,10 +63,12 @@ func getOpenSshConfig(path, command string) (config map[string]ServerConfig, err
 	}
 
 	// Get Node names
-	hostList := []string{}
+	var hostList []string
+
 	for _, h := range cfg.Hosts {
 		// not supported wildcard host
 		re := regexp.MustCompile(`\*`)
+
 		for _, pattern := range h.Patterns {
 			if !re.MatchString(pattern.String()) {
 				hostList = append(hostList, pattern.String())
@@ -84,6 +91,7 @@ func getOpenSshConfig(path, command string) (config map[string]ServerConfig, err
 		// TODO(blacknon): OpenSshの設定ファイルだと、Certificateは複数指定可能な模様。ただ、あまり一般的な使い方ではないようなので、現状は複数のファイルを受け付けるように作っていない。
 		key := ssh_config.Get(host, "IdentityFile")
 		cert := ssh_config.Get(host, "Certificate")
+
 		if cert != "" {
 			serverConfig.Cert = cert
 			serverConfig.CertKey = key
@@ -100,7 +108,7 @@ func getOpenSshConfig(path, command string) (config map[string]ServerConfig, err
 
 		// x11 forwarding
 		x11 := ssh_config.Get(host, "ForwardX11")
-		if x11 == "yes" {
+		if x11 == misc.Yes {
 			serverConfig.X11 = true
 		}
 

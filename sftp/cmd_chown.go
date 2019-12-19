@@ -39,10 +39,12 @@ func (r *RunSftp) chown(args []string) {
 		if len(c.Args()) != 2 {
 			fmt.Println("Requires two arguments")
 			fmt.Println("chown group path")
+
 			return nil
 		}
 
 		exit := make(chan bool)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl
@@ -80,7 +82,7 @@ func (r *RunSftp) chown(args []string) {
 					passwd := string(passwdByte)
 
 					// get gid
-					uid32, err := common.GetIdFromName(passwd, user)
+					uid32, err := common.GetIDFromName(passwd, user)
 					if err != nil {
 						fmt.Fprintf(w, "%s\n", err)
 						exit <- true

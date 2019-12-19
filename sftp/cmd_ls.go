@@ -66,10 +66,13 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 	if err != nil {
 		return
 	}
+
 	passwdByte, err := ioutil.ReadAll(passwdFile)
+
 	if err != nil {
 		return
 	}
+
 	passwd := string(passwdByte)
 
 	// read /etc/group
@@ -77,10 +80,13 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 	if err != nil {
 		return
 	}
+
 	groupByte, err := ioutil.ReadAll(groupFile)
+
 	if err != nil {
 		return
 	}
+
 	groups := string(groupByte)
 
 	// set lsdata
@@ -131,6 +137,7 @@ func (r *RunSftp) ls(args []string) (err error) {
 		exit := make(chan bool)
 		lsdata := map[string]sftpLs{}
 		m := new(sync.Mutex)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl
@@ -200,7 +207,9 @@ func (r *RunSftp) ls(args []string) (err error) {
 
 			// get maxSizeWidth
 			var maxSizeWidth int
+
 			var sizestr string
+
 			for _, data := range lsdata {
 				for _, f := range data.Files {
 					if c.Bool("h") {
@@ -228,7 +237,9 @@ func (r *RunSftp) ls(args []string) (err error) {
 
 					// TODO(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
 					var uid, gid uint32
+
 					var size uint64
+
 					var user, group, timestr, sizestr string
 
 					if stat, ok := sys.(*sftp.FileStat); ok {
@@ -244,8 +255,8 @@ func (r *RunSftp) ls(args []string) (err error) {
 						user = strconv.FormatUint(uint64(uid), 10)
 						group = strconv.FormatUint(uint64(gid), 10)
 					} else {
-						user, _ = common.GetNameFromId(lsdata[server].Passwd, uid)
-						group, _ = common.GetNameFromId(lsdata[server].Groups, gid)
+						user, _ = common.GetNameFromID(lsdata[server].Passwd, uid)
+						group, _ = common.GetNameFromID(lsdata[server].Groups, gid)
 					}
 
 					// Switch with or without -h option.

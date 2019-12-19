@@ -87,7 +87,9 @@ func (r *RunSftp) lls(args []string) (err error) {
 
 			// get maxSizeWidth
 			var maxSizeWidth int
+
 			var user, group, timestr, sizestr string
+
 			for _, f := range data {
 				if c.Bool("h") {
 					sizestr = humanize.Bytes(uint64(f.Size()))
@@ -103,6 +105,7 @@ func (r *RunSftp) lls(args []string) (err error) {
 
 			for _, f := range data {
 				var uid, gid uint32
+
 				var size int64
 
 				timestamp := f.ModTime()

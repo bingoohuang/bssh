@@ -2,9 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-/*
-common is a package that summarizes the common processing of lssh package.
-*/
+// Package common is a package that summarizes the common processing of lssh package.
 package common
 
 import (
@@ -29,6 +27,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// nolint
 var characterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 // IsExist returns existence of file.
@@ -93,6 +92,7 @@ func StructToMap(val interface{}) (mapVal map[string]interface{}, ok bool) {
 // WARN: ok value is not used. Always returns false.
 func MapToStruct(mapVal map[string]interface{}, val interface{}) (ok bool) {
 	structVal := reflect.Indirect(reflect.ValueOf(val))
+
 	for name, elem := range mapVal {
 		structVal.FieldByName(name).Set(reflect.ValueOf(elem))
 	}
@@ -106,10 +106,11 @@ func GetFullPath(path string) (fullPath string) {
 	usr, _ := user.Current()
 	fullPath = strings.Replace(path, "~", usr.HomeDir, 1)
 	fullPath, _ = filepath.Abs(fullPath)
+
 	return fullPath
 }
 
-// Get order num in array
+// GetOrderNumber get order num in array
 func GetOrderNumber(value string, array []string) int {
 	for i, v := range array {
 		if v == value {
@@ -120,21 +121,22 @@ func GetOrderNumber(value string, array []string) int {
 	return 0
 }
 
-// GetMaxLength returns a max length of list.
-// Length is byte length.
-func GetMaxLength(list []string) (MaxLength int) {
-	MaxLength = 0
+// GetMaxLength returns a max byte length of list.
+func GetMaxLength(list []string) int {
+	maxLength := 0
 	for _, elem := range list {
-		if MaxLength < len(elem) {
-			MaxLength = len(elem)
+		if maxLength < len(elem) {
+			maxLength = len(elem)
 		}
 	}
-	return
+
+	return maxLength
 }
 
 // GetFilesBase64 returns a base64 encoded string of file content of paths.
 func GetFilesBase64(paths []string) (result string, err error) {
-	var data []byte
+	data := make([]byte, 0)
+
 	for _, path := range paths {
 		fullPath := GetFullPath(path)
 
@@ -143,9 +145,10 @@ func GetFilesBase64(paths []string) (result string, err error) {
 		if err != nil {
 			return "", err
 		}
-		defer file.Close()
 
 		filedata, err := ioutil.ReadAll(file)
+		_ = file.Close()
+
 		if err != nil {
 			return "", err
 		}
@@ -155,6 +158,7 @@ func GetFilesBase64(paths []string) (result string, err error) {
 	}
 
 	result = base64.StdEncoding.EncodeToString(data)
+
 	return result, err
 }
 
@@ -178,7 +182,9 @@ func GetPassPhrase(msg string) (input string, err error) {
 	}
 
 	input = string(result)
+
 	fmt.Println()
+
 	return
 }
 
@@ -210,6 +216,7 @@ func RandomString(n int) string {
 	for i := range b {
 		b[i] = characterRunes[rand.Intn(len(characterRunes))]
 	}
+
 	return string(b)
 }
 
@@ -220,6 +227,7 @@ func GetUniqueSlice(data []string) (result []string) {
 	for _, ele := range data {
 		if !m[ele] {
 			m[ele] = true
+
 			result = append(result, ele)
 		}
 	}
@@ -236,51 +244,58 @@ func WalkDir(dir string) (files []string, err error) {
 
 	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
-			path = path + "/"
+			path += "/"
 		}
+
 		files = append(files, path)
+
 		return nil
 	})
+
 	return
 }
 
-// GetUserName return user name from /etc/passwd and uid.
-func GetIdFromName(file string, name string) (id uint32, err error) {
+// GetIDFromName return user name from /etc/passwd and uid.
+func GetIDFromName(file string, name string) (id uint32, err error) {
 	rd := strings.NewReader(file)
 	sc := bufio.NewScanner(rd)
 
 	for sc.Scan() {
 		l := sc.Text()
 		line := strings.Split(l, ":")
+
 		if line[0] == name {
 			idstr := line[2]
 			u64, _ := strconv.ParseUint(idstr, 10, 32)
 			id = uint32(u64)
+
 			return
 		}
 	}
 
-	err = errors.New(fmt.Sprintf("Error: %s", "name not found"))
+	err = fmt.Errorf("error: %s", "name not found")
 
 	return
 }
 
-// GetUserName return user name from /etc/passwd and uid.
-func GetNameFromId(file string, id uint32) (name string, err error) {
+// GetNameFromID return user name from /etc/passwd and uid.
+func GetNameFromID(file string, id uint32) (name string, err error) {
 	rd := strings.NewReader(file)
 	sc := bufio.NewScanner(rd)
 
 	idstr := strconv.FormatUint(uint64(id), 10)
+
 	for sc.Scan() {
 		l := sc.Text()
 		line := strings.Split(l, ":")
+
 		if line[2] == idstr {
 			name = line[0]
 			return
 		}
 	}
 
-	err = errors.New(fmt.Sprintf("Error: %s", "name not found"))
+	err = fmt.Errorf("error: %s", "name not found")
 
 	return
 }
@@ -313,7 +328,7 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 		}
 
 	default:
-		err = errors.New("Could not parse.")
+		err = errors.New("could not parse")
 	}
 
 	return
@@ -325,6 +340,7 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 func ParseArgs(options []cli.Flag, args []string) []string {
 	// create cli.Flag map
 	optionMap := map[string]cli.Flag{}
+
 	for _, op := range options {
 		name := op.GetName()
 		names := strings.Split(name, ",")
@@ -336,6 +352,7 @@ func ParseArgs(options []cli.Flag, args []string) []string {
 			} else {
 				n = "--" + n
 			}
+
 			optionMap[n] = op
 		}
 	}
@@ -389,5 +406,6 @@ parseloop:
 			}
 		}
 	}
+
 	return result
 }

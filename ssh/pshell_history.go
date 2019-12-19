@@ -25,7 +25,7 @@ type pShellHistory struct {
 }
 
 //
-func (ps *pShell) NewHistoryWriter(server string, output *output.Output, m *sync.Mutex) *io.PipeWriter {
+func (ps *pShell) NewHistoryWriter(server string, output *output.Output, m sync.Locker) *io.PipeWriter {
 	// craete pShellHistory struct
 	psh := &pShellHistory{
 		Command:   ps.latestCommand,
@@ -43,10 +43,11 @@ func (ps *pShell) NewHistoryWriter(server string, output *output.Output, m *sync
 	return w
 }
 
-func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r *io.PipeReader, m *sync.Mutex) {
+func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r io.Reader, m sync.Locker) {
 	count := ps.Count
 
 	var result string
+
 	sc := bufio.NewScanner(r)
 
 	for {
@@ -101,6 +102,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 
 		data = append(data, d)
 	}
+
 	return
 }
 

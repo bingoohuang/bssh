@@ -31,7 +31,7 @@ func (r *RunSftp) mkdir(args []string) {
 
 	// set help message
 	app.CustomAppHelpTemplate = helptext
-	app.Name = "mkdir"
+	app.Name = misc.Mkdir
 	app.Usage = "lsftp build-in command: mkdir [remote machine mkdir]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
@@ -44,10 +44,12 @@ func (r *RunSftp) mkdir(args []string) {
 		if len(c.Args()) != 1 {
 			fmt.Println("Requires one arguments")
 			fmt.Println("mkdir [path]")
+
 			return nil
 		}
 
 		exit := make(chan bool)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl
@@ -106,7 +108,7 @@ func (r *RunSftp) lmkdir(args []string) {
 
 	// set help message
 	app.CustomAppHelpTemplate = helptext
-	app.Name = "lmkdir"
+	app.Name = misc.Lmkdir
 	app.Usage = "lsftp build-in command: lmkdir [local machine mkdir]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
@@ -119,11 +121,14 @@ func (r *RunSftp) lmkdir(args []string) {
 		if len(c.Args()) != 1 {
 			fmt.Println("Requires one arguments")
 			fmt.Println("lmkdir [path]")
+
 			return nil
 		}
 
 		path := c.Args()[0]
+
 		var err error
+
 		if c.Bool("p") {
 			err = os.MkdirAll(path, 0755)
 		} else {

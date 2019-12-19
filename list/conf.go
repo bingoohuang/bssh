@@ -7,11 +7,12 @@ import (
 	"github.com/blacknon/lssh/conf"
 )
 
+// ShowServersView shows view for servers.
 func ShowServersView(cf *conf.Config, prompt, group string, names []string, isMulti bool) []string {
 	// View List And Get Select Line
-	l := new(ListInfo)
+	l := new(Info)
 	l.Prompt = prompt
-	l.NameList = cf.FilterGroupNames(group, names)
+	l.NameList = cf.FilterNamesByGroup(group, names)
 	l.SetTitle([]string{"ServerName", "Connect Information", "Note"})
 	l.RowFn = func(name string) string {
 		s := cf.Server[name]
@@ -22,6 +23,7 @@ func ShowServersView(cf *conf.Config, prompt, group string, names []string, isMu
 
 	l.View()
 	selected := l.SelectName
+
 	if selected[0] == "ServerName" {
 		fmt.Fprintln(os.Stderr, "Server not selected.")
 		os.Exit(1)
@@ -29,13 +31,15 @@ func ShowServersView(cf *conf.Config, prompt, group string, names []string, isMu
 
 	return selected
 }
+
+// ShowGroupsView shows view for groups.
 func ShowGroupsView(cf *conf.Config) string {
 	if len(cf.GetGrouping()) <= 1 {
 		return ""
 	}
 
 	// View List And Get Select Line
-	l := new(ListInfo)
+	l := new(Info)
 	l.Prompt = "group>>"
 	l.NameList = cf.GroupsNames()
 	l.SetTitle([]string{"GroupName"})
@@ -44,6 +48,7 @@ func ShowGroupsView(cf *conf.Config) string {
 
 	l.View()
 	selected := l.SelectName
+
 	if selected[0] == "GroupName" {
 		fmt.Fprintln(os.Stderr, "Group not selected.")
 		os.Exit(1)

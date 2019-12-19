@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
@@ -25,7 +27,7 @@ func (r *RunSftp) chgrp(args []string) {
 
 	// set help message
 	app.CustomAppHelpTemplate = helptext
-	app.Name = "chgrp"
+	app.Name = misc.Chgrp
 	app.Usage = "lsftp build-in command: chgrp [remote machine chgrp]"
 	app.ArgsUsage = "[group path]"
 	app.HideHelp = true
@@ -37,10 +39,12 @@ func (r *RunSftp) chgrp(args []string) {
 		if len(c.Args()) != 2 {
 			fmt.Println("Requires two arguments")
 			fmt.Println("chgrp group path")
+
 			return nil
 		}
 
 		exit := make(chan bool)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl
@@ -78,7 +82,7 @@ func (r *RunSftp) chgrp(args []string) {
 					groups := string(groupByte)
 
 					// get gid
-					gid32, err := common.GetIdFromName(groups, group)
+					gid32, err := common.GetIDFromName(groups, group)
 					if err != nil {
 						fmt.Fprintf(w, "%s\n", err)
 						exit <- true

@@ -95,8 +95,6 @@ func (o *Output) Create(server string) {
 
 // GetPrompt update variable value
 func (o *Output) GetPrompt() (p string) {
-	// Get time
-
 	// replace variable value
 	p = strings.Replace(o.Prompt, "${COUNT}", strconv.Itoa(o.Count), -1)
 	return
@@ -121,6 +119,7 @@ func (o *Output) Printer(reader io.Reader) {
 	for {
 		for sc.Scan() {
 			text := sc.Text()
+
 			if (len(o.ServerList) > 1 && !o.DisableHeader) || o.EnableHeader {
 				oPrompt := o.GetPrompt()
 				fmt.Printf("%s %s\n", oPrompt, text)
@@ -137,11 +136,12 @@ func (o *Output) Printer(reader io.Reader) {
 	}
 }
 
-// ProgressPrinter
+// ProgressPrinter ...
 func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 	// print header
 	oPrompt := ""
 	name := decor.Name(oPrompt)
+
 	if len(o.ServerList) > 1 {
 		oPrompt = o.GetPrompt()
 		name = decor.Name(oPrompt, decor.WC{W: len(path) + 1, C: decor.DSyncWidth})
@@ -171,8 +171,8 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 
 	// print out progress
 	defer o.ProgressWG.Done()
+
 	for {
-		// sleep
 		time.Sleep(time.Duration(rand.Intn(10)+1) * max / 10)
 
 		// read byte (1mb)
@@ -192,15 +192,17 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 	}
 }
 
+// OutColorStrings ...
 func OutColorStrings(num int, inStrings string) (str string) {
 	// 1=Red,2=Yellow,3=Blue,4=Magenta,0=Cyan
 	color := 31 + num%5
 
 	str = fmt.Sprintf("\x1b[%dm%s\x1b[0m", color, inStrings)
+
 	return
 }
 
-// multiPipeReadWriter is PipeReader to []io.WriteCloser.
+// PushPipeWriter is PipeReader to []io.WriteCloser.
 func PushPipeWriter(isExit <-chan bool, output []io.WriteCloser, input io.Reader) {
 	rd := bufio.NewReader(input)
 loop:
@@ -211,9 +213,8 @@ loop:
 		if size > 0 {
 			d := buf[:size]
 
-			// write
 			for _, w := range output {
-				w.Write(d)
+				_, _ = w.Write(d)
 			}
 		}
 
@@ -232,13 +233,12 @@ loop:
 		}
 	}
 
-	// close output
 	for _, w := range output {
-		w.Close()
+		_ = w.Close()
 	}
 }
 
-// send input to ssh Session Stdin
+// PushInput sends input to ssh Session Stdin
 func PushInput(isExit <-chan bool, output []io.WriteCloser) {
 	rd := bufio.NewReader(os.Stdin)
 loop:
@@ -246,7 +246,7 @@ loop:
 		data, _ := rd.ReadBytes('\n')
 		if len(data) > 0 {
 			for _, w := range output {
-				w.Write(data)
+				_, _ = w.Write(data)
 			}
 		}
 
@@ -258,8 +258,7 @@ loop:
 		}
 	}
 
-	// close output
 	for _, w := range output {
-		w.Close()
+		_ = w.Close()
 	}
 }

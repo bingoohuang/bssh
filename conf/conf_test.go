@@ -16,6 +16,7 @@ func TestCheckFormatServerConf(t *testing.T) {
 		c      Config
 		expect bool
 	}
+
 	tds := []TestData{
 		{
 			desc: "Address, user and password",
@@ -65,6 +66,7 @@ func TestCheckFormatServerConf(t *testing.T) {
 			expect: false,
 		},
 	}
+
 	for _, v := range tds {
 		got := checkFormatServerConf(v.c)
 		assert.Equal(t, v.expect, got, v.desc)
@@ -77,6 +79,7 @@ func TestCheckFormatServerConfAuth(t *testing.T) {
 		c      ServerConfig
 		expect bool
 	}
+
 	tds := []TestData{
 		{desc: "Password", c: ServerConfig{Pass: "Password"}, expect: true},
 		{desc: "Secret key file", c: ServerConfig{Key: "/tmp/key.pem"}, expect: true},
@@ -86,6 +89,7 @@ func TestCheckFormatServerConfAuth(t *testing.T) {
 		{desc: "Key files", c: ServerConfig{Keys: []string{"/tmp/key.pem", "/tmp/key2.pem"}}, expect: true},
 		{desc: "Passwords", c: ServerConfig{Passes: []string{"Pass1", "Pass2"}}, expect: true},
 	}
+
 	for _, v := range tds {
 		got := checkFormatServerConfAuth(v.c)
 		assert.Equal(t, v.expect, got, v.desc)
@@ -98,6 +102,7 @@ func TestServerConfigReduct(t *testing.T) {
 		perConfig, childConfig ServerConfig
 		expect                 ServerConfig
 	}
+
 	tds := []TestData{
 		{
 			desc:        "Set perConfig addr to child config",
@@ -124,6 +129,7 @@ func TestServerConfigReduct(t *testing.T) {
 			expect:      ServerConfig{},
 		},
 	}
+
 	for _, v := range tds {
 		got := serverConfigReduct(v.perConfig, v.childConfig)
 		assert.Equal(t, v.expect, got, v.desc)
@@ -136,6 +142,7 @@ func TestGetNameList(t *testing.T) {
 		listConf Config
 		expect   []string
 	}
+
 	tds := []TestData{
 		{
 			desc: "",
@@ -155,6 +162,7 @@ func TestGetNameList(t *testing.T) {
 			expect: nil,
 		},
 	}
+
 	for _, v := range tds {
 		got := GetNameList(v.listConf)
 		assert.Equal(t, v.expect, got, v.desc)

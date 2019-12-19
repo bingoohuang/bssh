@@ -43,10 +43,11 @@ func drawFilterLine(x, y int, str string, backColorNum, keywordColorNum int, sea
 			if charLocation < len(str) {
 				searchLineData = str[charLocation:]
 			}
+
 			searchLineDataStr := searchLineData
 			searchKeywordIndex := strings.Index(strings.ToLower(searchLineDataStr), searchKeyword)
 
-			charLocation = charLocation + searchKeywordIndex
+			charLocation += searchKeywordIndex
 			keyword := ""
 
 			// Countermeasure "slice bounds out of range"
@@ -57,28 +58,30 @@ func drawFilterLine(x, y int, str string, backColorNum, keywordColorNum int, sea
 			// Get Multibyte Charctor Location
 			multibyteStrCheckLine := str[:charLocation]
 			multiByteCharLocation := 0
+
 			for _, multiByteChar := range multibyteStrCheckLine {
 				multiByteCharLocation += runewidth.RuneWidth(multiByteChar)
 			}
 
 			drawLine(x+multiByteCharLocation, y, keyword, keywordColorNum, backColorNum)
-			charLocation = charLocation + searchKeywordLen
+
+			charLocation += searchKeywordLen
 		}
 	}
 }
 
 // draw list
-func (l *ListInfo) draw() {
+func (l *Info) draw() {
 	l.Term.Headline = 2
 	l.Term.LeftMargin = 2
 	l.Term.Color = 255
 	l.Term.BackgroundColor = 255
 
-	termbox.Clear(termbox.Attribute(l.Term.Color+1), termbox.Attribute(l.Term.BackgroundColor+1))
+	_ = termbox.Clear(termbox.Attribute(l.Term.Color+1), termbox.Attribute(l.Term.BackgroundColor+1))
 
 	// Get Terminal Size
 	_, height := termbox.Size()
-	height = height - l.Term.Headline
+	height -= l.Term.Headline
 
 	// Set View List Range
 	firstLine := (l.CursorLine/height)*height + 1
@@ -90,14 +93,29 @@ func (l *ListInfo) draw() {
 	} else {
 		viewList = l.ViewText[firstLine:lastLine]
 	}
+
 	cursor := l.CursorLine - firstLine + 1
 
-	// View Head
-	drawLine(0, 0, l.Prompt, 3, l.Term.BackgroundColor)
-	drawLine(len(l.Prompt), 0, l.Keyword, l.Term.Color, l.Term.BackgroundColor)
-	drawLine(l.Term.LeftMargin, 1, l.ViewText[0], 3, l.Term.BackgroundColor)
+	l.drawViewHead()
+	l.drawViewList(viewList, cursor)
 
-	// View List
+	// Multi-Byte SetCursor
+	x := l.countKeywordRuneWidth()
+
+	termbox.SetCursor(len(l.Prompt)+x, 0)
+	termbox.Flush()
+}
+
+func (l *Info) countKeywordRuneWidth() int {
+	x := 0
+	for _, c := range l.Keyword {
+		x += runewidth.RuneWidth(c)
+	}
+
+	return x
+}
+
+func (l *Info) drawViewList(viewList []string, cursor int) {
 	for listKey, listValue := range viewList {
 		paddingData := fmt.Sprintf("%-1000s", listValue)
 		// Set cursor color
@@ -123,14 +141,11 @@ func (l *ListInfo) draw() {
 
 		// Keyword Highlight
 		drawFilterLine(l.Term.LeftMargin, listKey+l.Term.Headline, paddingData, cursorBackColor, keywordColor, l.Keyword)
-		listKey++
 	}
+}
 
-	// Multi-Byte SetCursor
-	x := 0
-	for _, c := range l.Keyword {
-		x += runewidth.RuneWidth(c)
-	}
-	termbox.SetCursor(len(l.Prompt)+x, 0)
-	termbox.Flush()
+func (l *Info) drawViewHead() {
+	drawLine(0, 0, l.Prompt, 3, l.Term.BackgroundColor)
+	drawLine(len(l.Prompt), 0, l.Keyword, l.Term.Color, l.Term.BackgroundColor)
+	drawLine(l.Term.LeftMargin, 1, l.ViewText[0], 3, l.Term.BackgroundColor)
 }

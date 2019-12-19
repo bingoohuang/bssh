@@ -13,14 +13,16 @@ import (
 func TestInsertRune(t *testing.T) {
 	type TestData struct {
 		desc      string
-		l         ListInfo
+		l         Info
 		inputRune rune
 		expect    string
 	}
+
 	tds := []TestData{
-		{desc: "Input rune is a alphabet", l: ListInfo{Keyword: "a"}, inputRune: 'b', expect: "ab"},
-		{desc: "Input rune is a multibyte character", l: ListInfo{Keyword: "a"}, inputRune: 'あ', expect: "aあ"},
+		{desc: "Input rune is a alphabet", l: Info{Keyword: "a"}, inputRune: 'b', expect: "ab"},
+		{desc: "Input rune is a multibyte character", l: Info{Keyword: "a"}, inputRune: 'あ', expect: "aあ"},
 	}
+
 	for _, v := range tds {
 		v.l.insertRune(v.inputRune)
 		assert.Equal(t, v.expect, v.l.Keyword, v.desc)
@@ -30,15 +32,17 @@ func TestInsertRune(t *testing.T) {
 func TestDeleteRune(t *testing.T) {
 	type TestData struct {
 		desc   string
-		l      ListInfo
+		l      Info
 		expect string
 	}
+
 	tds := []TestData{
-		{desc: "Delete alphabet rune", l: ListInfo{Keyword: "abc"}, expect: "ab"},
-		{desc: "Delete multibyte rune", l: ListInfo{Keyword: "あいう"}, expect: "あい"},
-		{desc: "Expect is empty", l: ListInfo{Keyword: "a"}, expect: ""},
-		// FIXME raise panic {desc: "Delete empty", l: ListInfo{Keyword: ""}, expect: ""},
+		{desc: "Delete alphabet rune", l: Info{Keyword: "abc"}, expect: "ab"},
+		{desc: "Delete multibyte rune", l: Info{Keyword: "あいう"}, expect: "あい"},
+		{desc: "Expect is empty", l: Info{Keyword: "a"}, expect: ""},
+		// FIXME raise panic {desc: "Delete empty", l: Info{Keyword: ""}, expect: ""},
 	}
+
 	for _, v := range tds {
 		v.l.deleteRune()
 		assert.Equal(t, v.expect, v.l.Keyword, v.desc)

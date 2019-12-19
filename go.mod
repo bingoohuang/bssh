@@ -4,6 +4,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
+	github.com/bingoohuang/gonet v0.0.0-20191216053050-9d60a7650df8
 	github.com/bingoohuang/gou v0.0.0-20191212070132-501baed7c024
 	github.com/blacknon/go-sshlib v0.1.1
 	github.com/blacknon/textcol v0.0.1
@@ -25,7 +26,7 @@ require (
 	github.com/vbauerster/mpb v3.4.0+incompatible
 	github.com/youtube/vitess v2.1.1+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586
-	golang.org/x/net v0.0.0-20190522155817-f3200d17e092
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	mvdan.cc/sh v2.6.3+incompatible
 )
 

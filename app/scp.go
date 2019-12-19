@@ -20,9 +20,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-func Lscp() (app *cli.App) {
-	// nolint
-	cli.AppHelpTemplate = `NAME:
+// nolint
+const lscpAppHelpTemplate = `NAME:
     {{.Name}} - {{.Usage}}
 USAGE:
     {{.HelpName}} {{if .VisibleFlags}}[options]{{end}} (local|remote):from_path... (local|remote):to_path
@@ -51,9 +50,11 @@ USAGE:
     # remote to remote scp
     {{.Name}} remote:/path/to/remote... remote:/path/to/local
 `
-	// Create app
+
+// Lscp scp ...
+func Lscp() (app *cli.App) {
+	cli.AppHelpTemplate = lscpAppHelpTemplate
 	app = cli.NewApp()
-	// app.UseShortOptionHandling = true
 	app.Name = "lscp"
 	app.Usage = "TUI list select and parallel scp client command."
 	app.Copyright = misc.Copyright
@@ -67,7 +68,6 @@ USAGE:
 		cli.BoolFlag{Name: "list,l", Usage: "print server list from config"},
 		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
 			Usage: "config file path"},
-		cli.BoolFlag{Name: "permission,p", Usage: "copy file permission"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
 	app.EnableBashCompletion = true
@@ -101,6 +101,7 @@ func lscpAction(c *cli.Context) error {
 
 	isFromInRemote := false
 	isFromInLocal := false
+
 	for _, from := range fromArgs {
 		// parse args
 		isFromRemote, _ := check.ParseScpPath(from)
@@ -111,10 +112,11 @@ func lscpAction(c *cli.Context) error {
 			isFromInLocal = true
 		}
 	}
+
 	isToRemote, _ := check.ParseScpPath(toArg)
 
 	// Check from and to Type
-	check.CheckTypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
+	check.TypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
 
 	// Get config data
 	data := conf.ReadConf(confpath)
@@ -170,28 +172,33 @@ func lscpAction(c *cli.Context) error {
 				fmt.Fprintf(os.Stderr, "not found path %s \n", fromPath)
 				os.Exit(1)
 			}
+
 			fromPath = common.GetFullPath(fromPath)
 		}
 
 		// set from data
 		scp.From.IsRemote = isFromRemote
+
 		if isFromRemote {
 			fromPath = check.EscapePath(fromPath)
 		}
+
 		scp.From.Path = append(scp.From.Path, fromPath)
 	}
+
 	scp.From.Server = fromServer
 
 	// set to info
 	isToRemote, toPath := check.ParseScpPath(toArg)
 	scp.To.IsRemote = isToRemote
+
 	if isToRemote {
 		toPath = check.EscapePath(toPath)
 	}
+
 	scp.To.Path = []string{toPath}
 	scp.To.Server = toServer
 
-	scp.Permission = c.Bool("permission")
 	scp.Config = data
 
 	// print from
@@ -209,5 +216,6 @@ func lscpAction(c *cli.Context) error {
 	}
 
 	scp.Start()
+
 	return nil
 }

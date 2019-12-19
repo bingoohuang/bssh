@@ -73,6 +73,7 @@ func (ps *pShell) parseExecuter(pslice [][]pipeLine) {
 
 			// declare in,out
 			var in *io.PipeReader
+
 			var out *io.PipeWriter
 
 			// get next pipe line
@@ -121,6 +122,7 @@ func (ps *pShell) parseExecuter(pslice [][]pipeLine) {
 	// add ps.Count
 	// (Does not count if only the built-in command is executed)
 	isBuildInOnly := true
+
 	for _, pline := range pslice {
 		if len(pline) > 1 {
 			isBuildInOnly = false

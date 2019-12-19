@@ -49,6 +49,7 @@ func (r *RunSftp) df(args []string) {
 
 		// get remote stat data
 		stats := map[string]*sftp.StatVFS{}
+
 		for server, client := range r.Client {
 			// set ftp client
 			ftp := client.Connect
@@ -90,6 +91,7 @@ func (r *RunSftp) df(args []string) {
 		for server, stat := range stats {
 			// set data in columns
 			var column1, column2, column3, column4, column5 string
+
 			switch {
 			case c.Bool("i"):
 				totals := stat.Files

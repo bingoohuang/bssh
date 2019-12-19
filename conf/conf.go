@@ -2,9 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-/*
-conf is a package used to read configuration file (~/.lssh.conf).
-*/
+// Package conf is a package used to read configuration file (~/.lssh.conf).
 package conf
 
 import (
@@ -33,7 +31,7 @@ type Config struct {
 	Server   map[string]ServerConfig
 	Proxy    map[string]ProxyConfig
 
-	SshConfig map[string]OpenSshConfig
+	SSHConfig map[string]OpenSSHConfig
 
 	grouping map[string]map[string]ServerConfig
 }
@@ -57,7 +55,7 @@ type LogConfig struct {
 	Dir string `toml:"dirpath"`
 }
 
-// Structure for storing lssh-shell settings.
+// ShellConfig structure for storing lssh-shell settings.
 type ShellConfig struct {
 	// prompt
 	Prompt  string `toml:"PROMPT"`  // lssh shell prompt
@@ -74,12 +72,12 @@ type ShellConfig struct {
 	PostCmd string `toml:"post_cmd"`
 }
 
-// Specify the configuration file to include (ServerConfig only).
+// IncludeConfig specify the configuration file to include (ServerConfig only).
 type IncludeConfig struct {
 	Path string `toml:"path"`
 }
 
-// Specify the configuration file to include (ServerConfig only).
+// IncludesConfig specify the configuration file to include (ServerConfig only).
 // Struct that can specify multiple files in array.
 type IncludesConfig struct {
 	// example:
@@ -90,7 +88,7 @@ type IncludesConfig struct {
 	Path []string `toml:"path"`
 }
 
-// Structure for holding SSH connection information
+// ServerConfig structure for holding SSH connection information
 type ServerConfig struct {
 	// templates, host:port user/pass
 	Tmpl  string   `toml:"tmpl"`
@@ -102,23 +100,28 @@ type ServerConfig struct {
 	User string `toml:"user"`
 
 	// Connect auth Setting
-	Pass            string   `toml:"pass"`
-	Passes          []string `toml:"passes"`
-	Key             string   `toml:"key"`
-	KeyCommand      string   `toml:"keycmd"`
-	KeyCommandPass  string   `toml:"keycmdpass"`
-	KeyPass         string   `toml:"keypass"`
-	Keys            []string `toml:"keys"` // "keypath::passphrase"
-	Cert            string   `toml:"cert"`
-	CertKey         string   `toml:"certkey"`
-	CertKeyPass     string   `toml:"certkeypass"`
-	CertPKCS11      bool     `toml:"certpkcs11"`
-	AgentAuth       bool     `toml:"agentauth"`
-	SSHAgentUse     bool     `toml:"ssh_agent"`
+	Pass           string   `toml:"pass"`
+	Passes         []string `toml:"passes"`
+	Key            string   `toml:"key"`
+	KeyCommand     string   `toml:"keycmd"`
+	KeyCommandPass string   `toml:"keycmdpass"`
+	KeyPass        string   `toml:"keypass"`
+	Keys           []string `toml:"keys"` // "keypath::passphrase"
+	Cert           string   `toml:"cert"`
+	CertKey        string   `toml:"certkey"`
+	CertKeyPass    string   `toml:"certkeypass"`
+
+	CertPKCS11  bool `toml:"certpkcs11"`
+	AgentAuth   bool `toml:"agentauth"`
+	SSHAgentUse bool `toml:"ssh_agent"`
+	PKCS11Use   bool `toml:"pkcs11"`
+	// x11 forwarding setting
+	X11 bool `toml:"x11"`
+
 	SSHAgentKeyPath []string `toml:"ssh_agent_key"` // "keypath::passphrase"
-	PKCS11Use       bool     `toml:"pkcs11"`
-	PKCS11Provider  string   `toml:"pkcs11provider"` // PKCS11 Provider PATH
-	PKCS11PIN       string   `toml:"pkcs11pin"`      // PKCS11 PIN code
+
+	PKCS11Provider string `toml:"pkcs11provider"` // PKCS11 Provider PATH
+	PKCS11PIN      string `toml:"pkcs11pin"`      // PKCS11 PIN code
 
 	// pre | post command setting
 	PreCmd  string `toml:"pre_cmd"`
@@ -141,9 +144,7 @@ type ServerConfig struct {
 
 	// Dynamic Port Forwarding setting
 	DynamicPortForward string `toml:"dynamic_port_forward"` // ex.) "11080"
-
-	// x11 forwarding setting
-	X11 bool `toml:"x11"`
+	Note               string `toml:"note"`
 
 	// Connection Timeout second
 	ConnectTimeout int `toml:"connect_timeout"`
@@ -151,13 +152,12 @@ type ServerConfig struct {
 	// Server Alive
 	ServerAliveCountMax      int `toml:"alive_max"`
 	ServerAliveCountInterval int `toml:"alive_interval"`
-
-	// note
-	Note string `toml:"note"`
 }
 
+// BelongsToGroup belongs to group or not
 func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
 	othersGroupName := cf.pickOthersGroupName()
+
 	if len(sf.Group) == 0 { //others
 		return name == "" || name == othersGroupName
 	}
@@ -175,7 +175,7 @@ func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
 	return false
 }
 
-// Struct that stores Proxy server settings connected via http and socks5.
+// ProxyConfig struct that stores Proxy server settings connected via http and socks5.
 type ProxyConfig struct {
 	Addr      string `toml:"addr"`
 	Port      string `toml:"port"`
@@ -186,10 +186,10 @@ type ProxyConfig struct {
 	Note      string `toml:"note"`
 }
 
-// Structure to read OpenSSH configuration file.
+// OpenSSHConfig to read OpenSSH configuration file.
 //
 // WARN: This struct is not use...
-type OpenSshConfig struct {
+type OpenSSHConfig struct {
 	Path    string `toml:"path"` // This is preferred
 	Command string `toml:"command"`
 	ServerConfig
@@ -207,7 +207,7 @@ func ReadConf(confPath string) (config Config) {
 	}
 
 	config.Server = map[string]ServerConfig{}
-	config.SshConfig = map[string]OpenSshConfig{}
+	config.SSHConfig = map[string]OpenSSHConfig{}
 
 	// Read config file
 	_, err := toml.DecodeFile(confPath, &config)
@@ -224,15 +224,15 @@ func ReadConf(confPath string) (config Config) {
 	config.parseConfigServers(config.Server, config.Common)
 
 	// Read Openssh configs
-	if len(config.SshConfig) == 0 {
-		if v, err := getOpenSshConfig("~/.ssh/config", ""); err == nil {
+	if len(config.SSHConfig) == 0 {
+		if v, err := getOpenSSHConfig("~/.ssh/config", ""); err == nil {
 			config.parseConfigServers(v, config.Common)
 		}
 	} else {
-		for _, sshConfig := range config.SshConfig {
+		for _, sshConfig := range config.SSHConfig {
 			setCommon := serverConfigReduct(config.Common, sshConfig.ServerConfig)
 
-			if v, err := getOpenSshConfig(sshConfig.Path, sshConfig.Command); err == nil {
+			if v, err := getOpenSSHConfig(sshConfig.Path, sshConfig.Command); err == nil {
 				config.parseConfigServers(v, setCommon)
 			}
 		}
@@ -340,6 +340,7 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 
 		if value.Tmpl != "" {
 			delete(cf.Server, key)
+
 			tmplConfigs = append(tmplConfigs, tmplConfig{
 				k: key, c: setValue, t: ParseTmpl(setValue.Tmpl)})
 		}
@@ -348,8 +349,10 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 	cf.tmplServers(tmplConfigs)
 }
 
-func (cf *Config) FilterGroupNames(group string, names []string) []string {
+// FilterNamesByGroup  filter server names by group.
+func (cf *Config) FilterNamesByGroup(group string, names []string) []string {
 	x := make([]string, 0, len(names))
+
 	for _, name := range names {
 		if sc := cf.Server[name]; sc.BelongsToGroup(cf, group) {
 			x = append(x, name)
@@ -359,11 +362,12 @@ func (cf *Config) FilterGroupNames(group string, names []string) []string {
 	return x
 }
 
+// GroupsNames get groups' names.
 func (cf *Config) GroupsNames() []string {
 	otherGroupName := cf.pickOthersGroupName()
 	names := make([]string, 0)
 
-	for k, _ := range cf.grouping {
+	for k := range cf.grouping {
 		if k == "" {
 			k = otherGroupName
 		}
@@ -384,9 +388,11 @@ func (cf *Config) pickOthersGroupName() string {
 			break
 		}
 	}
+
 	return otherGroupName
 }
 
+// GetGrouping get grouping map.
 func (cf *Config) GetGrouping() map[string]map[string]ServerConfig { return cf.grouping }
 
 // checkFormatServerConf checkes format of server config.
@@ -397,24 +403,29 @@ func (cf *Config) GetGrouping() map[string]map[string]ServerConfig { return cf.g
 // See also: checkFormatServerConfAuth function.
 func checkFormatServerConf(c Config) (isFormat bool) {
 	isFormat = true
+
 	for k, v := range c.Server {
 		// Address Set Check
 		if v.Addr == "" {
 			fmt.Printf("%s: 'addr' is not set.\n", k)
+
 			isFormat = false
 		}
 
 		// User Set Check
 		if v.User == "" {
 			fmt.Printf("%s: 'user' is not set.\n", k)
+
 			isFormat = false
 		}
 
 		if !checkFormatServerConfAuth(v) {
 			fmt.Printf("%s: Authentication information is not set.\n", k)
+
 			isFormat = false
 		}
 	}
+
 	return
 }
 
@@ -466,5 +477,6 @@ func GetNameList(listConf Config) (nameList []string) {
 	for k := range listConf.Server {
 		nameList = append(nameList, k)
 	}
+
 	return
 }

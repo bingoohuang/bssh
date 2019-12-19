@@ -84,6 +84,7 @@ func lpbeAction(c *cli.Context) error {
 
 	confpath := c.String("file")
 	confContent, err := ioutil.ReadFile(confpath)
+
 	if err != nil {
 		fmt.Println(confpath, "read error", err.Error())
 
@@ -139,7 +140,7 @@ func collectPasses(reverse bool, data conf.Config, m map[string]string) {
 		addPass(reverse, sc.Pass, m)
 	}
 
-	for _, sc := range data.SshConfig {
+	for _, sc := range data.SSHConfig {
 		addPass(reverse, sc.Pass, m)
 
 		for _, p := range sc.Passes {

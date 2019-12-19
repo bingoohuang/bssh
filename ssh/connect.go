@@ -7,6 +7,11 @@ package ssh
 import (
 	"fmt"
 	"strings"
+	"time"
+
+	"github.com/blacknon/lssh/misc"
+
+	"github.com/bingoohuang/gonet"
 
 	sshlib "github.com/blacknon/go-sshlib"
 	"github.com/blacknon/lssh/conf"
@@ -28,38 +33,29 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 	}
 
 	// setup dialer
-	var dialer proxy.Dialer
-	dialer = proxy.Direct
+	timeout := 10 * time.Second
+
+	var dialer proxy.Dialer = gonet.DialerTimeoutBean{ConnTimeout: timeout, ReadWriteTimeout: timeout}
 
 	// Connect loop proxy server
 	for _, p := range proxyRoute {
 		config := r.Conf
 
 		switch p.Type {
-		case "http", "https", "socks", "socks5":
+		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5:
 			c := config.Proxy[p.Name]
 
-			pxy := &sshlib.Proxy{
-				Type:      p.Type,
-				Forwarder: dialer,
-				Addr:      c.Addr,
-				Port:      c.Port,
-				User:      c.User,
-				Password:  c.Pass,
-			}
+			pxy := &sshlib.Proxy{Type: p.Type, Forwarder: dialer,
+				Addr: c.Addr, Port: c.Port, User: c.User, Password: c.Pass}
 			dialer, err = pxy.CreateProxyDialer()
-		case "command":
-			pxy := &sshlib.Proxy{
-				Type:    p.Type,
-				Command: p.Name,
-			}
+		case misc.Command:
+			pxy := &sshlib.Proxy{Type: p.Type, Command: p.Name}
 			dialer, err = pxy.CreateProxyDialer()
 		default:
 			c := config.Server[p.Name]
-			pxy := &sshlib.Connect{
-				ProxyDialer: dialer,
-			}
+			pxy := &sshlib.Connect{ProxyDialer: dialer}
 			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[p.Name])
+
 			if err != nil {
 				return connect, err
 			}
@@ -102,22 +98,24 @@ type proxyRouteData struct {
 // getProxyList return []*pxy function.
 func getProxyRoute(server string, config conf.Config) (proxyRoute []*proxyRouteData, err error) {
 	var conName, conType string
+
 	var proxyName, proxyType, proxyPort string
+
 	var isOk bool
 
 	conName = server
-	conType = "ssh"
+	conType = misc.SSH
 
 proxyLoop:
 	for {
 		switch conType {
-		case "http", "https", "socks", "socks5":
+		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5:
 			var conConf conf.ProxyConfig
 			conConf, isOk = config.Proxy[conName]
 			proxyName = conConf.Proxy
 			proxyType = conConf.ProxyType
 			proxyPort = conConf.Port
-		case "command":
+		case misc.Command:
 			break proxyLoop
 		default:
 			var conConf conf.ServerConfig
@@ -126,7 +124,7 @@ proxyLoop:
 			// If ProxyCommand is set, give priority to that
 			if conConf.ProxyCommand != "" && conConf.ProxyCommand != "none" {
 				proxyName = expansionProxyCommand(conConf.ProxyCommand, conConf)
-				proxyType = "command"
+				proxyType = misc.Command
 				proxyPort = ""
 			} else {
 				proxyName = conConf.Proxy
@@ -150,12 +148,12 @@ proxyLoop:
 		p := new(proxyRouteData)
 		p.Name = proxyName
 		switch proxyType {
-		case "http", "https", "socks", "socks5":
+		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5:
 			p.Type = proxyType
-		case "command":
+		case misc.Command:
 			p.Type = proxyType
 		default:
-			p.Type = "ssh"
+			p.Type = misc.SSH
 		}
 		p.Port = proxyPort
 

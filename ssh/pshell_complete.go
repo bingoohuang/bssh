@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/blacknon/lssh/misc"
 	prompt "github.com/c-bata/go-prompt"
 )
 
@@ -30,6 +31,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	// Get cursor left
 	left := t.CurrentLineBeforeCursor()
 	pslice, err := parsePipeLine(left)
+
 	if err != nil {
 		return prompt.FilterHasPrefix(nil, t.GetWordBeforeCursor(), false)
 	}
@@ -43,6 +45,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	sl := len(pslice) // pline slice count
 	ll := 0
 	num := 0
+
 	if sl >= 1 {
 		ll = len(pslice[sl-1])             // pline count
 		num = len(pslice[sl-1][ll-1].Args) // pline args count
@@ -62,7 +65,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 				{Text: "quit", Description: "exit lssh shell"},
 				{Text: "clear", Description: "clear screen"},
 				{Text: "%history", Description: "show history"},
-				{Text: "%out", Description: "%out [num], show history result."},
+				{Text: misc.PercentOut, Description: "%out [num], show history result."},
 				{Text: "%outlist", Description: "%outlist, show history result list."},
 				// outの出力でdiffをするためのローカルコマンド。すべての出力と比較するのはあまりに辛いと思われるため、最初の出力との比較、といった方式で対応するのが良いか？？
 				// {Text: "%diff", Description: "%diff [num], show history result list."},
@@ -77,8 +80,9 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 
 		case checkBuildInCommand(c): // if build-in command.
 			var a []prompt.Suggest
+
 			switch c {
-			case "%out":
+			case misc.PercentOut:
 				for i := 0; i < len(ps.History); i++ {
 					var cmd string
 					for _, h := range ps.History[i] {
@@ -106,6 +110,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 			// get last slash place
 			word := t.GetWordBeforeCursor()
 			sp := strings.LastIndex(word, "/")
+
 			if len(word) > 0 {
 				word = word[sp+1:]
 			}
@@ -259,6 +264,7 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 	}
 
 	sort.SliceStable(p, func(i, j int) bool { return p[i].Text < p[j].Text })
+
 	return
 }
 
@@ -268,5 +274,6 @@ func contains(s []string, e string) bool {
 			return true
 		}
 	}
+
 	return false
 }

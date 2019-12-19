@@ -38,10 +38,12 @@ func (r *RunSftp) rm(args []string) {
 		if len(c.Args()) != 1 {
 			fmt.Println("Requires one arguments")
 			fmt.Println("rm [path]")
+
 			return nil
 		}
 
 		exit := make(chan bool)
+
 		for s, cl := range r.Client {
 			server := s
 			client := cl

@@ -29,6 +29,7 @@ func (r *RunSftp) cd(args []string) {
 
 	// check directory
 	var okcounter int
+
 	for server, client := range r.Client {
 		// get output
 		client.Output.Create(server)
@@ -36,7 +37,9 @@ func (r *RunSftp) cd(args []string) {
 
 		// set arg path
 		path = args[1]
+
 		var err error
+
 		if !filepath.IsAbs(path) {
 			path = filepath.Join(client.Pwd, path)
 		}

@@ -6,14 +6,13 @@ package ssh
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
 	"github.com/blacknon/lssh/conf"
-	daemon "github.com/sevlyar/go-daemon"
+	"github.com/blacknon/lssh/misc"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -32,6 +31,7 @@ import (
 //         - https://github.com/hanwen/go-fuse
 //         - https://gitlab.com/dns2utf8/revfs/
 
+// Run running info.
 type Run struct {
 	ServerList []string
 	Conf       conf.Config
@@ -91,7 +91,7 @@ type Run struct {
 	serverAuthMethodMap map[string][]ssh.AuthMethod
 }
 
-// Auth map key
+// AuthKey define auth key\
 type AuthKey struct {
 	// auth type:
 	//   - password
@@ -111,17 +111,21 @@ type AuthKey struct {
 	Value string
 }
 
-// use scp,sftp
+// PathSet ...
 type PathSet struct {
 	Base      string
 	PathSlice []string
 }
 
 const (
-	AuthkeyPassword = "password"
-	AuthkeyKey      = "key"
-	AuthkeyCert     = "cert"
-	AuthkeyPkcs11   = "pkcs11"
+	// AuthKeyPassword auth by Password
+	AuthKeyPassword = "password"
+	// AuthKeyKey auth by key
+	AuthKeyKey = "key"
+	// AuthKeyCert  auth by cert
+	AuthKeyCert = "cert"
+	// AuthKeyPkcs11 auth by pkcs11
+	AuthKeyPkcs11 = "pkcs11"
 )
 
 // Start ssh connect
@@ -139,23 +143,15 @@ func (r *Run) Start() {
 		}
 	}
 
-	// create AuthMap
 	r.CreateAuthMethodMap()
 
-	// connect
 	switch {
 	case len(r.ExecCmd) > 0 && r.Mode == "cmd":
-		// connect and run command
 		err = r.cmd()
-
 	case r.Mode == "shell":
-		// connect remote shell
 		err = r.shell()
-
 	case r.Mode == "pshell":
-		// start lsshshell
 		err = r.pshell()
-
 	default:
 		return
 	}
@@ -228,9 +224,9 @@ func (r *Run) printProxy(server string) {
 	array = append(array, localhost)
 
 	for _, pxy := range proxyRoute {
-		// seprator
+		// separator
 		var sep string
-		if pxy.Type == "command" {
+		if pxy.Type == misc.Command {
 			sep = ":"
 		} else {
 			sep = "://"
@@ -239,9 +235,10 @@ func (r *Run) printProxy(server string) {
 		// setup string
 		str := "[" + pxy.Type + sep + pxy.Name
 		if pxy.Port != "" {
-			str = str + ":" + pxy.Port
+			str += ":" + pxy.Port
 		}
-		str = str + "]"
+
+		str += "]"
 
 		array = append(array, str)
 	}
@@ -259,24 +256,4 @@ func (r *Run) printProxy(server string) {
 func execLocalCommand(cmd string) {
 	out, _ := exec.Command("sh", "-c", cmd).CombinedOutput()
 	fmt.Print(string(out))
-}
-
-// startBackgroundMode run deamon mode
-// not working... and not use... how this do ...?
-func startBackgroundMode() {
-	cntxt := &daemon.Context{}
-	d, err := cntxt.Reborn()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if d != nil {
-		return
-	}
-
-	defer func() {
-		if err := cntxt.Release(); err != nil {
-			log.Printf("error encountered while killing daemon: %v", err)
-		}
-	}()
 }
