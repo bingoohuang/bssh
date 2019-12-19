@@ -16,6 +16,8 @@ import (
 	"syscall"
 	"text/tabwriter"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/blacknon/textcol"
 	humanize "github.com/dustin/go-humanize"
@@ -43,9 +45,9 @@ func (r *RunSftp) lls(args []string) (err error) {
 		cli.BoolFlag{Name: "S", Usage: "sort by file size, largest first"},
 		cli.BoolFlag{Name: "t", Usage: "sort by modification time, newest first"},
 	}
-	app.Name = "lls"
+	app.Name = misc.Lls
 	app.Usage = "lsftp build-in command: lls [local machine ls]"
-	app.ArgsUsage = "[PATH]"
+	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true

@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"text/tabwriter"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/pkg/sftp"
@@ -36,7 +38,7 @@ func (r *RunSftp) df(args []string) {
 	}
 	app.Name = "df"
 	app.Usage = "lsftp build-in command: df [remote machine df]"
-	app.ArgsUsage = "[PATH]"
+	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true

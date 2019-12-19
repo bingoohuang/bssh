@@ -24,7 +24,7 @@ func drawLine(x, y int, str string, colorNum int, backColorNum int) {
 }
 
 // Highlight lines and draw text based on filtering results
-func drawFilterLine(x, y int, str string, colorNum int, backColorNum int, keywordColorNum int, searchText string) {
+func drawFilterLine(x, y int, str string, backColorNum, keywordColorNum int, searchText string) {
 	// SearchText Bounds Space
 	searchWords := strings.Fields(searchText)
 
@@ -42,7 +42,7 @@ func drawFilterLine(x, y int, str string, colorNum int, backColorNum int, keywor
 			if charLocation < len(str) {
 				searchLineData = str[charLocation:]
 			}
-			searchLineDataStr := string(searchLineData)
+			searchLineDataStr := searchLineData
 			searchKeywordIndex := strings.Index(strings.ToLower(searchLineDataStr), searchKeyword)
 
 			charLocation = charLocation + searchKeywordIndex
@@ -121,7 +121,7 @@ func (l *ListInfo) draw() {
 		drawLine(l.Term.LeftMargin, listKey+l.Term.Headline, paddingData, cursorColor, cursorBackColor)
 
 		// Keyword Highlight
-		drawFilterLine(l.Term.LeftMargin, listKey+l.Term.Headline, paddingData, cursorColor, cursorBackColor, keywordColor, l.Keyword)
+		drawFilterLine(l.Term.LeftMargin, listKey+l.Term.Headline, paddingData, cursorBackColor, keywordColor, l.Keyword)
 		listKey++
 	}
 

@@ -7,6 +7,8 @@ package sftp
 import (
 	"fmt"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 )
@@ -19,7 +21,7 @@ func (r *RunSftp) rmdir(args []string) {
 
 	// set help message
 	app.CustomAppHelpTemplate = helptext
-	app.Name = "rmdir"
+	app.Name = misc.Rmdir
 	app.Usage = "lsftp build-in command: rmdir [remote machine rmdir]"
 	app.HideHelp = true
 	app.HideVersion = true

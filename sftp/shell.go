@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/blacknon/lssh/misc"
+
 	prompt "github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 )
@@ -63,7 +65,7 @@ func (r *RunSftp) Executor(command string) {
 		r.chgrp(cmdline)
 	case "chmod":
 		r.chmod(cmdline)
-	case "chown":
+	case misc.Chown:
 		r.chown(cmdline)
 
 	// case "copy":
@@ -74,7 +76,7 @@ func (r *RunSftp) Executor(command string) {
 		r.get(cmdline)
 	case "lcd":
 		r.lcd(cmdline)
-	case "lls":
+	case misc.Lls:
 		r.lls(cmdline)
 	case "lmkdir":
 		r.lmkdir(cmdline)
@@ -98,7 +100,7 @@ func (r *RunSftp) Executor(command string) {
 		r.rename(cmdline)
 	case "rm":
 		r.rm(cmdline)
-	case "rmdir":
+	case misc.Rmdir:
 		r.rmdir(cmdline)
 	case "symlink":
 		r.symlink(cmdline)
@@ -131,7 +133,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			// {Text: "cat", Description: "Open file"},
 			{Text: "cd", Description: "Change remote directory to 'path'"},
 			{Text: "chgrp", Description: "Change group of file 'path' to 'grp'"},
-			{Text: "chown", Description: "Change owner of file 'path' to 'own'"},
+			{Text: misc.Chown, Description: "Change owner of file 'path' to 'own'"},
 			// {Text: "copy", Description: "Copy to file from 'remote' or 'local' to 'remote' or 'local'"},
 			{Text: "df", Description: "Display statistics for current directory or filesystem containing 'path'"},
 			{Text: "exit", Description: "Quit lsftp"},
@@ -140,7 +142,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			// {Text: "reput", Description: "Resume upload file"},
 			{Text: "help", Description: "Display this help text"},
 			{Text: "lcd", Description: "Change local directory to 'path'"},
-			{Text: "lls", Description: "Display local directory listing"},
+			{Text: misc.Lls, Description: "Display local directory listing"},
 			{Text: "lmkdir", Description: "Create local directory"},
 			// {Text: "ln", Description: "Link remote file (-s for symlink)"},
 			{Text: "lpwd", Description: "Print local working directory"},
@@ -153,7 +155,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			{Text: "quit", Description: "Quit sftp"},
 			{Text: "rename", Description: "Rename remote file"},
 			{Text: "rm", Description: "Delete remote file"},
-			{Text: "rmdir", Description: "Remove remote directory"},
+			{Text: misc.Rmdir, Description: "Remove remote directory"},
 			{Text: "symlink", Description: "Create symbolic link"},
 			// {Text: "tree", Description: "Tree view remote directory"},
 			// {Text: "!command", Description: "Execute 'command' in local shell"},
@@ -166,7 +168,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			return r.PathComplete(true, 1, t)
 		case "chgrp":
 			// TODO(blacknon): そのうち追加 ver0.6.1
-		case "chown":
+		case misc.Chown:
 			// TODO(blacknon): そのうち追加 ver0.6.1
 		case "df":
 			suggest = []prompt.Suggest{
@@ -185,7 +187,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 
 		case "lcd":
 			return r.PathComplete(false, 1, t)
-		case "lls":
+		case misc.Lls:
 			// switch options or path
 			switch {
 			case contains([]string{"-"}, char):
@@ -266,7 +268,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			return r.PathComplete(true, 1, t)
 		case "rm":
 			return r.PathComplete(true, 1, t)
-		case "rmdir":
+		case misc.Rmdir:
 			return r.PathComplete(true, 1, t)
 		case "symlink":
 			// TODO(blacknon): そのうち追加 ver0.6.1

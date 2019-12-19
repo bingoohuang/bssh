@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/urfave/cli"
 )
@@ -31,7 +33,7 @@ func (r *RunSftp) mkdir(args []string) {
 	app.CustomAppHelpTemplate = helptext
 	app.Name = "mkdir"
 	app.Usage = "lsftp build-in command: mkdir [remote machine mkdir]"
-	app.ArgsUsage = "[path]"
+	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true
@@ -106,7 +108,7 @@ func (r *RunSftp) lmkdir(args []string) {
 	app.CustomAppHelpTemplate = helptext
 	app.Name = "lmkdir"
 	app.Usage = "lsftp build-in command: lmkdir [local machine mkdir]"
-	app.ArgsUsage = "[path]"
+	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/blacknon/lssh/list"
+	"github.com/blacknon/lssh/misc"
 
 	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/check"
@@ -57,7 +58,7 @@ USAGE:
 	// app.UseShortOptionHandling = true
 	app.Name = "lscp"
 	app.Usage = "TUI list select and parallel scp client command."
-	app.Copyright = "blacknon(blacknon@orebibou.com)"
+	app.Copyright = misc.Copyright
 	app.Version = lssh.AppVersion
 
 	// options

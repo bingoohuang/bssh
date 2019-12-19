@@ -14,7 +14,6 @@ import (
 // Add Rune to search keywords(l.Keyword)
 func (l *ListInfo) insertRune(inputRune rune) {
 	l.Keyword = l.Keyword + string(inputRune)
-
 }
 
 // Delete Rune at search keywords(l.Keyword)

@@ -63,6 +63,7 @@ func (r *Run) shell() (err error) {
 	r.printPortForward(config.PortForwardMode, config.PortForwardLocal, config.PortForwardRemote)
 	r.printDynamicPortForward(config.DynamicPortForward)
 	r.printProxy(server)
+
 	if config.LocalRcUse == "yes" {
 		fmt.Fprintf(os.Stderr, "Information   :This connect use local bashrc.\n")
 	}
@@ -133,7 +134,6 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == "yes" {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			// Connect shell
 			err = connect.Shell(session)
 		}
 	}

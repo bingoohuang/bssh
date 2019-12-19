@@ -93,8 +93,8 @@ type IncludesConfig struct {
 // Structure for holding SSH connection information
 type ServerConfig struct {
 	// templates, host:port user/pass
-	Tmpl  string `toml:"tmpl"`
-	Group string `toml:"group"`
+	Tmpl  string   `toml:"tmpl"`
+	Group []string `toml:"group"`
 
 	// Connect basic Setting
 	Addr string `toml:"addr"`
@@ -154,6 +154,25 @@ type ServerConfig struct {
 
 	// note
 	Note string `toml:"note"`
+}
+
+func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
+	othersGroupName := cf.pickOthersGroupName()
+	if len(sf.Group) == 0 { //others
+		return name == "" || name == othersGroupName
+	}
+
+	if name == "" || name == othersGroupName {
+		return false
+	}
+
+	for _, g := range sf.Group {
+		if strings.HasPrefix(g, name) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Struct that stores Proxy server settings connected via http and socks5.
@@ -291,13 +310,24 @@ func (cf *Config) parseGroups() {
 	cf.grouping = make(map[string]map[string]ServerConfig)
 
 	for k, v := range cf.Server {
-		if _, ok := cf.grouping[v.Group]; ok {
-			cf.grouping[v.Group][k] = v
-		} else {
-			m := make(map[string]ServerConfig)
-			m[k] = v
-			cf.grouping[v.Group] = m
+		if len(v.Group) == 0 {
+			cf.addGroup("", k, v)
+			continue
 		}
+
+		for _, group := range v.Group {
+			cf.addGroup(group, k, v)
+		}
+	}
+}
+
+func (cf *Config) addGroup(group, name string, v ServerConfig) {
+	if _, ok := cf.grouping[group]; ok {
+		cf.grouping[group][name] = v
+	} else {
+		m := make(map[string]ServerConfig)
+		m[name] = v
+		cf.grouping[group] = m
 	}
 }
 
@@ -319,13 +349,9 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 }
 
 func (cf *Config) FilterGroupNames(group string, names []string) []string {
-	if group == "" {
-		return names
-	}
-
 	x := make([]string, 0, len(names))
 	for _, name := range names {
-		if strings.HasPrefix(cf.Server[name].Group, group) {
+		if sc := cf.Server[name]; sc.BelongsToGroup(cf, group) {
 			x = append(x, name)
 		}
 	}
@@ -334,11 +360,12 @@ func (cf *Config) FilterGroupNames(group string, names []string) []string {
 }
 
 func (cf *Config) GroupsNames() []string {
+	otherGroupName := cf.pickOthersGroupName()
 	names := make([]string, 0)
 
 	for k, _ := range cf.grouping {
 		if k == "" {
-			k = "Others"
+			k = otherGroupName
 		}
 
 		names = append(names, k)
@@ -347,9 +374,20 @@ func (cf *Config) GroupsNames() []string {
 	return names
 }
 
-func (cf *Config) GetGrouping() map[string]map[string]ServerConfig {
-	return cf.grouping
+func (cf *Config) pickOthersGroupName() string {
+	otherGroupNames := []string{"others", "default", "else", "todo"} // no blanks allowed among the names
+	otherGroupName := ""
+
+	for _, groupName := range otherGroupNames {
+		if _, ok := cf.grouping[groupName]; !ok {
+			otherGroupName = groupName
+			break
+		}
+	}
+	return otherGroupName
 }
+
+func (cf *Config) GetGrouping() map[string]map[string]ServerConfig { return cf.grouping }
 
 // checkFormatServerConf checkes format of server config.
 //

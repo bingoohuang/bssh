@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/blacknon/lssh/misc"
+
 	"github.com/blacknon/lssh/common"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
@@ -25,7 +27,7 @@ func (r *RunSftp) chown(args []string) {
 
 	// set help message
 	app.CustomAppHelpTemplate = helptext
-	app.Name = "chown"
+	app.Name = misc.Chown
 	app.Usage = "lsftp build-in command: chown [remote machine chown]"
 	app.ArgsUsage = "[user path]"
 	app.HideHelp = true

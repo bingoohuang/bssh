@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/blacknon/lssh/list"
+	"github.com/blacknon/lssh/misc"
 
 	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/conf"
@@ -47,7 +48,7 @@ USAGE:
 	// app.UseShortOptionHandling = true
 	app.Name = "lsftp"
 	app.Usage = "TUI list select and parallel sftp client command."
-	app.Copyright = "blacknon(blacknon@orebibou.com)"
+	app.Copyright = misc.Copyright
 	app.Version = lssh.AppVersion
 
 	app.Flags = []cli.Flag{

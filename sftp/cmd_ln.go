@@ -15,8 +15,7 @@ import (
 )
 
 // TODO(blacknon): sftpライブラリ側で対応するようになったら開発する
-
-//
+// TODO（blacknon）：在支持sftp库方面进行开发
 func (r *RunSftp) ln(args []string) (err error) {
 	// create app
 	app := cli.NewApp()

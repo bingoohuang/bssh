@@ -22,16 +22,16 @@ tmpl = "192.168.118.(69-71):22 root/{PBE}-iw_tYxDmpRGBjPCWD-jPuHV6mfq8EIz"
 
 # 阿里云环境 -- start ---
 [server.aliyun-jumper]
-#group = "aliyun 阿里云环境"
+# group = ["aliyun"]
 tmpl = "192.168.27.3:60022 huangjinbing/{PBE}1D4HK2qEipX3DsmxkDQCmZAE-pas8Whh"
 note = "aliyun-jumper"
 [server.C-api-gateway]
-#group = "aliyun 阿里云环境"
+# group = ["aliyun"]
 tmpl = "192.168.(29.11 37.82) footstone/empty"
 note = "C区-api-gateway"
 proxy = "aliyun-jumper"
 [server.A-gw-test]
-#group = "aliyun 阿里云环境"
+# group = ["aliyun"]
 tmpl = "192.168.8.(22-26):22 footstone/empty"
 note = "A区-API网关测试"
 proxy = "aliyun-jumper"
