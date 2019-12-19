@@ -9,32 +9,35 @@ dirpath = "~/.lssh.log"
 
 # 机房测试环境 -- start ---
 [server.mysqlm]
+group = ["localsite"]
 tmpl = "192.168.136.(217 218):8022 app/{PBE}tLFzF-dKX4wmJFG9wnxnia7PjepL4pzC"
 note = "机房MySQL"
 # 机房测试环境 -- end ---
 
 # 腾讯云环境 -- start ---
-[server.qqyun108]
+[server.qqyun]
+group = ["qqyun"]
 tmpl = "123.206.185.162:(21061-21063) root/{PBE}H3y5VaKfj-vxSJ5JUHL0R-CBtZTkR2UR"
 # 腾讯云环境 -- end ---
 
 # openstack 环境 -- start ---
 [server.openstack]
+group = ["openstack"]
 tmpl = "192.168.118.(69-71):22 root/{PBE}-iw_tYxDmpRGBjPCWD-jPuHV6mfq8EIz"
 # openstack 环境 -- end ---
 
 # 阿里云环境 -- start ---
 [server.aliyun-jumper]
-# group = ["aliyun"]
+group = ["aliyun"]
 tmpl = "192.168.27.3:60022 huangjinbing/{PBE}1D4HK2qEipX3DsmxkDQCmZAE-pas8Whh"
 note = "aliyun-jumper"
 [server.C-api-gateway]
-# group = ["aliyun"]
+ group = ["aliyun"]
 tmpl = "192.168.(29.11 37.82) footstone/na"
 note = "C区-api-gateway"
 proxy = "aliyun-jumper"
 [server.A-gw-test]
-# group = ["aliyun"]
+group = ["aliyun"]
 tmpl = "192.168.8.(22-26):22 footstone/na"
 note = "A区-API网关测试"
 proxy = "aliyun-jumper"

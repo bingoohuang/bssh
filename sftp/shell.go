@@ -37,6 +37,7 @@ func (r *RunSftp) shell() {
 		prompt.OptionLivePrefix(r.CreatePrompt),
 		prompt.OptionInputTextColor(prompt.Green),
 		prompt.OptionPrefixTextColor(prompt.Blue),
+		prompt.OptionMaxSuggestion(16),
 		prompt.OptionCompletionWordSeparator(completer.FilePathCompletionSeparator), // test
 	)
 
@@ -191,7 +192,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		case misc.Lls:
 			// switch options or path
 			switch {
-			case contains([]string{"-"}, char):
+			case common.Contains([]string{"-"}, char):
 				suggest = []prompt.Suggest{
 					{Text: "-1", Description: "list one file per line"},
 					{Text: "-a", Description: "do not ignore entries starting with"},
@@ -210,7 +211,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			}
 		case misc.Lmkdir:
 			switch {
-			case contains([]string{"-"}, char):
+			case common.Contains([]string{"-"}, char):
 				suggest = []prompt.Suggest{
 					{Text: "-p", Description: "no error if existing, make parent directories as needed"},
 				}
@@ -225,7 +226,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		case "ls":
 			// switch options or path
 			switch {
-			case contains([]string{"-"}, char):
+			case common.Contains([]string{"-"}, char):
 				suggest = []prompt.Suggest{
 					{Text: "-1", Description: "list one file per line"},
 					{Text: "-a", Description: "do not ignore entries starting with"},
@@ -246,7 +247,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		// case "lumask":
 		case misc.Mkdir:
 			switch {
-			case contains([]string{"-"}, char):
+			case common.Contains([]string{"-"}, char):
 				suggest = []prompt.Suggest{
 					{Text: "-p", Description: "no error if existing, make parent directories as needed"},
 				}
@@ -307,18 +308,18 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 
 	if remote {
 		switch {
-		case contains([]string{"/"}, char): // char is slash or
+		case common.Contains([]string{"/"}, char): // char is slash or
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
-		case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
+		case common.Contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
 		}
 
 		suggest = r.RemoteComplete
 	} else {
 		switch {
-		case contains([]string{"/"}, char): // char is slash or
+		case common.Contains([]string{"/"}, char): // char is slash or
 			r.GetLocalComplete(t.GetWordBeforeCursor())
-		case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
+		case common.Contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetLocalComplete(t.GetWordBeforeCursor())
 		}
 
@@ -339,33 +340,14 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 
 	// connect client...
 	for s, c := range r.Client {
-		server := s
-		client := c
+		server, client := s, c
 
 		go func() {
-			defer func() {
-				exit <- true
-			}()
+			defer func() { exit <- true }()
 
-			var rpath string
-			if filepath.IsAbs(path) {
-				rpath = path
-			} else if strings.HasPrefix(path, "~/") {
-				rpath = filepath.Join(client.Pwd, path[2:])
-			} else {
-				rpath = filepath.Join(client.Pwd, path)
-			}
-
-			// check rpath
-			stat, err := client.Connect.Stat(rpath)
+			rpath, err := r.prepareRemotePath(path, client)
 			if err != nil {
 				return
-			}
-
-			if stat.IsDir() {
-				rpath += "/*"
-			} else {
-				rpath += "*"
 			}
 
 			// get path list
@@ -381,11 +363,10 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 				m[p] = append(m[p], server)
 				sm.Unlock()
 			}
-
 		}()
 	}
 
-	for i := 0; i < len(r.Client); i++ {
+	for range r.Client {
 		<-exit
 	}
 
@@ -411,6 +392,30 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 
 	// set suggest to struct
 	r.RemoteComplete = p
+}
+
+func (r *RunSftp) prepareRemotePath(path string, client *Connect) (string, error) {
+	var rpath string
+	if filepath.IsAbs(path) {
+		rpath = path
+	} else if strings.HasPrefix(path, "~/") {
+		rpath = filepath.Join(client.Pwd, path[2:])
+	} else {
+		rpath = filepath.Join(client.Pwd, path)
+	}
+
+	stat, err := client.Connect.Stat(rpath)
+	if err != nil {
+		return "", err
+	}
+
+	if stat.IsDir() {
+		rpath += "/*"
+	} else {
+		rpath += "*"
+	}
+
+	return rpath, nil
 }
 
 // GetLocalComplete ...
@@ -453,14 +458,4 @@ func (r *RunSftp) GetLocalComplete(path string) {
 func (r *RunSftp) CreatePrompt() (p string, result bool) {
 	p = "lsftp>> "
 	return p, true
-}
-
-func contains(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-
-	return false
 }

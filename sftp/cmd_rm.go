@@ -14,7 +14,6 @@ import (
 
 //
 func (r *RunSftp) rm(args []string) {
-	// create app
 	app := cli.NewApp()
 	// app.UseShortOptionHandling = true
 
@@ -32,86 +31,83 @@ func (r *RunSftp) rm(args []string) {
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true
-
-	// action
-	app.Action = func(c *cli.Context) error {
-		if len(c.Args()) != 1 {
-			fmt.Println("Requires one arguments")
-			fmt.Println("rm [path]")
-
-			return nil
-		}
-
-		exit := make(chan bool)
-
-		for s, cl := range r.Client {
-			server := s
-			client := cl
-			path := c.Args()[0]
-
-			go func() {
-				// get writer
-				client.Output.Create(server)
-				w := client.Output.NewWriter()
-
-				// set arg path
-				if !filepath.IsAbs(path) {
-					path = filepath.Join(client.Pwd, path)
-				}
-
-				// get current directory
-				if c.Bool("r") {
-					// create walker
-					walker := client.Connect.Walk(path)
-
-					var data []string
-					for walker.Step() {
-						err := walker.Err()
-						if err != nil {
-							fmt.Fprintf(w, "Error: %s\n", err)
-							exit <- true
-							return
-						}
-
-						p := walker.Path()
-						data = append(data, p)
-					}
-
-					// reverse slice
-					for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
-						data[i], data[j] = data[j], data[i]
-					}
-
-					for _, p := range data {
-						err := client.Connect.Remove(p)
-						if err != nil {
-							fmt.Fprintf(w, "%s\n", err)
-							exit <- true
-							return
-						}
-					}
-				} else {
-					err := client.Connect.Remove(path)
-					if err != nil {
-						fmt.Fprintf(w, "%s\n", err)
-						exit <- true
-						return
-					}
-				}
-
-				fmt.Fprintf(w, "remove: %s\n", path)
-				exit <- true
-			}()
-		}
-
-		for i := 0; i < len(r.Client); i++ {
-			<-exit
-		}
-
-		return nil
-	}
+	app.Action = r.rmAction
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
+}
+
+func (r *RunSftp) rmAction(c *cli.Context) error {
+	if len(c.Args()) != 1 {
+		fmt.Println("Requires one arguments")
+		fmt.Println("rm [path]")
+
+		return nil
+	}
+
+	exit := make(chan bool)
+
+	for s, cl := range r.Client {
+		server, client := s, cl
+		path := c.Args()[0]
+
+		go func() {
+			defer func() { exit <- true }()
+
+			// get writer
+			client.Output.Create(server)
+			w := client.Output.NewWriter()
+
+			// set arg path
+			if !filepath.IsAbs(path) {
+				path = filepath.Join(client.Pwd, path)
+			}
+
+			// get current directory
+			if c.Bool("r") {
+				// create walker
+				walker := client.Connect.Walk(path)
+
+				var data []string
+				for walker.Step() {
+					err := walker.Err()
+					if err != nil {
+						fmt.Fprintf(w, "Error: %s\n", err)
+						return
+					}
+
+					p := walker.Path()
+					data = append(data, p)
+				}
+
+				// reverse slice
+				for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
+					data[i], data[j] = data[j], data[i]
+				}
+
+				for _, p := range data {
+					err := client.Connect.Remove(p)
+					if err != nil {
+						fmt.Fprintf(w, "%s\n", err)
+						return
+					}
+				}
+			} else {
+				err := client.Connect.Remove(path)
+				if err != nil {
+					fmt.Fprintf(w, "%s\n", err)
+					return
+				}
+			}
+
+			fmt.Fprintf(w, "remove: %s\n", path)
+		}()
+	}
+
+	for range r.Client {
+		<-exit
+	}
+
+	return nil
 }

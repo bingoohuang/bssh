@@ -10,3 +10,14 @@ func ExpandHomeDir(f string) string {
 
 	return f
 }
+
+// Contains tells if s contains element e.
+func Contains(s []string, e string) bool {
+	for _, v := range s {
+		if e == v {
+			return true
+		}
+	}
+
+	return false
+}

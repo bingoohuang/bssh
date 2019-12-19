@@ -26,58 +26,55 @@ func (r *RunSftp) symlink(args []string) {
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true
-
-	// action
-	app.Action = func(c *cli.Context) error {
-		if len(c.Args()) != 2 {
-			fmt.Println("Requires two arguments")
-			fmt.Println("symlink source target")
-
-			return nil
-		}
-
-		exit := make(chan bool)
-
-		for s, cl := range r.Client {
-			server := s
-			client := cl
-
-			source := c.Args()[0]
-			target := c.Args()[1]
-
-			go func() {
-				// get writer
-				client.Output.Create(server)
-				w := client.Output.NewWriter()
-
-				// set arg path
-				if !filepath.IsAbs(source) {
-					source = filepath.Join(client.Pwd, source)
-				}
-
-				if !filepath.IsAbs(target) {
-					target = filepath.Join(client.Pwd, target)
-				}
-
-				err := client.Connect.Symlink(source, target)
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					exit <- true
-					return
-				}
-
-				exit <- true
-			}()
-		}
-
-		for i := 0; i < len(r.Client); i++ {
-			<-exit
-		}
-
-		return nil
-	}
+	app.Action = r.symlinkAction
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
+}
+
+func (r *RunSftp) symlinkAction(c *cli.Context) error {
+	if len(c.Args()) != 2 {
+		fmt.Println("Requires two arguments")
+		fmt.Println("symlink source target")
+
+		return nil
+	}
+
+	exit := make(chan bool)
+
+	for s, cl := range r.Client {
+		server, client := s, cl
+
+		source := c.Args()[0]
+		target := c.Args()[1]
+
+		go func() {
+			defer func() { exit <- true }()
+
+			// get writer
+			client.Output.Create(server)
+			w := client.Output.NewWriter()
+
+			// set arg path
+			if !filepath.IsAbs(source) {
+				source = filepath.Join(client.Pwd, source)
+			}
+
+			if !filepath.IsAbs(target) {
+				target = filepath.Join(client.Pwd, target)
+			}
+
+			if err := client.Connect.Symlink(source, target); err != nil {
+				fmt.Fprintf(w, "%s\n", err)
+				return
+			}
+		}()
+	}
+
+	for range r.Client {
+		<-exit
+	}
+
+	return nil
 }

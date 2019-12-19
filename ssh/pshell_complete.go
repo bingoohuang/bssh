@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/blacknon/lssh/common"
+
 	"github.com/blacknon/lssh/misc"
 	prompt "github.com/c-bata/go-prompt"
 )
@@ -56,7 +58,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 
 		// switch suggest
 		switch {
-		case num <= 1 && !contains([]string{" ", "|"}, char): // if command
+		case num <= 1 && !common.Contains([]string{" ", "|"}, char): // if command
 			var c []prompt.Suggest
 
 			// build-in command suggest
@@ -101,9 +103,9 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 
 		default:
 			switch {
-			case contains([]string{"/"}, char): // char is slach or
+			case common.Contains([]string{"/"}, char): // char is slach or
 				ps.PathComplete = ps.GetPathComplete(!checkLocalCommand(c), t.GetWordBeforeCursor())
-			case contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == 1:
+			case common.Contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == 1:
 				ps.PathComplete = ps.GetPathComplete(!checkLocalCommand(c), t.GetWordBeforeCursor())
 			}
 
@@ -206,6 +208,8 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 			con := c
 
 			go func() {
+				defer func() { exit <- true }()
+
 				// Create buffer
 				buf := new(bytes.Buffer)
 
@@ -224,12 +228,10 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 					m[path] = append(m[path], con.Name)
 					sm.Unlock()
 				}
-
-				exit <- true
 			}()
 		}
 
-		for i := 0; i < len(ps.Connects); i++ {
+		for range ps.Connects {
 			<-exit
 		}
 
@@ -241,7 +243,7 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 			// create suggest
 			suggest := prompt.Suggest{
 				Text:        path,
-				Description: "remote path. from:" + h,
+				Description: "remote path from " + h,
 			}
 
 			// append ps.Complete
@@ -266,14 +268,4 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 	sort.SliceStable(p, func(i, j int) bool { return p[i].Text < p[j].Text })
 
 	return
-}
-
-func contains(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-
-	return false
 }

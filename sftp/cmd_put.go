@@ -24,98 +24,80 @@ import (
 func (r *RunSftp) put(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext
-
-	// set parameter
 	app.Name = misc.Put
 	app.Usage = "lsftp build-in command: put"
 	app.ArgsUsage = "[source(local) target(remote)]"
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true
+	app.Action = r.putAction
 
-	// action
-	app.Action = func(c *cli.Context) error {
-		if len(c.Args()) != 2 {
-			fmt.Println("Requires two arguments")
-			fmt.Println("put source(local) target(remote)")
+	// parse short options
+	args = common.ParseArgs(app.Flags, args)
+	_ = app.Run(args)
+}
 
-			return nil
-		}
-
-		// Create Progress
-		r.ProgressWG = new(sync.WaitGroup)
-		r.Progress = mpb.New(mpb.WithWaitGroup(r.ProgressWG))
-
-		// set path
-		source := common.ExpandHomeDir(c.Args()[0])
-		target := c.Args()[1]
-
-		// get local host directory walk data
-		var pathset []PathSet
-
-		data, err := common.WalkDir(source)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			return nil
-		}
-
-		sort.Strings(data)
-
-		dataset := PathSet{
-			Base:      filepath.Dir(source),
-			PathSlice: data,
-		}
-		pathset = append(pathset, dataset)
-
-		// parallel push data
-		exit := make(chan bool)
-
-		for s, c := range r.Client {
-			server := s
-			client := c
-
-			go func() {
-				// set Progress
-				client.Output.Progress = r.Progress
-				client.Output.ProgressWG = r.ProgressWG
-
-				// create output
-				client.Output.Create(server)
-
-				// push path
-				for _, p := range pathset {
-					base := p.Base
-					data := p.PathSlice
-
-					for _, path := range data {
-						r.pushPath(client, target, base, path)
-					}
-				}
-
-				// exit
-				exit <- true
-			}()
-		}
-
-		// wait exit
-		for i := 0; i < len(r.Client); i++ {
-			<-exit
-		}
-		close(exit)
-
-		// wait Progress
-		r.Progress.Wait()
-
-		// wait 0.3 sec
-		time.Sleep(300 * time.Millisecond)
+func (r *RunSftp) putAction(c *cli.Context) error {
+	if len(c.Args()) != 2 {
+		fmt.Println("Requires two arguments")
+		fmt.Println("put source(local) target(remote)")
 
 		return nil
 	}
 
-	// parse short options
-	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+	// Create Progress
+	r.ProgressWG = new(sync.WaitGroup)
+	r.Progress = mpb.New(mpb.WithWaitGroup(r.ProgressWG))
+
+	// set path
+	source := common.ExpandHomeDir(c.Args()[0])
+	target := c.Args()[1]
+
+	data, err := common.WalkDir(source)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		return nil
+	}
+
+	sort.Strings(data)
+
+	// get local host directory walk data
+	pathSet := PathSet{Base: filepath.Dir(source), PathSlice: data}
+
+	// parallel push data
+	exit := make(chan bool)
+
+	for s, c := range r.Client {
+		server, client := s, c
+
+		go func() {
+			defer func() { exit <- true }()
+
+			client.Output.Progress = r.Progress
+			client.Output.ProgressWG = r.ProgressWG
+
+			client.Output.Create(server)
+
+			base := pathSet.Base
+			data := pathSet.PathSlice
+
+			for _, path := range data {
+				_ = r.pushPath(client, target, base, path)
+			}
+		}()
+	}
+
+	// wait exit
+	for range r.Client {
+		<-exit
+	}
+
+	r.Progress.Wait() // wait Progress
+
+	time.Sleep(300 * time.Millisecond)
+
+	return nil
 }
 
 func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err error) {
@@ -132,52 +114,42 @@ func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err erro
 	if fInfo.IsDir() { // directory
 		_ = client.Connect.Mkdir(rpath)
 	} else { //file
-		localfile, err := os.Open(path)
+		localFile, err := os.Open(path)
 		if err != nil {
 			return err
 		}
-		defer localfile.Close()
 
-		// get file size
-		lstat, _ := os.Lstat(path)
-		size := lstat.Size()
+		defer localFile.Close()
 
-		// copy file
-		err = r.pushFile(client, localfile, rpath, size)
+		err = r.pushFile(client, localFile, rpath, fInfo.Size())
 		if err != nil {
 			return err
 		}
 	}
 
-	client.Connect.Chmod(rpath, fInfo.Mode())
+	_ = client.Connect.Chmod(rpath, fInfo.Mode())
 
 	return nil
 }
 
-// pushfile put file to path.
-func (r *RunSftp) pushFile(client *Connect, localfile io.Reader, path string, size int64) (err error) {
-	// mkdir all
+// pushFile put file to path.
+func (r *RunSftp) pushFile(c *Connect, localFile io.Reader, path string, size int64) (err error) {
 	dir := filepath.Dir(path)
-	err = client.Connect.MkdirAll(dir)
-
-	if err != nil {
-		return
+	if err := c.Connect.MkdirAll(dir); err != nil {
+		return err
 	}
 
-	// open remote file
-	remotefile, err := client.Connect.OpenFile(path, os.O_RDWR|os.O_CREATE)
+	remoteFile, err := c.Connect.OpenFile(path, os.O_RDWR|os.O_CREATE)
 	if err != nil {
-		return
+		return err
 	}
 
-	defer remotefile.Close()
+	defer remoteFile.Close()
 
-	// set tee reader
-	rd := io.TeeReader(localfile, remotefile)
+	rd := io.TeeReader(localFile, remoteFile)
 
-	// copy to data
 	r.ProgressWG.Add(1)
-	client.Output.ProgressPrinter(size, rd, path)
+	c.Output.ProgressPrinter(size, rd, path)
 
 	return nil
 }

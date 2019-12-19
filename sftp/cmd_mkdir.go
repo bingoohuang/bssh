@@ -51,11 +51,12 @@ func (r *RunSftp) mkdir(args []string) {
 		exit := make(chan bool)
 
 		for s, cl := range r.Client {
-			server := s
-			client := cl
+			server, client := s, cl
 			path := c.Args()[0]
 
 			go func() {
+				defer func() { exit <- true }()
+
 				// get writer
 				client.Output.Create(server)
 				w := client.Output.NewWriter()
@@ -79,11 +80,10 @@ func (r *RunSftp) mkdir(args []string) {
 				}
 
 				fmt.Fprintf(w, "make directory: %s\n", path)
-				exit <- true
 			}()
 		}
 
-		for i := 0; i < len(r.Client); i++ {
+		for range r.Client {
 			<-exit
 		}
 

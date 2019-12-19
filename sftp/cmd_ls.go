@@ -101,15 +101,9 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 }
 
 // ls exec and print out remote ls data.
-func (r *RunSftp) ls(args []string) (err error) {
-	// create app
+func (r *RunSftp) ls(args []string) error {
 	app := cli.NewApp()
-	// app.UseShortOptionHandling = true
-
-	// set help message
 	app.CustomAppHelpTemplate = helptext
-
-	// set parameter
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{Name: "1", Usage: "list one file per line"},
 		cli.BoolFlag{Name: "a", Usage: "do not ignore entries starting with"},
@@ -127,208 +121,202 @@ func (r *RunSftp) ls(args []string) (err error) {
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true
+	app.Action = r.lsAction
+	args = common.ParseArgs(app.Flags, args)
+	return app.Run(args)
+}
 
-	// action
-	app.Action = func(c *cli.Context) error {
-		// argpath
-		argpath := c.Args().First()
+func (r *RunSftp) lsAction(c *cli.Context) error {
+	// argpath
+	argpath := c.Args().First()
 
-		// get directory files data
-		exit := make(chan bool)
-		lsdata := map[string]sftpLs{}
-		m := new(sync.Mutex)
+	// get directory files data
+	exit := make(chan bool)
+	lsdata := map[string]sftpLs{}
+	m := new(sync.Mutex)
 
-		for s, cl := range r.Client {
-			server := s
-			client := cl
+	for s, cl := range r.Client {
+		server, client := s, cl
 
-			go func() {
-				// get output
-				client.Output.Create(server)
-				w := client.Output.NewWriter()
+		go func() {
+			defer func() { exit <- true }()
 
-				// set path
-				path := client.Pwd
-				if len(argpath) > 0 {
-					if !filepath.IsAbs(argpath) {
-						path = filepath.Join(path, argpath)
-					} else {
-						path = argpath
-					}
-				}
+			// get output
+			client.Output.Create(server)
+			w := client.Output.NewWriter()
 
-				// get ls data
-				data, err := r.getRemoteLsData(client, path)
-				if err != nil {
-					fmt.Fprintf(w, "Error: %s\n", err)
-					exit <- true
-					return
-				}
-
-				// if `a` flag disable, delete Hidden files...
-				if !c.Bool("a") {
-					// hidden delete data slice
-					hddata := []os.FileInfo{}
-
-					// regex
-					rgx := regexp.MustCompile(`^\.`)
-
-					for _, f := range data.Files {
-						if !rgx.MatchString(f.Name()) {
-							hddata = append(hddata, f)
-						}
-					}
-
-					data.Files = hddata
-				}
-
-				// sort
-				r.SortLsData(c, data.Files)
-
-				// write lsdata
-				m.Lock()
-				lsdata[server] = data
-				m.Unlock()
-
-				exit <- true
-			}()
-		}
-
-		// wait get directory data
-		for i := 0; i < len(r.Client); i++ {
-			<-exit
-		}
-
-		switch {
-		case c.Bool("l"): // long list format
-			// set tabwriter
-			tabw := new(tabwriter.Writer)
-			tabw.Init(os.Stdout, 0, 1, 1, ' ', 0)
-
-			// get maxSizeWidth
-			var maxSizeWidth int
-
-			var sizestr string
-
-			for _, data := range lsdata {
-				for _, f := range data.Files {
-					if c.Bool("h") {
-						sizestr = humanize.Bytes(uint64(f.Size()))
-					} else {
-						sizestr = strconv.FormatUint(uint64(f.Size()), 10)
-					}
-
-					// set sizestr max length
-					if maxSizeWidth < len(sizestr) {
-						maxSizeWidth = len(sizestr)
-					}
+			// set path
+			path := client.Pwd
+			if len(argpath) > 0 {
+				if !filepath.IsAbs(argpath) {
+					path = filepath.Join(path, argpath)
+				} else {
+					path = argpath
 				}
 			}
 
-			// print list ls
-			for server, data := range lsdata {
-				// get prompt
-				data.Client.Output.Create(server)
-				prompt := data.Client.Output.GetPrompt()
-
-				// for get data
-				for _, f := range lsdata[server].Files {
-					sys := f.Sys()
-
-					// TODO(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
-					var uid, gid uint32
-
-					var size uint64
-
-					var user, group, timestr, sizestr string
-
-					if stat, ok := sys.(*sftp.FileStat); ok {
-						uid = stat.UID
-						gid = stat.GID
-						size = stat.Size
-						timestamp := time.Unix(int64(stat.Mtime), 0)
-						timestr = timestamp.Format("2006 01-02 15:04:05")
-					}
-
-					// Switch with or without -n option.
-					if c.Bool("n") {
-						user = strconv.FormatUint(uint64(uid), 10)
-						group = strconv.FormatUint(uint64(gid), 10)
-					} else {
-						user, _ = common.GetNameFromID(lsdata[server].Passwd, uid)
-						group, _ = common.GetNameFromID(lsdata[server].Groups, gid)
-					}
-
-					// Switch with or without -h option.
-					if c.Bool("h") {
-						sizestr = humanize.Bytes(size)
-					} else {
-						sizestr = strconv.FormatUint(size, 10)
-					}
-
-					// set data
-					data := new(sftpLsData)
-					data.Mode = f.Mode().String()
-					data.User = user
-					data.Group = group
-					data.Size = sizestr
-					data.Time = timestr
-					data.Path = f.Name()
-
-					if len(lsdata) == 1 {
-						// set print format
-						format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
-
-						// write data
-						fmt.Fprintf(tabw, format, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
-					} else {
-						// set print format
-						format := "%s\t%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
-
-						// write data
-						fmt.Fprintf(tabw, format, prompt, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
-					}
-				}
+			// get ls data
+			data, err := r.getRemoteLsData(client, path)
+			if err != nil {
+				fmt.Fprintf(w, "Error: %s\n", err)
+				return
 			}
 
-			tabw.Flush()
+			// if `a` flag disable, delete Hidden files...
+			if !c.Bool("a") {
+				// hidden delete data slice
+				hddata := []os.FileInfo{}
 
-		case c.Bool("1"): // list 1 file per line
-			// for list
-			for server, data := range lsdata {
-				data.Client.Output.Create(server)
-				w := data.Client.Output.NewWriter()
+				// regex
+				rgx := regexp.MustCompile(`^\.`)
 
 				for _, f := range data.Files {
-					name := f.Name()
-					fmt.Fprintf(w, "%s\n", name)
-				}
-			}
-
-		default: // default
-			for server, data := range lsdata {
-				// get header width
-				data.Client.Output.Create(server)
-				w := data.Client.Output.NewWriter()
-				headerWidth := len(data.Client.Output.Prompt)
-
-				var item []string
-				for _, f := range data.Files {
-					item = append(item, f.Name())
+					if !rgx.MatchString(f.Name()) {
+						hddata = append(hddata, f)
+					}
 				}
 
-				textcol.Output = w
-				textcol.Padding = headerWidth
-				textcol.PrintColumns(&item, 2)
+				data.Files = hddata
 			}
-		}
 
-		return nil
+			// sort
+			r.SortLsData(c, data.Files)
+
+			// write lsdata
+			m.Lock()
+			lsdata[server] = data
+			m.Unlock()
+		}()
 	}
 
-	// parse short options
-	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+	// wait get directory data
+	for range r.Client {
+		<-exit
+	}
 
-	return err
+	switch {
+	case c.Bool("l"): // long list format
+		// set tabwriter
+		tabw := new(tabwriter.Writer)
+		tabw.Init(os.Stdout, 0, 1, 1, ' ', 0)
+
+		// get maxSizeWidth
+		var maxSizeWidth int
+
+		var sizestr string
+
+		for _, data := range lsdata {
+			for _, f := range data.Files {
+				if c.Bool("h") {
+					sizestr = humanize.Bytes(uint64(f.Size()))
+				} else {
+					sizestr = strconv.FormatUint(uint64(f.Size()), 10)
+				}
+
+				// set sizestr max length
+				if maxSizeWidth < len(sizestr) {
+					maxSizeWidth = len(sizestr)
+				}
+			}
+		}
+
+		// print list ls
+		for server, data := range lsdata {
+			// get prompt
+			data.Client.Output.Create(server)
+			prompt := data.Client.Output.GetPrompt()
+
+			// for get data
+			for _, f := range lsdata[server].Files {
+				sys := f.Sys()
+
+				// TODO(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
+				var uid, gid uint32
+
+				var size uint64
+
+				var user, group, timestr, sizestr string
+
+				if stat, ok := sys.(*sftp.FileStat); ok {
+					uid = stat.UID
+					gid = stat.GID
+					size = stat.Size
+					timestamp := time.Unix(int64(stat.Mtime), 0)
+					timestr = timestamp.Format("2006 01-02 15:04:05")
+				}
+
+				// Switch with or without -n option.
+				if c.Bool("n") {
+					user = strconv.FormatUint(uint64(uid), 10)
+					group = strconv.FormatUint(uint64(gid), 10)
+				} else {
+					user, _ = common.GetNameFromID(lsdata[server].Passwd, uid)
+					group, _ = common.GetNameFromID(lsdata[server].Groups, gid)
+				}
+
+				// Switch with or without -h option.
+				if c.Bool("h") {
+					sizestr = humanize.Bytes(size)
+				} else {
+					sizestr = strconv.FormatUint(size, 10)
+				}
+
+				// set data
+				data := new(sftpLsData)
+				data.Mode = f.Mode().String()
+				data.User = user
+				data.Group = group
+				data.Size = sizestr
+				data.Time = timestr
+				data.Path = f.Name()
+
+				if len(lsdata) == 1 {
+					// set print format
+					format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
+
+					// write data
+					fmt.Fprintf(tabw, format, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
+				} else {
+					// set print format
+					format := "%s\t%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
+
+					// write data
+					fmt.Fprintf(tabw, format, prompt, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
+				}
+			}
+		}
+
+		tabw.Flush()
+
+	case c.Bool("1"): // list 1 file per line
+		// for list
+		for server, data := range lsdata {
+			data.Client.Output.Create(server)
+			w := data.Client.Output.NewWriter()
+
+			for _, f := range data.Files {
+				name := f.Name()
+				fmt.Fprintf(w, "%s\n", name)
+			}
+		}
+
+	default: // default
+		for server, data := range lsdata {
+			// get header width
+			data.Client.Output.Create(server)
+			w := data.Client.Output.NewWriter()
+			headerWidth := len(data.Client.Output.Prompt)
+
+			var item []string
+			for _, f := range data.Files {
+				item = append(item, f.Name())
+			}
+
+			textcol.Output = w
+			textcol.Padding = headerWidth
+			textcol.PrintColumns(&item, 2)
+		}
+	}
+
+	return nil
 }

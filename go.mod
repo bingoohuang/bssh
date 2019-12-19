@@ -10,7 +10,6 @@ require (
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.3
 	github.com/dustin/go-humanize v1.0.0
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20190724205821-6cfae18c12b8
 	github.com/mattn/go-runewidth v0.0.7
 	github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859 // indirect
@@ -18,7 +17,6 @@ require (
 	github.com/nsf/termbox-go v0.0.0-20190325093121-288510b9734e
 	github.com/pkg/sftp v1.10.1
 	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942 // indirect
-	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.6.1
 	github.com/stretchr/testify v1.4.0

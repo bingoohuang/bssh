@@ -21,7 +21,6 @@ import (
 
 // TODO(blacknon): リファクタリング(v0.6.1)
 
-//
 func (r *RunSftp) get(args []string) {
 	// create app
 	app := cli.NewApp()
@@ -39,86 +38,7 @@ func (r *RunSftp) get(args []string) {
 	app.EnableBashCompletion = true
 
 	// action
-	app.Action = func(c *cli.Context) error {
-		if len(c.Args()) != 2 {
-			fmt.Println("Requires two arguments")
-			fmt.Println("get source(remote) target(local)")
-
-			return nil
-		}
-
-		// Create Progress
-		r.ProgressWG = new(sync.WaitGroup)
-		r.Progress = mpb.New(mpb.WithWaitGroup(r.ProgressWG))
-
-		// set path
-		source := c.Args()[0]
-		target := common.ExpandHomeDir(c.Args()[1])
-
-		// get target directory abs
-		target, err := filepath.Abs(target)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-			return nil
-		}
-
-		// mkdir local target directory
-		err = os.MkdirAll(target, 0755)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-			return nil
-		}
-
-		// get directory data, copy remote to local
-		exit := make(chan bool)
-
-		for s, c := range r.Client {
-			server := s
-			client := c
-
-			targetdir := target
-			if len(r.Client) > 1 {
-				targetdir = filepath.Join(target, server)
-				// mkdir local target directory
-				err = os.MkdirAll(targetdir, 0755)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-					return nil
-				}
-			}
-
-			go func() {
-				// set Progress
-				client.Output.Progress = r.Progress
-				client.Output.ProgressWG = r.ProgressWG
-
-				// create output
-				client.Output.Create(server)
-
-				// local target
-				target, _ = filepath.Abs(target)
-
-				err = r.pullPath(client, source, targetdir)
-
-				exit <- true
-			}()
-		}
-
-		// wait exit
-		for i := 0; i < len(r.Client); i++ {
-			<-exit
-		}
-		close(exit)
-
-		// wait Progress
-		r.Progress.Wait()
-
-		// wait 0.3 sec
-		time.Sleep(300 * time.Millisecond)
-
-		return nil
-	}
-
+	app.Action = r.getAction
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 	app.Run(args)
@@ -171,6 +91,84 @@ func (r *RunSftp) pullPath(client *Connect, path, target string) (err error) {
 			os.Chmod(localpath, stat.Mode())
 		}
 	}
+
+	return nil
+}
+
+func (r *RunSftp) getAction(c *cli.Context) error {
+	if len(c.Args()) != 2 {
+		fmt.Println("Requires two arguments")
+		fmt.Println("get source(remote) target(local)")
+
+		return nil
+	}
+
+	// Create Progress
+	r.ProgressWG = new(sync.WaitGroup)
+	r.Progress = mpb.New(mpb.WithWaitGroup(r.ProgressWG))
+
+	// set path
+	source := c.Args()[0]
+	target := common.ExpandHomeDir(c.Args()[1])
+
+	// get target directory abs
+	target, err := filepath.Abs(target)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		return nil
+	}
+
+	// mkdir local target directory
+	err = os.MkdirAll(target, 0755)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		return nil
+	}
+
+	// get directory data, copy remote to local
+	exit := make(chan bool)
+
+	for s, c := range r.Client {
+		server, client := s, c
+
+		targetdir := target
+		if len(r.Client) > 1 {
+			targetdir = filepath.Join(target, server)
+			// mkdir local target directory
+			err = os.MkdirAll(targetdir, 0755)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+				return nil
+			}
+		}
+
+		go func() {
+			defer func() { exit <- true }()
+
+			// set Progress
+			client.Output.Progress = r.Progress
+			client.Output.ProgressWG = r.ProgressWG
+
+			// create output
+			client.Output.Create(server)
+
+			// local target
+			target, _ = filepath.Abs(target)
+
+			err = r.pullPath(client, source, targetdir)
+		}()
+	}
+
+	// wait exit
+	for range r.Client {
+		<-exit
+	}
+
+	// wait Progress
+	r.Progress.Wait()
+
+	// wait 0.3 sec
+	time.Sleep(300 * time.Millisecond)
 
 	return nil
 }

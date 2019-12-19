@@ -144,6 +144,7 @@ func (cp *Scp) push() {
 		client := c
 
 		go func() {
+			defer func() { exit <- true }()
 			// TODO(blacknon): Parallelで指定した数までは同時コピーできるようにする
 
 			// set ftp client
@@ -161,17 +162,13 @@ func (cp *Scp) push() {
 					cp.pushPath(ftp, ow, client.Output, base, path)
 				}
 			}
-
-			// exit
-			exit <- true
 		}()
 	}
 
 	// wait send data
-	for i := 0; i < len(clients); i++ {
+	for range clients {
 		<-exit
 	}
-	close(exit)
 
 	// wait 0.3 sec
 	time.Sleep(300 * time.Millisecond)
@@ -275,7 +272,6 @@ func (cp *Scp) viaPush() {
 	fmt.Println("all push exit.")
 }
 
-//
 func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 	// from ftp client
 	ftp := fclient.Connect
@@ -299,7 +295,7 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 
 		if stat.IsDir() { // is directory
 			for _, tc := range tclients {
-				tc.Connect.Mkdir(p)
+				_ = tc.Connect.Mkdir(p)
 			}
 		} else { // is file
 			// open from server file
@@ -313,22 +309,23 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 			exit := make(chan bool)
 			for _, tc := range tclients {
 				tclient := tc
+
 				go func() {
+					defer func() { exit <- true }()
+
 					tclient.Output.Create(tclient.Server)
 
-					cp.pushFile(file, tclient.Connect, tclient.Output, p, size)
-					exit <- true
+					_ = cp.pushFile(file, tclient.Connect, tclient.Output, p, size)
 				}()
 			}
 
-			for i := 0; i < len(tclients); i++ {
+			for range tclients {
 				<-exit
 			}
 		}
 	}
 }
 
-//
 func (cp *Scp) pull() {
 	// set target hosts
 	targets := cp.From.Server
@@ -348,17 +345,17 @@ func (cp *Scp) pull() {
 		client := c
 
 		go func() {
+			defer func() { exit <- true }()
+
 			// pull data
 			cp.pullPath(client)
-			exit <- true
 		}()
 	}
 
 	// wait send data
-	for i := 0; i < len(clients); i++ {
+	for range clients {
 		<-exit
 	}
-	close(exit)
 
 	// wait 0.3 sec
 	time.Sleep(300 * time.Millisecond)
@@ -454,11 +451,12 @@ func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 		server := target
 
 		go func() {
+			defer func() { ch <- true }()
+
 			// ssh connect
 			conn, err := cp.Run.CreateSSHConnect(server)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s connect error: %s\n", server, err)
-				ch <- true
 				return
 			}
 
@@ -466,7 +464,6 @@ func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 			ftp, err := sftp.NewClient(conn.Client)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s create client error: %s\n", server, err)
-				ch <- true
 				return
 			}
 
@@ -481,23 +478,17 @@ func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 			}
 
 			// create ScpConnect
-			scpCon := &Connect{
-				Server:  server,
-				Connect: ftp,
-				Output:  o,
-			}
+			scpCon := &Connect{Server: server, Connect: ftp, Output: o}
 
 			// append result
 			m.Lock()
 			result = append(result, scpCon)
 			m.Unlock()
-
-			ch <- true
 		}()
 	}
 
 	// wait
-	for i := 0; i < len(targets); i++ {
+	for range targets {
 		<-ch
 	}
 

@@ -6,8 +6,7 @@ import (
 	"sort"
 
 	"github.com/bingoohuang/gou/str"
-
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/blacknon/lssh/list"
 	"github.com/blacknon/lssh/misc"

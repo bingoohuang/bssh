@@ -43,13 +43,14 @@ func (r *RunSftp) chmod(args []string) {
 		exit := make(chan bool)
 
 		for s, cl := range r.Client {
-			server := s
-			client := cl
+			server, client := s, cl
 
 			mode := c.Args()[0]
 			path := c.Args()[1]
 
 			go func() {
+				defer func() { exit <- true }()
+
 				// get writer
 				client.Output.Create(server)
 				w := client.Output.NewWriter()
@@ -63,25 +64,21 @@ func (r *RunSftp) chmod(args []string) {
 				modeint, err := strconv.ParseUint(mode, 8, 32)
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
-					exit <- true
 					return
 				}
 				filemode := os.FileMode(modeint)
 
 				// set filemode
-				err = client.Connect.Chmod(path, filemode)
-				if err != nil {
+				if err = client.Connect.Chmod(path, filemode); err != nil {
 					fmt.Fprintf(w, "%s\n", err)
-					exit <- true
 					return
 				}
 
 				fmt.Fprintf(w, "chmod: set %s's permission as %o(%s)\n", path, filemode.Perm(), filemode.String())
-				exit <- true
 			}()
 		}
 
-		for i := 0; i < len(r.Client); i++ {
+		for range r.Client {
 			<-exit
 		}
 

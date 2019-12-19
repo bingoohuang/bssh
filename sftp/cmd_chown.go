@@ -46,13 +46,14 @@ func (r *RunSftp) chown(args []string) {
 		exit := make(chan bool)
 
 		for s, cl := range r.Client {
-			server := s
-			client := cl
+			server, client := s, cl
 
 			user := c.Args()[0]
 			path := c.Args()[1]
 
 			go func() {
+				defer func() { exit <- true }()
+
 				// get writer
 				client.Output.Create(server)
 				w := client.Output.NewWriter()
@@ -70,13 +71,11 @@ func (r *RunSftp) chown(args []string) {
 					passwdFile, err := client.Connect.Open("/etc/passwd")
 					if err != nil {
 						fmt.Fprintf(w, "%s\n", err)
-						exit <- true
 						return
 					}
 					passwdByte, err := ioutil.ReadAll(passwdFile)
 					if err != nil {
 						fmt.Fprintf(w, "%s\n", err)
-						exit <- true
 						return
 					}
 					passwd := string(passwdByte)
@@ -85,7 +84,6 @@ func (r *RunSftp) chown(args []string) {
 					uid32, err := common.GetIDFromName(passwd, user)
 					if err != nil {
 						fmt.Fprintf(w, "%s\n", err)
-						exit <- true
 						return
 					}
 
@@ -98,7 +96,6 @@ func (r *RunSftp) chown(args []string) {
 				stat, err := client.Connect.Lstat(path)
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
-					exit <- true
 					return
 				}
 
@@ -111,16 +108,14 @@ func (r *RunSftp) chown(args []string) {
 				err = client.Connect.Chown(path, uid, gid)
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
-					exit <- true
 					return
 				}
 
 				fmt.Fprintf(w, "chown: set %s's user as %s\n", path, user)
-				exit <- true
 			}()
 		}
 
-		for i := 0; i < len(r.Client); i++ {
+		for range r.Client {
 			<-exit
 		}
 

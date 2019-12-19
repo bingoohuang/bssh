@@ -12,7 +12,7 @@ import (
 	"github.com/blacknon/lssh"
 	"github.com/blacknon/lssh/conf"
 	"github.com/blacknon/lssh/misc"
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli"
 )

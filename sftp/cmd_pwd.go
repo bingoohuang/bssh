@@ -17,8 +17,12 @@ import (
 func (r *RunSftp) pwd() {
 	exit := make(chan bool)
 
-	go func() {
-		for server, client := range r.Client {
+	for s, c := range r.Client {
+		server, client := s, c
+
+		go func() {
+			defer func() { exit <- true }()
+
 			// get writer
 			client.Output.Create(server)
 			w := client.Output.NewWriter()
@@ -34,12 +38,10 @@ func (r *RunSftp) pwd() {
 			}
 
 			fmt.Fprintf(w, "%s\n", pwd)
+		}()
+	}
 
-			exit <- true
-		}
-	}()
-
-	for i := 0; i < len(r.Client); i++ {
+	for range r.Client {
 		<-exit
 	}
 }
