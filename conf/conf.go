@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -476,5 +477,13 @@ func GetNameList(listConf Config) (nameList []string) {
 		nameList = append(nameList, k)
 	}
 
-	return
+	return nameList
+}
+
+// GetNameSortedList return a list of server names from the Config structure.
+func GetNameSortedList(listConf Config) (nameList []string) {
+	nameList = GetNameList(listConf)
+	sort.Strings(nameList)
+
+	return nameList
 }

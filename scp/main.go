@@ -159,7 +159,7 @@ func (cp *Scp) push() {
 				base := p.Base
 				data := p.PathSlice
 				for _, path := range data {
-					cp.pushPath(ftp, ow, client.Output, base, path)
+					_ = cp.pushPath(ftp, ow, client.Output, base, path)
 				}
 			}
 		}()
@@ -186,7 +186,7 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 	// get local file info
 	fInfo, _ := os.Lstat(path)
 	if fInfo.IsDir() { // directory
-		ftp.Mkdir(rpath)
+		_ = ftp.Mkdir(rpath)
 	} else { //file
 		// open local file
 		lf, err := os.Open(path)
@@ -379,7 +379,7 @@ func (cp *Scp) pullPath(client *Connect) {
 	// if multi pull, servername add baseDir
 	if len(cp.From.Server) > 1 {
 		baseDir = filepath.Join(baseDir, client.Server)
-		os.MkdirAll(baseDir, 0755)
+		_ = os.MkdirAll(baseDir, 0755)
 	}
 
 	baseDir, _ = filepath.Abs(baseDir)
@@ -410,7 +410,7 @@ func (cp *Scp) pullPath(client *Connect) {
 
 				stat := walker.Stat()
 				if stat.IsDir() { // create dir
-					os.MkdirAll(lpath, 0755)
+					_ = os.MkdirAll(lpath, 0755)
 				} else { // create file
 					// get size
 					size := stat.Size()

@@ -25,7 +25,7 @@ func (r *RunSftp) chmod(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = "chmod"
-	app.Usage = "lsftp build-in command: chmod [remote machine chmod]"
+	app.Usage = "lssh ftp build-in command: chmod [remote machine chmod]"
 	app.ArgsUsage = "[perm path]"
 	app.HideHelp = true
 	app.HideVersion = true

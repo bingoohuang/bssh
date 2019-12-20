@@ -22,7 +22,7 @@ func (r *RunSftp) rmdir(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Rmdir
-	app.Usage = "lsftp build-in command: rmdir [remote machine rmdir]"
+	app.Usage = "lssh ftp build-in command: rmdir [remote machine rmdir]"
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true

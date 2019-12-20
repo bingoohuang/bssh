@@ -31,7 +31,7 @@ func (r *RunSftp) get(args []string) {
 
 	// set parameter
 	app.Name = misc.Get
-	app.Usage = "lsftp build-in command: get"
+	app.Usage = "lssh ftp build-in command: get"
 	app.ArgsUsage = "[source(remote) target(local)]"
 	app.HideHelp = true
 	app.HideVersion = true

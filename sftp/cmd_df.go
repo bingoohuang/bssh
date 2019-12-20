@@ -37,7 +37,7 @@ func (r *RunSftp) df(args []string) {
 		cli.BoolFlag{Name: "i", Usage: "list inode information instead of block usage"},
 	}
 	app.Name = "df"
-	app.Usage = "lsftp build-in command: df [remote machine df]"
+	app.Usage = "lssh ftp build-in command: df [remote machine df]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true

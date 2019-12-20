@@ -27,7 +27,7 @@ func (r *RunSftp) rm(args []string) {
 	}
 
 	app.Name = "rm"
-	app.Usage = "lsftp build-in command: rm [remote machine rm]"
+	app.Usage = "lssh ftp build-in command: rm [remote machine rm]"
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true

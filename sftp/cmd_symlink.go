@@ -21,7 +21,7 @@ func (r *RunSftp) symlink(args []string) {
 
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Symlink
-	app.Usage = "lsftp build-in command: symlink [remote machine symlink]"
+	app.Usage = "lssh ftp build-in command: symlink [remote machine symlink]"
 	app.ArgsUsage = "[source target]"
 	app.HideHelp = true
 	app.HideVersion = true

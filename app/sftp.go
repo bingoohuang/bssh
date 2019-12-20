@@ -2,12 +2,10 @@ package app
 
 import (
 	"os"
-	"sort"
 
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
 
-	"github.com/blacknon/lssh/list"
 	"github.com/blacknon/lssh/misc"
 
 	"github.com/blacknon/lssh"
@@ -45,12 +43,13 @@ USAGE:
 func Lsftp() (app *cli.App) {
 	cli.AppHelpTemplate = appHelpTemplate
 	app = cli.NewApp()
-	app.Name = "lsftp"
+	app.Name = "lssh ftp"
 	app.Usage = "TUI list select and parallel sftp client command."
 	app.Copyright = misc.Copyright
 	app.Version = lssh.AppVersion
 
 	app.Flags = []cli.Flag{
+		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
 		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
 			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
@@ -71,24 +70,18 @@ func lsftpAction(c *cli.Context) error {
 		os.Exit(0)
 	}
 
+	hosts := c.StringSlice("host")
 	confpath := c.String("file")
 
-	// Get config data
 	data := conf.ReadConf(confpath)
-
-	// Get Server Name List (and sort List)
-	names := conf.GetNameList(data)
-	sort.Strings(names)
-
-	selectedGroup := list.ShowGroupsView(&data)
-	selected := list.ShowServersView(&data, "lsftp>>", selectedGroup, names, true)
+	names := conf.GetNameSortedList(data)
 
 	// scp struct
-	runSftp := new(sftp.RunSftp)
-	runSftp.Config = data
-	runSftp.SelectServer = selected
+	r := new(sftp.RunSftp)
+	r.Config = data
+	r.SelectServer = parseSelected("lssh ftp>>", hosts, names, data, true)
 
-	runSftp.Start()
+	r.Start()
 
 	return nil
 }

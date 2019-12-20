@@ -28,7 +28,7 @@ func (r *RunSftp) chgrp(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Chgrp
-	app.Usage = "lsftp build-in command: chgrp [remote machine chgrp]"
+	app.Usage = "lssh ftp build-in command: chgrp [remote machine chgrp]"
 	app.ArgsUsage = "[group path]"
 	app.HideHelp = true
 	app.HideVersion = true

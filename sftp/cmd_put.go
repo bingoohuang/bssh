@@ -25,7 +25,7 @@ func (r *RunSftp) put(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Put
-	app.Usage = "lsftp build-in command: put"
+	app.Usage = "lssh ftp build-in command: put"
 	app.ArgsUsage = "[source(local) target(remote)]"
 	app.HideHelp = true
 	app.HideVersion = true

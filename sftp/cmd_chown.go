@@ -28,7 +28,7 @@ func (r *RunSftp) chown(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Chown
-	app.Usage = "lsftp build-in command: chown [remote machine chown]"
+	app.Usage = "lssh ftp build-in command: chown [remote machine chown]"
 	app.ArgsUsage = "[user path]"
 	app.HideHelp = true
 	app.HideVersion = true

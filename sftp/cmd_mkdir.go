@@ -32,7 +32,7 @@ func (r *RunSftp) mkdir(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Mkdir
-	app.Usage = "lsftp build-in command: mkdir [remote machine mkdir]"
+	app.Usage = "lssh ftp build-in command: mkdir [remote machine mkdir]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
@@ -92,7 +92,8 @@ func (r *RunSftp) mkdir(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+
+	_ = app.Run(args)
 }
 
 //
@@ -109,7 +110,7 @@ func (r *RunSftp) lmkdir(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Lmkdir
-	app.Usage = "lsftp build-in command: lmkdir [local machine mkdir]"
+	app.Usage = "lssh ftp build-in command: lmkdir [local machine mkdir]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
@@ -144,5 +145,6 @@ func (r *RunSftp) lmkdir(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+
+	_ = app.Run(args)
 }

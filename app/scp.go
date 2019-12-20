@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 
 	"github.com/bingoohuang/gou/str"
@@ -55,7 +54,7 @@ USAGE:
 func Lscp() (app *cli.App) {
 	cli.AppHelpTemplate = lscpAppHelpTemplate
 	app = cli.NewApp()
-	app.Name = "lscp"
+	app.Name = "lssh scp"
 	app.Usage = "TUI list select and parallel scp client command."
 	app.Copyright = misc.Copyright
 	app.Version = lssh.AppVersion
@@ -118,12 +117,8 @@ func lscpAction(c *cli.Context) error {
 	// Check from and to Type
 	check.TypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
 
-	// Get config data
 	data := conf.ReadConf(confpath)
-
-	// Get Server Name List (and sort List)
-	names := conf.GetNameList(data)
-	sort.Strings(names)
+	names := conf.GetNameSortedList(data)
 
 	var selected, toServer, fromServer []string
 
@@ -141,14 +136,14 @@ func lscpAction(c *cli.Context) error {
 	case isFromInRemote && isToRemote:
 		// View From list
 		selectedGroup := list.ShowGroupsView(&data)
-		fromServer = list.ShowServersView(&data, "lscp(from)>>", selectedGroup, names, false)
+		fromServer = list.ShowServersView(&data, "lssh scp(from)>>", selectedGroup, names, false)
 		// View to list
 		selectedGroup = list.ShowGroupsView(&data)
-		toServer = list.ShowServersView(&data, "lscp(to)>>", selectedGroup, names, true)
+		toServer = list.ShowServersView(&data, "lssh scp(to)>>", selectedGroup, names, true)
 	default:
 		// View List And Get Select Line
 		selectedGroup := list.ShowGroupsView(&data)
-		selected = list.ShowServersView(&data, "lscp>>", selectedGroup, names, true)
+		selected = list.ShowServersView(&data, "lssh scp>>", selectedGroup, names, true)
 
 		if isFromInRemote {
 			fromServer = selected

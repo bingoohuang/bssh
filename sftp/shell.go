@@ -459,6 +459,6 @@ func (r *RunSftp) GetLocalComplete(path string) {
 
 // CreatePrompt creates prompt.
 func (r *RunSftp) CreatePrompt() (p string, result bool) {
-	p = "lsftp>> "
+	p = "lssh ftp>> "
 	return p, true
 }

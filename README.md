@@ -1,8 +1,7 @@
 [![TravisCI](https://travis-ci.org/blacknon/lssh.svg?branch=master)](https://travis-ci.org/blacknon/lssh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/blacknon/lssh)](https://goreportcard.com/report/github.com/blacknon/lssh)
 
-lssh
-====
+# lssh
 
 TUI list select ssh/scp/sftp client tools.
 
@@ -12,6 +11,7 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 
 ## Features
 
+* Config Templating, grouping, passwords PEB encryption and direct last sub-command to reuse last chosen servers.
 * List selection type ssh client.
 * Pure Go.
 * Commands can be executed by ssh connection in parallel.
@@ -32,36 +32,24 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 
 compile gofile(tested go1.12.4).
 
-    go get -u github.com/blacknon/lssh/cmd/lssh
-    go get -u github.com/blacknon/lssh/cmd/lscp
-    go get -u github.com/blacknon/lssh/cmd/lsftp
+    go get -u github.com/bingoohuang/lssh/cmd/lssh
 
     # copy sample config. create `~/.lssh.conf`.
-    test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/blacknon/lssh/master/example/config.tml -o ~/.lssh.conf
+    test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/lssh/master/example/config.toml -o ~/.lssh.conf
 
 or
 
-    git clone https://github.com/blacknon/lssh
+    git clone https://github.com/bingoohuang/lssh
     cd lssh
     make && sudo make install
 
     # copy sample config. create `~/.lssh.conf`.
-    test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/blacknon/lssh/master/example/config.tml -o ~/.lssh.conf
-
-### brew install
-
-brew install(Mac OS X)
-
-	brew tap blacknon/lssh
-	brew install lssh
-
-	# copy sample config. create `~/.lssh.conf`.
-	test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/blacknon/lssh/master/example/config.tml -o ~/.lssh.conf
+    test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/lssh/master/example/config.toml -o ~/.lssh.conf
 
 ## Config
 
 Please edit "~/.lssh.conf".\
-For details see [wiki](https://github.com/blacknon/lssh/wiki/Config).
+For details see [Config](doc/Config.md).
 
 ## Usage
 
@@ -115,18 +103,18 @@ option(lssh)
 	    lssh -s
 
 
-### lscp
+### lssh scp
 
 run command.
 
-    lscp from... to
+    lssh scp from... to
 
 option(lscp)
 	
 	NAME:
-	    lscp - TUI list select and parallel scp client command.
+	    lscp scp - TUI list select and parallel scp client command.
 	USAGE:
-	    lscp [options] (local|remote):from_path... (local|remote):to_path
+	    lscp scp [options] (local|remote):from_path... (local|remote):to_path
 	
 	OPTIONS:
 	    --host value, -H value  connect servernames
@@ -144,13 +132,13 @@ option(lscp)
 	
 	USAGE:
 	    # local to remote scp
-	    lscp /path/to/local... remote:/path/to/remote
+	    lssh scp /path/to/local... remote:/path/to/remote
 	
 	    # remote to local scp
-	    lscp remote:/path/to/remote... /path/to/local
+	    lssh scp remote:/path/to/remote... /path/to/local
 	
 	    # remote to remote scp
-	    lscp remote:/path/to/remote... remote:/path/to/local
+	    lssh scp remote:/path/to/remote... remote:/path/to/local
 
 
 ### lsftp
@@ -324,7 +312,7 @@ You can also combine remote and local commands.
 
 </details>
 
-### 4. [lscp] scp (local=>remote(multi), remote(multi)=>local, remote=>remote(multi))
+### 4. [lssh] scp (local=>remote(multi), remote(multi)=>local, remote=>remote(multi))
 <details>
 
 You can do scp by selecting a list with the command lscp.\

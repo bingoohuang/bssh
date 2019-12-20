@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"os"
-	"sort"
 
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
@@ -105,8 +104,6 @@ func Lssh() (app *cli.App) {
 	}
 	app.EnableBashCompletion = true
 	app.HideHelp = true
-
-	// Run command action
 	app.Action = lsshAction
 
 	return app
@@ -123,21 +120,15 @@ func lsshAction(c *cli.Context) error {
 	hosts := c.StringSlice("host")
 	confpath := c.String("file")
 
-	// Get config data
 	data := conf.ReadConf(confpath)
-
 	isMulti := parseMultiFlag(c)
+	names := conf.GetNameSortedList(data)
 
-	// Extraction server name list from 'data'
-	names := conf.GetNameList(data)
-	sort.Strings(names)
-
-	processList(c, names)
+	processListFlag(c, names)
 
 	r := new(sshcmd.Run)
-	r.ServerList = parseSelected(hosts, names, data, isMulti)
+	r.ServerList = parseSelected("lssh>>", hosts, names, data, isMulti)
 	r.Conf = data
-
 	r.Mode = parseMode(c)
 	r.ExecCmd = c.Args() // exec command
 	r.IsParallel = c.Bool("parallel")
@@ -204,7 +195,7 @@ func parseMultiFlag(c *cli.Context) bool {
 	return (len(c.Args()) > 0 || c.Bool("pshell")) && !c.Bool("not-execute")
 }
 
-func processList(c *cli.Context, names []string) {
+func processListFlag(c *cli.Context, names []string) {
 	// Check list flag
 	if !c.Bool("list") {
 		return
@@ -230,7 +221,7 @@ func parseMode(c *cli.Context) string {
 	}
 }
 
-func parseSelected(hosts []string, names []string, data conf.Config, isMulti bool) []string {
+func parseSelected(prompt string, hosts []string, names []string, data conf.Config, isMulti bool) []string {
 	var selected []string
 
 	if len(hosts) > 0 {
@@ -242,7 +233,7 @@ func parseSelected(hosts []string, names []string, data conf.Config, isMulti boo
 		}
 	} else {
 		selectedGroup := list.ShowGroupsView(&data)
-		selected = list.ShowServersView(&data, "lssh>>", selectedGroup, names, isMulti)
+		selected = list.ShowServersView(&data, prompt, selectedGroup, names, isMulti)
 	}
 
 	return selected

@@ -116,7 +116,7 @@ func (r *RunSftp) ls(args []string) {
 		cli.BoolFlag{Name: "t", Usage: "sort by modification time, newest first"},
 	}
 	app.Name = "ls"
-	app.Usage = "lsftp build-in command: ls [remote machine ls]"
+	app.Usage = "lssh ftp build-in command: ls [remote machine ls]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true

@@ -18,7 +18,7 @@ func (r *RunSftp) rename(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Rename
-	app.Usage = "lsftp build-in command: rename [remote machine rename]"
+	app.Usage = "lssh ftp build-in command: rename [remote machine rename]"
 	app.ArgsUsage = "[path path]"
 	app.HideHelp = true
 	app.HideVersion = true
@@ -27,7 +27,8 @@ func (r *RunSftp) rename(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+
+	_ = app.Run(args)
 }
 
 func (r *RunSftp) renameAction(c *cli.Context) error {
