@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/blacknon/lssh/common"
+
 	"github.com/blacknon/lssh/conf"
 )
 
@@ -28,6 +30,8 @@ func ShowServersView(cf *conf.Config, prompt, group string, names []string, isMu
 		fmt.Fprintln(os.Stderr, "Server not selected.")
 		os.Exit(1)
 	}
+
+	common.SaveServerNameLastLog(selected)
 
 	return selected
 }

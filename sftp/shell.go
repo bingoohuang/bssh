@@ -395,12 +395,14 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 }
 
 func (r *RunSftp) prepareRemotePath(path string, client *Connect) (string, error) {
-	var rpath string
-	if filepath.IsAbs(path) {
+	rpath := ""
+
+	switch {
+	case filepath.IsAbs(path):
 		rpath = path
-	} else if strings.HasPrefix(path, "~/") {
+	case strings.HasPrefix(path, "~/"):
 		rpath = filepath.Join(client.Pwd, path[2:])
-	} else {
+	default:
 		rpath = filepath.Join(client.Pwd, path)
 	}
 
@@ -422,6 +424,7 @@ func (r *RunSftp) prepareRemotePath(path string, client *Connect) (string, error
 func (r *RunSftp) GetLocalComplete(path string) {
 	path = common.ExpandHomeDir(path)
 	stat, err := os.Lstat(path)
+
 	if err != nil {
 		return
 	}

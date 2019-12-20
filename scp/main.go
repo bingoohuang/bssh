@@ -178,7 +178,7 @@ func (cp *Scp) push() {
 }
 
 //
-func (cp *Scp) pushPath(ftp *sftp.Client, ow *io.PipeWriter, output *output.Output, base, path string) (err error) {
+func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, base, path string) (err error) {
 	// get rel path
 	relpath, _ := filepath.Rel(base, path)
 	rpath := filepath.Join(cp.To.Path[0], relpath)

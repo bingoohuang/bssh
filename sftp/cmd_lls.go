@@ -55,7 +55,7 @@ func (r *RunSftp) lls(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+	_ = app.Run(args)
 }
 
 func llsAction(c *cli.Context) error {

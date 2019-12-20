@@ -242,14 +242,13 @@ func ReadConf(confPath string) (config Config) {
 	config.readIncludeFiles()
 
 	// Check Config Parameter
-	checkAlertFlag := checkFormatServerConf(config)
-	if !checkAlertFlag {
+	if !checkFormatServerConf(config) {
 		os.Exit(1)
 	}
 
 	config.parseGroups()
 
-	return
+	return config
 }
 
 func (cf *Config) appendIncludePaths() {
@@ -266,9 +265,8 @@ func (cf *Config) appendIncludePaths() {
 		unixTime := time.Now().Unix()
 		keyString := strings.Join([]string{string(unixTime), includePath}, "_")
 
-		// key to md5
 		hasher := md5.New()
-		hasher.Write([]byte(keyString))
+		_, _ = hasher.Write([]byte(keyString))
 		key := hex.EncodeToString(hasher.Sum(nil))
 
 		// append config.Include[key]

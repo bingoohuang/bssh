@@ -87,5 +87,5 @@ func (r *RunSftp) chmod(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+	_ = app.Run(args)
 }

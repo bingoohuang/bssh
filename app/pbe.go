@@ -17,10 +17,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Lpbe pbe passwords in the conf file
-func Lpbe() (app *cli.App) {
-	// nolint
-	cli.AppHelpTemplate = `NAME:
+// nolint
+const lpbeAppHelpTemplate = `NAME:
     {{.Name}} - {{.Usage}}
 USAGE:
     {{.HelpName}} {{if .VisibleFlags}}[options]{{end}} [commands...]
@@ -52,6 +50,10 @@ USAGE:
 	# decrypt the  passwords in the conf file located at filepath.
 	{{.Name}} -r -F filepath...
 `
+
+// Lpbe pbe passwords in the conf file
+func Lpbe() (app *cli.App) {
+	cli.AppHelpTemplate = lpbeAppHelpTemplate
 
 	app = cli.NewApp()
 	app.Name = "lssh pbe"

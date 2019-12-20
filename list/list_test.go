@@ -297,24 +297,6 @@ func TestGetFilterText(t *testing.T) {
 				"dev_web2           user1@192.168.101.2        WebServer",
 			},
 		},
-		// { // Can't use regexp
-		// 	desc: "Regexp \\d",
-		// 	l: Info{
-		// 		Keyword: `dev_web\d+`,
-		// 		DataText: []string{
-		// 			"ServerName         Connect Information        Note",
-		// 			"dev_web            user1@192.168.101.99       WebServer",
-		// 			"dev_web1           user1@192.168.101.1        WebServer",
-		// 			"dev_web2           user1@192.168.101.2        WebServer",
-		// 			"dev_webX           user1@192.168.101.31       WebServer",
-		// 		},
-		// 	},
-		// 	expect: []string{
-		// 		"ServerName         Connect Information        Note",
-		// 		"dev_web1           user1@192.168.101.1        WebServer",
-		// 		"dev_web2           user1@192.168.101.2        WebServer",
-		// 	},
-		// },
 	}
 
 	for _, v := range tds {

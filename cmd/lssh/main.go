@@ -19,8 +19,10 @@ func main() {
 
 	args := os.Args
 
+HERE:
 	if len(args) > 1 {
-		switch args[1] {
+		sub := args[1]
+		switch sub {
 		case "scp":
 			args = append(args[0:1], args[2:]...)
 			ap = app.Lscp()
@@ -33,12 +35,20 @@ func main() {
 		case "pbe":
 			args = append(args[0:1], args[2:]...)
 			ap = app.Lpbe()
+		case "l", "last":
+			args = append(args[0:1], args[2:]...)
+			if lastArgs, ok := app.Last(); ok {
+				args = lastArgs
+				goto HERE
+			}
 		}
 	}
 
 	if ap == nil {
 		ap = app.Lssh()
 	}
+
+	common.SaveArgsLastLog()
 
 	_ = ap.Run(common.ParseArgs(ap.Flags, args))
 }

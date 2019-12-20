@@ -58,12 +58,7 @@ func checkLocalCommand(cmd string) (isLocalCmd bool) {
 	regex := regexp.MustCompile(`^!.*`)
 
 	// local command
-	switch {
-	case regex.MatchString(cmd):
-		isLocalCmd = true
-	}
-
-	return
+	return regex.MatchString(cmd)
 }
 
 // check local or build-in command
@@ -163,8 +158,7 @@ func (ps *pShell) buildinHistory(out *io.PipeWriter, ch chan<- bool) {
 	}
 
 	// close out
-	switch stdout.(type) {
-	case *io.PipeWriter:
+	if _, ok := stdout.(*io.PipeWriter); ok {
 		out.CloseWithError(io.ErrClosedPipe)
 	}
 
@@ -185,8 +179,7 @@ func (ps *pShell) buildinOutlist(out *io.PipeWriter, ch chan<- bool) {
 	}
 
 	// close out
-	switch stdout.(type) {
-	case *io.PipeWriter:
+	if _, ok := stdout.(*io.PipeWriter); ok {
 		out.CloseWithError(io.ErrClosedPipe)
 	}
 

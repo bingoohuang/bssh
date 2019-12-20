@@ -159,7 +159,7 @@ func (ps *pShell) GetCommandComplete() {
 		session.Stdout = buf
 
 		// Run get complete command
-		session.Run(command)
+		_ = session.Run(command)
 
 		// Scan and put completed command to map.
 		sc := bufio.NewScanner(buf)
@@ -175,10 +175,7 @@ func (ps *pShell) GetCommandComplete() {
 		h := strings.Join(hosts, ",")
 
 		// create suggest
-		suggest := prompt.Suggest{
-			Text:        cmd,
-			Description: "Command. from:" + h,
-		}
+		suggest := prompt.Suggest{Text: cmd, Description: "Command. from " + h}
 
 		// append ps.Complete
 		ps.CmdComplete = append(ps.CmdComplete, suggest)
@@ -237,16 +234,8 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 
 		// m to suggest
 		for path, hosts := range m {
-			// join hosts
 			h := strings.Join(hosts, ",")
-
-			// create suggest
-			suggest := prompt.Suggest{
-				Text:        path,
-				Description: "remote path from " + h,
-			}
-
-			// append ps.Complete
+			suggest := prompt.Suggest{Text: path, Description: "remote path from " + h}
 			p = append(p, suggest)
 		}
 
@@ -256,16 +245,12 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 		sc := bufio.NewScanner(rd)
 
 		for sc.Scan() {
-			suggest := prompt.Suggest{
-				Text: filepath.Base(sc.Text()),
-				// Text:        sc.Text(),
-				Description: "local path.",
-			}
+			suggest := prompt.Suggest{Text: filepath.Base(sc.Text()), Description: "local path."}
 			p = append(p, suggest)
 		}
 	}
 
 	sort.SliceStable(p, func(i, j int) bool { return p[i].Text < p[j].Text })
 
-	return
+	return p
 }

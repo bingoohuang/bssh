@@ -7,6 +7,7 @@ package common
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/sha1"
 	"encoding/base64"
 	"errors"
@@ -15,7 +16,6 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"os/user"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -103,8 +103,7 @@ func MapToStruct(mapVal map[string]interface{}, val interface{}) (ok bool) {
 // GetFullPath returns a fullpath of path.
 // Expands `~` to user directory ($HOME environment variable).
 func GetFullPath(path string) (fullPath string) {
-	usr, _ := user.Current()
-	fullPath = strings.Replace(path, "~", usr.HomeDir, 1)
+	fullPath = ExpandHomeDir(path)
 	fullPath, _ = filepath.Abs(fullPath)
 
 	return fullPath
@@ -134,32 +133,23 @@ func GetMaxLength(list []string) int {
 }
 
 // GetFilesBase64 returns a base64 encoded string of file content of paths.
-func GetFilesBase64(paths []string) (result string, err error) {
-	data := make([]byte, 0)
+func GetFilesBase64(paths []string) (string, error) {
+	var data bytes.Buffer
 
 	for _, path := range paths {
-		fullPath := GetFullPath(path)
-
-		// open file
-		file, err := os.Open(fullPath)
-		if err != nil {
-			return "", err
-		}
-
-		filedata, err := ioutil.ReadAll(file)
-		_ = file.Close()
+		file, err := ioutil.ReadFile(GetFullPath(path))
 
 		if err != nil {
 			return "", err
 		}
 
-		data = append(data, filedata...)
-		data = append(data, '\n')
+		data.Write(file)
+		data.WriteByte('\n')
 	}
 
-	result = base64.StdEncoding.EncodeToString(data)
+	result := base64.StdEncoding.EncodeToString(data.Bytes())
 
-	return result, err
+	return result, nil
 }
 
 // GetPassPhrase gets the passphrase from virtual terminal input and returns the result. Works only on UNIX-based OS.
@@ -204,7 +194,7 @@ func NewSHA1Hash(n ...int) string {
 	randString := RandomString(noRandomCharacters)
 
 	hash := sha1.New()
-	hash.Write([]byte(randString))
+	_, _ = hash.Write([]byte(randString))
 	bs := hash.Sum(nil)
 
 	return fmt.Sprintf("%02x", bs)

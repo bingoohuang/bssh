@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/user"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -29,9 +29,8 @@ func (r *Run) shell() (err error) {
 	// check count AuthMethod
 	if len(r.serverAuthMethodMap[server]) == 0 {
 		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", server)
-		err = errors.New(msg)
 
-		return
+		return errors.New(msg)
 	}
 
 	// OverWrite port forward mode
@@ -73,13 +72,13 @@ func (r *Run) shell() (err error) {
 	// Create sshlib.Connect (Connect Proxy loop)
 	connect, err := r.CreateSSHConnect(server)
 	if err != nil {
-		return
+		return err
 	}
 
 	// Create session
 	session, err := connect.CreateSession()
 	if err != nil {
-		return
+		return err
 	}
 
 	// ssh-agent
@@ -160,26 +159,24 @@ func (r *Run) getLogPath(server string) (logPath string) {
 	}
 
 	file := time.Now().Format("20060102_150405") + "_" + server + ".log"
-	logPath = dir + "/" + file
+	logPath = filepath.Join(dir, file)
 
-	return
+	return logPath
 }
 
 // getLogDirPath return log directory path
 func (r *Run) getLogDirPath(server string) (dir string, err error) {
-	u, _ := user.Current()
 	logConf := r.Conf.Log
 
-	// expantion variable
-	dir = logConf.Dir
-	dir = strings.Replace(dir, "~", u.HomeDir, 1)
+	// expansion variable
+	dir = common.ExpandHomeDir(logConf.Dir)
 	dir = strings.Replace(dir, "<Date>", time.Now().Format("20060102"), 1)
 	dir = strings.Replace(dir, "<Hostname>", server, 1)
 
 	// create directory
 	err = os.MkdirAll(dir, 0700)
 
-	return
+	return dir, err
 }
 
 // runLocalRcShell connect to remote shell using local bashrc
@@ -192,7 +189,7 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 	// get bashrc base64 data
 	rcData, err := common.GetFilesBase64(localrcPath)
 	if err != nil {
-		return
+		return err
 	}
 
 	// command
@@ -204,16 +201,12 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 		cmd = fmt.Sprintf("bash --noprofile --rcfile <(echo %s | %s)", rcData, decoder)
 	}
 
-	connect.CmdShell(session, cmd)
-
-	return
+	return connect.CmdShell(session, cmd)
 }
 
 // noneExecute is not execute command and shell.
-func (r *Run) noneExecute() (err error) {
+func (r *Run) noneExecute() {
 	for range time.After(500 * time.Millisecond) {
 
 	}
-
-	return
 }

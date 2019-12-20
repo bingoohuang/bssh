@@ -101,7 +101,7 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 }
 
 // ls exec and print out remote ls data.
-func (r *RunSftp) ls(args []string) error {
+func (r *RunSftp) ls(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext
 	app.Flags = []cli.Flag{
@@ -123,7 +123,8 @@ func (r *RunSftp) ls(args []string) error {
 	app.EnableBashCompletion = true
 	app.Action = r.lsAction
 	args = common.ParseArgs(app.Flags, args)
-	return app.Run(args)
+
+	_ = app.Run(args)
 }
 
 func (r *RunSftp) lsAction(c *cli.Context) error {

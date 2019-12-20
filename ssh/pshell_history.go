@@ -9,10 +9,11 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/user"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/blacknon/lssh/common"
 
 	"github.com/blacknon/lssh/output"
 )
@@ -74,9 +75,7 @@ func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r io.Rea
 
 // GetHistoryFromFile return []History from historyfile
 func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
-	// user path
-	usr, _ := user.Current()
-	histfile := strings.Replace(ps.HistoryFile, "~", usr.HomeDir, 1)
+	histfile := common.ExpandHomeDir(ps.HistoryFile)
 
 	// Open history file
 	file, err := os.OpenFile(histfile, os.O_RDONLY, 0600)
@@ -103,7 +102,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 		data = append(data, d)
 	}
 
-	return
+	return data, err
 }
 
 // PutHistoryFile put history text to s.HistoryFile
@@ -112,9 +111,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 //     YYYY-mm-dd_HH:MM:SS command...
 //     ...
 func (ps *pShell) PutHistoryFile(cmd string) (err error) {
-	// user path
-	usr, _ := user.Current()
-	histfile := strings.Replace(ps.HistoryFile, "~", usr.HomeDir, 1)
+	histfile := common.ExpandHomeDir(ps.HistoryFile)
 
 	// Open history file
 	file, err := os.OpenFile(histfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)

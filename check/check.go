@@ -41,34 +41,20 @@ func ParseScpPath(arg string) (isRemote bool, path string) {
 
 	// check split count
 	if len(argArray) < 2 {
-		isRemote = false
-		path = argArray[0]
-
-		return
+		return false, argArray[0]
 	}
 
 	switch pathType := strings.ToLower(argArray[0]); pathType {
-	// local
-	case "local", "l":
-		isRemote = false
-		path = argArray[1]
-
-	// remote
-	case "remote", "r":
-		isRemote = true
-		path = argArray[1]
-
-	// false
-	default:
-		isRemote = false
-		path = ""
-
-		// error
-		fmt.Fprintln(os.Stderr, "The format of the specified argument is incorrect.")
+	case "local", "l": // local
+		return false, argArray[1]
+	case "remote", "r": // remote
+		return true, argArray[1]
+	default: // false
+		_, _ = fmt.Fprintln(os.Stderr, "The format of the specified argument is incorrect.")
 		os.Exit(1)
 	}
 
-	return
+	return false, ""
 }
 
 // EscapePath escapes characters (`\`, `;`, ` `).
@@ -76,9 +62,8 @@ func EscapePath(str string) (escapeStr string) {
 	str = strings.Replace(str, "\\", "\\\\", -1)
 	str = strings.Replace(str, ";", "\\;", -1)
 	str = strings.Replace(str, " ", "\\ ", -1)
-	escapeStr = str
 
-	return
+	return str
 }
 
 // TypeError validates from-remote, from-local, to-remote and host-counts.

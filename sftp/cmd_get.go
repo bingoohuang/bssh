@@ -41,10 +41,10 @@ func (r *RunSftp) get(args []string) {
 	app.Action = r.getAction
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+	_ = app.Run(args)
 }
 
-func (r *RunSftp) pullPath(client *Connect, path, target string) (err error) {
+func (r *RunSftp) pullPath(client *Connect, path, target string) {
 	// set arg path
 	var rpath string
 
@@ -82,17 +82,15 @@ func (r *RunSftp) pullPath(client *Connect, path, target string) (err error) {
 
 			//
 			if stat.IsDir() { // is directory
-				os.Mkdir(localpath, 0755)
+				_ = os.Mkdir(localpath, 0755)
 			} else if err := pullFile(stat, client, localpath, p, r); err != nil { // is not directory
 				fmt.Fprintf(ow, "Error: %s\n", err)
 				continue
 			}
 
-			os.Chmod(localpath, stat.Mode())
+			_ = os.Chmod(localpath, stat.Mode())
 		}
 	}
-
-	return nil
 }
 
 func (r *RunSftp) getAction(c *cli.Context) error {
@@ -155,7 +153,7 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 			// local target
 			target, _ = filepath.Abs(target)
 
-			err = r.pullPath(client, source, targetdir)
+			r.pullPath(client, source, targetdir)
 		}()
 	}
 
