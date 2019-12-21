@@ -155,27 +155,6 @@ type ServerConfig struct {
 	ServerAliveCountInterval int `toml:"alive_interval"`
 }
 
-// BelongsToGroup belongs to group or not
-func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
-	othersGroupName := cf.pickOthersGroupName()
-
-	if len(sf.Group) == 0 { //others
-		return name == "" || name == othersGroupName
-	}
-
-	if name == "" || name == othersGroupName {
-		return false
-	}
-
-	for _, g := range sf.Group {
-		if strings.HasPrefix(g, name) {
-			return true
-		}
-	}
-
-	return false
-}
-
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
 type ProxyConfig struct {
 	Addr      string `toml:"addr"`
@@ -203,7 +182,7 @@ func ReadConf(confPath string) (config Config) {
 
 	if !common.IsExist(confPath) {
 		fmt.Printf("Config file(%s) Not Found.\nPlease create file.\n\n", confPath)
-		fmt.Printf("sample: %s\n", "https://raw.githubusercontent.com/blacknon/lssh/master/example/config.tml")
+		fmt.Printf("sample: %s\n", "https://raw.githubusercontent.com/bingoohuang/lssh/master/example/config.toml")
 		os.Exit(1)
 	}
 
@@ -211,8 +190,7 @@ func ReadConf(confPath string) (config Config) {
 	config.SSHConfig = map[string]OpenSSHConfig{}
 
 	// Read config file
-	_, err := toml.DecodeFile(confPath, &config)
-	if err != nil {
+	if _, err := toml.DecodeFile(confPath, &config); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -305,31 +283,6 @@ func (cf *Config) readIncludeFiles() {
 	}
 }
 
-func (cf *Config) parseGroups() {
-	cf.grouping = make(map[string]map[string]ServerConfig)
-
-	for k, v := range cf.Server {
-		if len(v.Group) == 0 {
-			cf.addGroup("", k, v)
-			continue
-		}
-
-		for _, group := range v.Group {
-			cf.addGroup(group, k, v)
-		}
-	}
-}
-
-func (cf *Config) addGroup(group, name string, v ServerConfig) {
-	if _, ok := cf.grouping[group]; ok {
-		cf.grouping[group][name] = v
-	} else {
-		m := make(map[string]ServerConfig)
-		m[name] = v
-		cf.grouping[group] = m
-	}
-}
-
 func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setCommon ServerConfig) {
 	tmplConfigs := make([]tmplConfig, 0)
 
@@ -347,52 +300,6 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 
 	cf.tmplServers(tmplConfigs)
 }
-
-// FilterNamesByGroup  filter server names by group.
-func (cf *Config) FilterNamesByGroup(group string, names []string) []string {
-	x := make([]string, 0, len(names))
-
-	for _, name := range names {
-		if sc := cf.Server[name]; sc.BelongsToGroup(cf, group) {
-			x = append(x, name)
-		}
-	}
-
-	return x
-}
-
-// GroupsNames get groups' names.
-func (cf *Config) GroupsNames() []string {
-	otherGroupName := cf.pickOthersGroupName()
-	names := make([]string, 0)
-
-	for k := range cf.grouping {
-		if k == "" {
-			k = otherGroupName
-		}
-
-		names = append(names, k)
-	}
-
-	return names
-}
-
-func (cf *Config) pickOthersGroupName() string {
-	otherGroupNames := []string{"others", "default", "else", "todo"} // no blanks allowed among the names
-	otherGroupName := ""
-
-	for _, groupName := range otherGroupNames {
-		if _, ok := cf.grouping[groupName]; !ok {
-			otherGroupName = groupName
-			break
-		}
-	}
-
-	return otherGroupName
-}
-
-// GetGrouping get grouping map.
-func (cf *Config) GetGrouping() map[string]map[string]ServerConfig { return cf.grouping }
 
 // checkFormatServerConf checkes format of server config.
 //

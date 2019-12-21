@@ -95,14 +95,11 @@ type proxyRouteData struct {
 
 // getProxyList return []*pxy function.
 func getProxyRoute(server string, config conf.Config) (proxyRoute []*proxyRouteData, err error) {
-	var conName, conType string
+	var conName, conType, proxyName, proxyType, proxyPort string
 
-	var proxyName, proxyType, proxyPort string
+	isOk := false
 
-	var isOk bool
-
-	conName = server
-	conType = misc.SSH
+	conName, conType = server, misc.SSH
 
 proxyLoop:
 	for {
@@ -110,9 +107,7 @@ proxyLoop:
 		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5:
 			var conConf conf.ProxyConfig
 			conConf, isOk = config.Proxy[conName]
-			proxyName = conConf.Proxy
-			proxyType = conConf.ProxyType
-			proxyPort = conConf.Port
+			proxyName, proxyType, proxyPort = conConf.Proxy, conConf.ProxyType, conConf.Port
 		case misc.Command:
 			break proxyLoop
 		default:
@@ -120,14 +115,11 @@ proxyLoop:
 			conConf, isOk = config.Server[conName]
 
 			// If ProxyCommand is set, give priority to that
-			if conConf.ProxyCommand != "" && conConf.ProxyCommand != "none" {
-				proxyName = expansionProxyCommand(conConf.ProxyCommand, conConf)
-				proxyType = misc.Command
-				proxyPort = ""
-			} else {
-				proxyName = conConf.Proxy
-				proxyType = conConf.ProxyType
-				proxyPort = conConf.Port
+			switch proxyCommand := conConf.ProxyCommand; proxyCommand {
+			case "", "none":
+				proxyName, proxyType, proxyPort = conConf.Proxy, conConf.ProxyType, conConf.Port
+			default:
+				proxyName, proxyType, proxyPort = expandProxyCommand(proxyCommand, conConf), misc.Command, ""
 			}
 		}
 
@@ -136,19 +128,14 @@ proxyLoop:
 			break
 		}
 
-		//
 		if !isOk {
 			err = fmt.Errorf("not Found proxy : %s", server)
 			return nil, err
 		}
 
-		//
-		p := new(proxyRouteData)
-		p.Name = proxyName
+		p := &proxyRouteData{Name: proxyName}
 		switch proxyType {
-		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5:
-			p.Type = proxyType
-		case misc.Command:
+		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5, misc.Command:
 			p.Type = proxyType
 		default:
 			p.Type = misc.SSH
@@ -156,8 +143,7 @@ proxyLoop:
 		p.Port = proxyPort
 
 		proxyRoute = append(proxyRoute, p)
-		conName = proxyName
-		conType = proxyType
+		conName, conType = proxyName, proxyType
 	}
 
 	// reverse proxy slice
@@ -168,7 +154,7 @@ proxyLoop:
 	return proxyRoute, err
 }
 
-func expansionProxyCommand(proxyCommand string, config conf.ServerConfig) string {
+func expandProxyCommand(proxyCommand string, config conf.ServerConfig) string {
 	// replace variable
 	proxyCommand = strings.Replace(proxyCommand, "%h", config.Addr, -1)
 	proxyCommand = strings.Replace(proxyCommand, "%p", config.Port, -1)

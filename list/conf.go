@@ -10,7 +10,9 @@ import (
 )
 
 // ShowServersView shows view for servers.
-func ShowServersView(cf *conf.Config, prompt, group string, names []string, isMulti bool) []string {
+func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti bool) []string {
+	group := showGroupsView(cf)
+
 	// View List And Get Select Line
 	l := new(Info)
 	l.Prompt = prompt
@@ -36,8 +38,8 @@ func ShowServersView(cf *conf.Config, prompt, group string, names []string, isMu
 	return selected
 }
 
-// ShowGroupsView shows view for groups.
-func ShowGroupsView(cf *conf.Config) string {
+// showGroupsView shows view for groups.
+func showGroupsView(cf *conf.Config) string {
 	if len(cf.GetGrouping()) <= 1 {
 		return ""
 	}

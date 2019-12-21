@@ -22,6 +22,7 @@ func (l *Info) deleteRune() {
 	l.Keyword = string(sc[:(len(sc) - 1)])
 }
 
+// nolint gocognit
 // keyEvent wait for keyboard events
 func (l *Info) keyEvent() {
 	l.CursorLine = 0

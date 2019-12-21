@@ -59,12 +59,8 @@ func Lscp() (app *cli.App) {
 	app.Copyright = misc.Copyright
 	app.Version = lssh.AppVersion
 
-	// options
-	// TODO(blacknon): オプションの追加(0.6.1)
-	//     -P <num> ... 同じホストでパラレルでファイルをコピーできるようにする。パラレル数を指定。
 	app.Flags = []cli.Flag{
-		cli.StringSliceFlag{Name: "host,H", Usage: "connect servernames"},
-		cli.BoolFlag{Name: "list,l", Usage: "print server list from config"},
+		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},
 		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
 			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
@@ -77,17 +73,11 @@ func Lscp() (app *cli.App) {
 }
 
 func lscpAction(c *cli.Context) error {
-	if c.Bool("help") {
-		_ = cli.ShowAppHelp(c)
-
-		os.Exit(0)
-	}
-
-	hosts := c.StringSlice("host")
-	confpath := c.String("file")
+	common.CheckHelpFlag(c)
 
 	// check count args
-	if len(c.Args()) < 2 {
+	args := c.Args()
+	if len(args) < 2 {
 		_, _ = fmt.Fprintln(os.Stderr, "Too few arguments.")
 		_ = cli.ShowAppHelp(c)
 
@@ -95,11 +85,9 @@ func lscpAction(c *cli.Context) error {
 	}
 
 	// Set args path
-	fromArgs := c.Args()[:c.NArg()-1]
-	toArg := c.Args()[c.NArg()-1]
+	fromArgs, toArg := args[:c.NArg()-1], args[c.NArg()-1]
 
-	isFromInRemote := false
-	isFromInLocal := false
+	isFromInRemote, isFromInLocal := false, false
 
 	for _, from := range fromArgs {
 		// parse args
@@ -113,6 +101,9 @@ func lscpAction(c *cli.Context) error {
 	}
 
 	isToRemote, _ := check.ParseScpPath(toArg)
+
+	hosts := c.StringSlice("host")
+	confpath := c.String("file")
 
 	// Check from and to Type
 	check.TypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
@@ -134,16 +125,10 @@ func lscpAction(c *cli.Context) error {
 		toServer = hosts
 	// remote to remote scp
 	case isFromInRemote && isToRemote:
-		// View From list
-		selectedGroup := list.ShowGroupsView(&data)
-		fromServer = list.ShowServersView(&data, "lssh scp(from)>>", selectedGroup, names, false)
-		// View to list
-		selectedGroup = list.ShowGroupsView(&data)
-		toServer = list.ShowServersView(&data, "lssh scp(to)>>", selectedGroup, names, true)
+		fromServer = list.ShowServersView(&data, "lssh scp(from)>>", names, false)
+		toServer = list.ShowServersView(&data, "lssh scp(to)>>", names, true)
 	default:
-		// View List And Get Select Line
-		selectedGroup := list.ShowGroupsView(&data)
-		selected = list.ShowServersView(&data, "lssh scp>>", selectedGroup, names, true)
+		selected = list.ShowServersView(&data, "lssh scp>>", names, true)
 
 		if isFromInRemote {
 			fromServer = selected
@@ -157,7 +142,6 @@ func lscpAction(c *cli.Context) error {
 
 	// set from info
 	for _, from := range fromArgs {
-		// parse args
 		isFromRemote, fromPath := check.ParseScpPath(from)
 
 		// Check local file exists

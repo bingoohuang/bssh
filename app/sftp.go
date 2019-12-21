@@ -1,9 +1,8 @@
 package app
 
 import (
-	"os"
-
 	"github.com/bingoohuang/gou/str"
+	"github.com/blacknon/lssh/common"
 	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/blacknon/lssh/misc"
@@ -64,11 +63,7 @@ func Lsftp() (app *cli.App) {
 }
 
 func lsftpAction(c *cli.Context) error {
-	if c.Bool("help") {
-		_ = cli.ShowAppHelp(c)
-
-		os.Exit(0)
-	}
+	common.CheckHelpFlag(c)
 
 	hosts := c.StringSlice("host")
 	confpath := c.String("file")

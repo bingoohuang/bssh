@@ -113,9 +113,7 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 				args := parseCallExpr(c)
 
 				args = append(args, parseRedirect(stmtRedirs)...)
-				pLine := pipeLine{
-					Args: args,
-				}
+				pLine := pipeLine{Args: args}
 				cmdLine = append(cmdLine, pLine)
 
 				break stmtCmdLoop
@@ -127,10 +125,8 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 					args := parseCallExpr(cx)
 					args = append(args, parseRedirect(cxr)...)
 
-					pLine := pipeLine{
-						Args:    args,
-						Oprator: c.Op.String(),
-					}
+					pLine := pipeLine{Args: args, Oprator: c.Op.String()}
+
 					cmdLine = append(cmdLine, pLine)
 					stmtCmd = c.Y.Cmd
 					stmtRedirs = c.Y.Redirs

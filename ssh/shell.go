@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/blacknon/lssh/conf"
+
 	"github.com/blacknon/lssh/misc"
 
 	sshlib "github.com/blacknon/go-sshlib"
@@ -33,31 +35,9 @@ func (r *Run) shell() (err error) {
 		return errors.New(msg)
 	}
 
-	// OverWrite port forward mode
-	if r.PortForwardMode != "" {
-		config.PortForwardMode = r.PortForwardMode
-	}
+	r.overwritePortForwardConfig(&config)
 
-	// OverWrite port forwarding address
-	if r.PortForwardLocal != "" && r.PortForwardRemote != "" {
-		config.PortForwardLocal = r.PortForwardLocal
-		config.PortForwardRemote = r.PortForwardRemote
-	}
-
-	// OverWrite dynamic port forwarding
-	if r.DynamicPortForward != "" {
-		config.DynamicPortForward = r.DynamicPortForward
-	}
-
-	// OverWrite local bashrc use
-	if r.IsBashrc {
-		config.LocalRcUse = misc.Yes
-	}
-
-	// OverWrite local bashrc not use
-	if r.IsNotBashrc {
-		config.LocalRcUse = "no"
-	}
+	r.overwriteBashrcConfig(&config)
 
 	// header
 	r.PrintSelectServer()
@@ -81,26 +61,9 @@ func (r *Run) shell() (err error) {
 		return err
 	}
 
-	// ssh-agent
-	if config.SSHAgentUse {
-		connect.Agent = r.agent
-		connect.ForwardSshAgent(session)
-	}
+	r.sshAgent(&config, connect, session)
 
-	// Local/Remote Port Forwarding
-	if config.PortForwardLocal != "" && config.PortForwardRemote != "" {
-		// port forwarding
-		switch config.PortForwardMode {
-		case "L", "":
-			err = connect.TCPLocalForward(config.PortForwardLocal, config.PortForwardRemote)
-		case "R":
-			err = connect.TCPRemoteForward(config.PortForwardLocal, config.PortForwardRemote)
-		}
-
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
+	err = r.portForwarding(&config, connect)
 
 	if config.DynamicPortForward != "" { // Dynamic Port Forwarding
 		go func() {
@@ -139,6 +102,63 @@ func (r *Run) shell() (err error) {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
 			err = connect.Shell(session)
+		}
+	}
+
+	return err
+}
+
+func (r *Run) sshAgent(config *conf.ServerConfig, connect *sshlib.Connect, session *ssh.Session) {
+	// ssh-agent
+	if config.SSHAgentUse {
+		connect.Agent = r.agent
+		connect.ForwardSshAgent(session)
+	}
+}
+
+func (r *Run) overwriteBashrcConfig(config *conf.ServerConfig) {
+	// OverWrite local bashrc use
+	if r.IsBashrc {
+		config.LocalRcUse = misc.Yes
+	}
+
+	// OverWrite local bashrc not use
+	if r.IsNotBashrc {
+		config.LocalRcUse = "no"
+	}
+}
+
+func (r *Run) overwritePortForwardConfig(config *conf.ServerConfig) {
+	// OverWrite port forward mode
+	if r.PortForwardMode != "" {
+		config.PortForwardMode = r.PortForwardMode
+	}
+
+	// OverWrite port forwarding address
+	if r.PortForwardLocal != "" && r.PortForwardRemote != "" {
+		config.PortForwardLocal = r.PortForwardLocal
+		config.PortForwardRemote = r.PortForwardRemote
+	}
+
+	// OverWrite dynamic port forwarding
+	if r.DynamicPortForward != "" {
+		config.DynamicPortForward = r.DynamicPortForward
+	}
+}
+
+func (r *Run) portForwarding(config *conf.ServerConfig, connect *sshlib.Connect) (err error) {
+	// Local/Remote Port Forwarding
+	if config.PortForwardLocal != "" && config.PortForwardRemote != "" {
+		// port forwarding
+		switch config.PortForwardMode {
+		case "L", "":
+			err = connect.TCPLocalForward(config.PortForwardLocal, config.PortForwardRemote)
+		case "R":
+			err = connect.TCPRemoteForward(config.PortForwardLocal, config.PortForwardRemote)
+		}
+
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 

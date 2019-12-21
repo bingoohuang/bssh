@@ -178,6 +178,7 @@ func GetPassPhrase(msg string) (input string, err error) {
 	return
 }
 
+// nolint gochecknoinits
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -324,6 +325,11 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 	return
 }
 
+var (
+	optionReg = regexp.MustCompile("^-")         // nolint gochecknoglobals
+	parseReg  = regexp.MustCompile("^-[^-]{2,}") // nolint gochecknoglobals
+)
+
 // ParseArgs return os.Args parse short options (ex.) [-la] => [-l,-a] )
 //
 // TODO(blacknon): Migrate to github.com/urfave/cli version 1.22.
@@ -332,8 +338,7 @@ func ParseArgs(options []cli.Flag, args []string) []string {
 	optionMap := map[string]cli.Flag{}
 
 	for _, op := range options {
-		name := op.GetName()
-		names := strings.Split(name, ",")
+		names := strings.Split(op.GetName(), ",")
 
 		for _, n := range names {
 			// add hyphen
@@ -347,14 +352,10 @@ func ParseArgs(options []cli.Flag, args []string) []string {
 		}
 	}
 
-	var result []string
-	result = append(result, args[0])
+	result := []string{args[0]}
 
 	// command flag
 	isOptionArgs := false
-
-	optionReg := regexp.MustCompile("^-")
-	parseReg := regexp.MustCompile("^-[^-]{2,}")
 
 parseloop:
 	for i, arg := range args[1:] {
@@ -375,9 +376,7 @@ parseloop:
 
 				if val, ok := optionMap[s]; ok {
 					switch val.(type) {
-					case cli.StringSliceFlag:
-						isOptionArgs = true
-					case cli.StringFlag:
+					case cli.StringSliceFlag, cli.StringFlag:
 						isOptionArgs = true
 					}
 				}
@@ -388,9 +387,7 @@ parseloop:
 
 			if val, ok := optionMap[arg]; ok {
 				switch val.(type) {
-				case cli.StringSliceFlag:
-					isOptionArgs = true
-				case cli.StringFlag:
+				case cli.StringSliceFlag, cli.StringFlag:
 					isOptionArgs = true
 				}
 			}

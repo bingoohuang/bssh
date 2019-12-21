@@ -111,11 +111,7 @@ func Lssh() (app *cli.App) {
 
 // lsshAction actions ssh functions.
 func lsshAction(c *cli.Context) error {
-	if c.Bool("help") {
-		_ = cli.ShowAppHelp(c)
-
-		os.Exit(0)
-	}
+	common.CheckHelpFlag(c)
 
 	hosts := c.StringSlice("host")
 	confpath := c.String("file")
@@ -232,8 +228,7 @@ func parseSelected(prompt string, hosts []string, names []string, data conf.Conf
 			selected = hosts
 		}
 	} else {
-		selectedGroup := list.ShowGroupsView(&data)
-		selected = list.ShowServersView(&data, prompt, selectedGroup, names, isMulti)
+		selected = list.ShowServersView(&data, prompt, names, isMulti)
 	}
 
 	return selected

@@ -18,11 +18,8 @@ import (
 
 // chmod
 func (r *RunSftp) chmod(args []string) {
-	// create app
 	app := cli.NewApp()
-	// app.UseShortOptionHandling = true
 
-	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = "chmod"
 	app.Usage = "lssh ftp build-in command: chmod [remote machine chmod]"
@@ -30,62 +27,63 @@ func (r *RunSftp) chmod(args []string) {
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true
+	app.Action = r.chmodAction
 
-	// action
-	app.Action = func(c *cli.Context) error {
-		if len(c.Args()) != 2 {
-			fmt.Println("Requires two arguments")
-			fmt.Println("chmod mode path")
+	// parse short options
+	args = common.ParseArgs(app.Flags, args)
 
-			return nil
-		}
+	_ = app.Run(args)
+}
 
-		exit := make(chan bool)
-
-		for s, cl := range r.Client {
-			server, client := s, cl
-
-			mode := c.Args()[0]
-			path := c.Args()[1]
-
-			go func() {
-				defer func() { exit <- true }()
-
-				// get writer
-				client.Output.Create(server)
-				w := client.Output.NewWriter()
-
-				// set arg path
-				if !filepath.IsAbs(path) {
-					path = filepath.Join(client.Pwd, path)
-				}
-
-				// get mode
-				modeint, err := strconv.ParseUint(mode, 8, 32)
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-				filemode := os.FileMode(modeint)
-
-				// set filemode
-				if err = client.Connect.Chmod(path, filemode); err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				fmt.Fprintf(w, "chmod: set %s's permission as %o(%s)\n", path, filemode.Perm(), filemode.String())
-			}()
-		}
-
-		for range r.Client {
-			<-exit
-		}
+func (r *RunSftp) chmodAction(c *cli.Context) error {
+	if len(c.Args()) != 2 {
+		fmt.Println("Requires two arguments")
+		fmt.Println("chmod mode path")
 
 		return nil
 	}
 
-	// parse short options
-	args = common.ParseArgs(app.Flags, args)
-	_ = app.Run(args)
+	exit := make(chan bool)
+
+	for s, cl := range r.Client {
+		server, client := s, cl
+
+		mode, path := c.Args()[0], c.Args()[1]
+
+		go func() {
+			defer func() { exit <- true }()
+
+			// get writer
+			client.Output.Create(server)
+			w := client.Output.NewWriter()
+
+			// set arg path
+			if !filepath.IsAbs(path) {
+				path = filepath.Join(client.Pwd, path)
+			}
+
+			// get mode
+			modeint, err := strconv.ParseUint(mode, 8, 32)
+			if err != nil {
+				fmt.Fprintf(w, "%s\n", err)
+				return
+			}
+
+			filemode := os.FileMode(modeint)
+
+			// set filemode
+			if err = client.Connect.Chmod(path, filemode); err != nil {
+				fmt.Fprintf(w, "%s\n", err)
+				return
+			}
+
+			fmt.Fprintf(w, "chmod: set %s's permission as %o(%s)\n", path, filemode.Perm(), filemode.String())
+		}()
+	}
+
+	for range r.Client {
+		<-exit
+	}
+
+	return nil
 }

@@ -368,14 +368,7 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 		// join hosts
 		h := strings.Join(hosts, ",")
 
-		// create suggest
-		suggest := prompt.Suggest{
-			Text:        path,
-			Description: "remote path. from:" + h,
-		}
-
-		// append ps.Complete
-		p = append(p, suggest)
+		p = append(p, prompt.Suggest{Text: path, Description: "remote path. from:" + h})
 	}
 
 	// sort

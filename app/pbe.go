@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/blacknon/lssh/common"
+
 	"github.com/bingoohuang/gou/str"
 
 	"github.com/bingoohuang/gou/pbe"
@@ -78,11 +80,7 @@ func Lpbe() (app *cli.App) {
 
 // lpbeAction actions lpbe functions.
 func lpbeAction(c *cli.Context) error {
-	if c.Bool("help") {
-		_ = cli.ShowAppHelp(c)
-
-		os.Exit(0)
-	}
+	common.CheckHelpFlag(c)
 
 	confpath := c.String("file")
 	confContent, err := ioutil.ReadFile(confpath)
