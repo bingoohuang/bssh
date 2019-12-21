@@ -30,7 +30,8 @@ func (r *RunSftp) symlink(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+
+	_ = app.Run(args)
 }
 
 func (r *RunSftp) symlinkAction(c *cli.Context) error {

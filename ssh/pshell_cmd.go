@@ -122,7 +122,7 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 	switch {
 	case buildinRegex.MatchString(command):
 		// exec local machine
-		ps.executeLocalPipeLine(pl, in, out, ch, kill)
+		_ = ps.executeLocalPipeLine(pl, in, out, ch, kill)
 	default:
 		// exec remote machine
 		ps.executeRemotePipeLine(pl, in, out, ch, kill)
@@ -224,8 +224,7 @@ func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 	}
 
 	// close out
-	switch stdout.(type) {
-	case *io.PipeWriter:
+	if _, ok := stdout.(*io.PipeWriter); ok {
 		_ = out.CloseWithError(io.ErrClosedPipe)
 	}
 
@@ -347,9 +346,8 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	ch <- true
 
 	// close out
-	switch stdout.(type) {
-	case *io.PipeWriter:
-		out.CloseWithError(io.ErrClosedPipe)
+	if _, ok := stdout.(*io.PipeWriter); ok {
+		_ = out.CloseWithError(io.ErrClosedPipe)
 	}
 }
 
@@ -409,15 +407,14 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 	_ = cmd.Wait()
 
 	// close out, or write pShellHistory
-	switch stdout.(type) {
-	case *io.PipeWriter:
+	if _, ok := stdout.(*io.PipeWriter); ok {
 		out.CloseWithError(io.ErrClosedPipe)
 	}
 
 	// send exit
 	ch <- true
 
-	return nil
+	return err
 }
 
 // ps.wait

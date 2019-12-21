@@ -35,7 +35,8 @@ func (r *RunSftp) rm(args []string) {
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
-	app.Run(args)
+
+	_ = app.Run(args)
 }
 
 func (r *RunSftp) rmAction(c *cli.Context) error {

@@ -21,12 +21,9 @@ import (
 const cmdOPROMPT = "${SERVER} :: "
 
 // cmd is run command.
-func (r *Run) cmd() (err error) {
-	// command
+func (r *Run) cmd() {
 	command := strings.Join(r.ExecCmd, " ")
-
-	// create connect map
-	connmap := map[string]*sshlib.Connect{}
+	connMap := map[string]*sshlib.Connect{}
 
 	// make channel
 	finished := make(chan bool)
@@ -40,7 +37,7 @@ func (r *Run) cmd() (err error) {
 		r.printProxy(r.ServerList[0])
 	}
 
-	// Create sshlib.Connect to connmap
+	// Create sshlib.Connect to connMap
 	for _, server := range r.ServerList {
 		// check count AuthMethod
 		if len(r.serverAuthMethodMap[server]) == 0 {
@@ -55,20 +52,17 @@ func (r *Run) cmd() (err error) {
 			continue
 		}
 
-		connmap[server] = conn
+		connMap[server] = conn
 	}
 
 	// Run command and print loop
-	writers := []io.WriteCloser{}
+	var writers []io.WriteCloser
 
-	for s, c := range connmap {
-		// set session
+	for s, c := range connMap {
 		c.Session, _ = c.CreateSession()
 
-		// Get server config
 		config := r.Conf.Server[s]
 
-		// create Output
 		o := &output.Output{
 			Templete:      cmdOPROMPT,
 			Count:         0,
@@ -80,7 +74,6 @@ func (r *Run) cmd() (err error) {
 		}
 		o.Create(s)
 
-		// set output
 		c.Stdout = o.NewWriter()
 		c.Stderr = o.NewWriter()
 
@@ -145,7 +138,7 @@ func (r *Run) cmd() (err error) {
 	}
 
 	// run command
-	for _, c := range connmap {
+	for _, c := range connMap {
 		conn := c
 
 		if r.IsParallel {
@@ -177,7 +170,7 @@ func (r *Run) cmd() (err error) {
 	}
 
 	// wait
-	for i := 0; i < len(connmap); i++ {
+	for i := 0; i < len(connMap); i++ {
 		<-finished
 	}
 
@@ -185,6 +178,4 @@ func (r *Run) cmd() (err error) {
 
 	// sleep
 	time.Sleep(300 * time.Millisecond)
-
-	return err
 }

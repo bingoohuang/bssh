@@ -83,8 +83,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 		case checkBuildInCommand(c): // if build-in command.
 			var a []prompt.Suggest
 
-			switch c {
-			case misc.PercentOut:
+			if c == misc.PercentOut {
 				for i := 0; i < len(ps.History); i++ {
 					var cmd string
 					for _, h := range ps.History[i] {
@@ -215,7 +214,7 @@ func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest)
 				session.Stdout = buf
 
 				// Run get complete command
-				session.Run(command)
+				_ = session.Run(command)
 
 				// Scan and put completed command to map.
 				sc := bufio.NewScanner(buf)

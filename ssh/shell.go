@@ -102,9 +102,12 @@ func (r *Run) shell() (err error) {
 		}
 	}
 
-	// Dynamic Port Forwarding
-	if config.DynamicPortForward != "" {
-		go connect.TCPDynamicForward("localhost", config.DynamicPortForward)
+	if config.DynamicPortForward != "" { // Dynamic Port Forwarding
+		go func() {
+			if err := connect.TCPDynamicForward("localhost", config.DynamicPortForward); err != nil {
+				fmt.Println(err)
+			}
+		}()
 	}
 
 	// switch check Not-execute flag

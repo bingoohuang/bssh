@@ -12,6 +12,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/kevinburke/ssh_config v0.0.0-20190724205821-6cfae18c12b8
 	github.com/mattn/go-runewidth v0.0.7
+	github.com/mattn/go-shellwords v1.0.6
 	github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsf/termbox-go v0.0.0-20190325093121-288510b9734e

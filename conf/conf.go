@@ -6,7 +6,7 @@
 package conf
 
 import (
-	"crypto/md5"
+	"crypto/md5" // nolint
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -266,7 +266,7 @@ func (cf *Config) appendIncludePaths() {
 		unixTime := time.Now().Unix()
 		keyString := strings.Join([]string{string(unixTime), includePath}, "_")
 
-		hasher := md5.New()
+		hasher := md5.New() // nolint
 		_, _ = hasher.Write([]byte(keyString))
 		key := hex.EncodeToString(hasher.Sum(nil))
 

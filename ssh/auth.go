@@ -44,19 +44,19 @@ func (r *Run) CreateAuthMethodMap() {
 
 		// Password
 		if config.Pass != "" {
-			r.registAuthMapPassword(server, config.Pass)
+			r.registerAuthMapPassword(server, config.Pass)
 		}
 
 		// Multiple Password
 		if len(config.Passes) > 0 {
 			for _, pass := range config.Passes {
-				r.registAuthMapPassword(server, pass)
+				r.registerAuthMapPassword(server, pass)
 			}
 		}
 
 		// PublicKey
 		if config.Key != "" {
-			err := r.registAuthMapPublicKey(server, config.Key, config.KeyPass)
+			err := r.registerAuthMapPublicKey(server, config.Key, config.KeyPass)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
@@ -76,7 +76,7 @@ func (r *Run) CreateAuthMethodMap() {
 				}
 
 				//
-				err := r.registAuthMapPublicKey(server, keyName, keyPass)
+				err := r.registerAuthMapPublicKey(server, keyName, keyPass)
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					continue
@@ -87,7 +87,7 @@ func (r *Run) CreateAuthMethodMap() {
 		// Public Key Command
 		if config.KeyCommand != "" {
 			// TODO(blacknon): keyCommandの追加
-			err := r.registAuthMapPublicKeyCommand(server, config.KeyCommand, config.KeyCommandPass)
+			err := r.registerAuthMapPublicKeyCommand(server, config.KeyCommand, config.KeyCommandPass)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
@@ -101,7 +101,7 @@ func (r *Run) CreateAuthMethodMap() {
 				continue
 			}
 
-			err = r.registAuthMapCertificate(server, config.Cert, keySigner)
+			err = r.registerAuthMapCertificate(server, config.Cert, keySigner)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				continue
@@ -110,7 +110,7 @@ func (r *Run) CreateAuthMethodMap() {
 
 		// PKCS11
 		if config.PKCS11Use {
-			err := r.registAuthMapPKCS11(server, config.PKCS11Provider, config.PKCS11PIN)
+			err := r.registerAuthMapPKCS11(server, config.PKCS11Provider, config.PKCS11PIN)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
@@ -124,19 +124,19 @@ func (r *Run) SetupSSHAgent() {
 	r.agent = sshlib.ConnectSshAgent()
 }
 
-// registAuthMapPassword ...
-func (r *Run) registAuthMapPassword(server, password string) {
+// registerAuthMapPassword ...
+func (r *Run) registerAuthMapPassword(server, password string) {
 	password = decodePassword(password)
 
 	authKey := AuthKey{AuthKeyPassword, password}
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		authMethod := sshlib.CreateAuthMethodPassword(password)
 
-		// Regist AuthMethod to authMethodMap
+		// Register AuthMethod to authMethodMap
 		r.authMethodMap[authKey] = append(r.authMethodMap[authKey], authMethod)
 	}
 
-	// Regist AuthMethod to serverAuthMethodMap from authMethodMap
+	// Register AuthMethod to serverAuthMethodMap from authMethodMap
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 }
 
@@ -149,7 +149,7 @@ func decodePassword(password string) string {
 }
 
 //
-func (r *Run) registAuthMapPublicKey(server, key, password string) (err error) {
+func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error) {
 	authKey := AuthKey{AuthKeyKey, key}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -162,18 +162,18 @@ func (r *Run) registAuthMapPublicKey(server, key, password string) (err error) {
 		// Create AuthMethod
 		authMethod := ssh.PublicKeys(signer)
 
-		// Regist AuthMethod to authMethodMap
+		// Register AuthMethod to authMethodMap
 		r.authMethodMap[authKey] = append(r.authMethodMap[authKey], authMethod)
 	}
 
-	// Regist AuthMethod to serverAuthMethodMap from authMethodMap
+	// Register AuthMethod to serverAuthMethodMap from authMethodMap
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 
 	return
 }
 
 //
-func (r *Run) registAuthMapPublicKeyCommand(server, command, password string) (err error) {
+func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) (err error) {
 	authKey := AuthKey{AuthKeyKey, command}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -194,18 +194,18 @@ func (r *Run) registAuthMapPublicKeyCommand(server, command, password string) (e
 		// Create AuthMethod
 		authMethod := ssh.PublicKeys(signer)
 
-		// Regist AuthMethod to authMethodMap
+		// Register AuthMethod to authMethodMap
 		r.authMethodMap[authKey] = append(r.authMethodMap[authKey], authMethod)
 	}
 
-	// Regist AuthMethod to serverAuthMethodMap from authMethodMap
+	// Register AuthMethod to serverAuthMethodMap from authMethodMap
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 
 	return
 }
 
 //
-func (r *Run) registAuthMapCertificate(server, cert string, signer ssh.Signer) (err error) {
+func (r *Run) registerAuthMapCertificate(server, cert string, signer ssh.Signer) (err error) {
 	authKey := AuthKey{AuthKeyCert, cert}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -214,17 +214,17 @@ func (r *Run) registAuthMapCertificate(server, cert string, signer ssh.Signer) (
 			return err
 		}
 
-		// Regist AuthMethod to authMethodMap
+		// Register AuthMethod to authMethodMap
 		r.authMethodMap[authKey] = append(r.authMethodMap[authKey], authMethod)
 	}
 
-	// Regist AuthMethod to serverAuthMethodMap from authMethodMap
+	// Register AuthMethod to serverAuthMethodMap from authMethodMap
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 
 	return
 }
 
-func (r *Run) registAuthMapPKCS11(server, provider, pin string) (err error) {
+func (r *Run) registerAuthMapPKCS11(server, provider, pin string) (err error) {
 	authKey := AuthKey{AuthKeyPkcs11, provider}
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		// Create Signer with key input
@@ -237,19 +237,19 @@ func (r *Run) registAuthMapPKCS11(server, provider, pin string) (err error) {
 			// Create AuthMethod
 			authMethod := ssh.PublicKeys(signer)
 
-			// Regist AuthMethod to AuthMethodMap
+			// Register AuthMethod to AuthMethodMap
 			r.authMethodMap[authKey] = append(r.authMethodMap[authKey], authMethod)
 		}
 	}
 
-	// Regist AuthMethod to serverAuthMethodMap from authMethodMap
+	// Register AuthMethod to serverAuthMethodMap from authMethodMap
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 
 	return
 }
 
-// registAuthMapKeyCmd is exec keycmd, and regist kyecmd result publickey to AuthMap.
-// func registAuthMapKeyCmd() () {}
+// registerAuthMapKeyCmd is exec keycmd, and register kyecmd result publickey to AuthMap.
+// func registerAuthMapKeyCmd() () {}
 
 // execKeyCommand
 // func execKeyCmd() {}

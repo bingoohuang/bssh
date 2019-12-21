@@ -147,7 +147,7 @@ func (r *Run) Start() {
 
 	switch {
 	case len(r.ExecCmd) > 0 && r.Mode == "cmd":
-		err = r.cmd()
+		r.cmd()
 	case r.Mode == "shell":
 		err = r.shell()
 	case r.Mode == "pshell":

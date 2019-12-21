@@ -17,6 +17,7 @@ import (
 
 	prompt "github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
+	shellwords "github.com/mattn/go-shellwords"
 )
 
 // TODO(blacknon): catコマンド相当の機能を追加する
@@ -47,20 +48,16 @@ func (r *RunSftp) shell() {
 
 // Executor sftp Shell mode function
 func (r *RunSftp) Executor(command string) {
-	// trim space
-	command = strings.TrimSpace(command)
-
-	// parse command
-	cmdline := strings.Split(command, " ")
+	p := shellwords.NewParser()
+	p.ParseEnv = true
+	cmdline, _ := p.Parse(command)
 
 	// switch command
 	switch cmdline[0] {
 	case "bye", "exit", "quit":
 		os.Exit(0)
 	case "help", "?":
-
 	// case "cat":
-
 	case "cd": // change remote directory
 		r.cd(cmdline)
 	case misc.Chgrp:
@@ -69,9 +66,7 @@ func (r *RunSftp) Executor(command string) {
 		r.chmod(cmdline)
 	case misc.Chown:
 		r.chown(cmdline)
-
 	// case "copy":
-
 	case "df":
 		r.df(cmdline)
 	case misc.Get:
@@ -82,16 +77,12 @@ func (r *RunSftp) Executor(command string) {
 		r.lls(cmdline)
 	case misc.Lmkdir:
 		r.lmkdir(cmdline)
-
 	// case "ln":
-
 	case "lpwd":
 		r.lpwd()
 	case "ls":
 		r.ls(cmdline)
-
 	// case "lumask":
-
 	case misc.Mkdir:
 		r.mkdir(cmdline)
 	case misc.Put:
