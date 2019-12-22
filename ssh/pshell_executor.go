@@ -82,13 +82,13 @@ func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 
 			// set stdin
 			// If the before delimiter is a pipe, set the stdin before io.PipeReader.
-			if bp.Oprator == "|" {
+			if bp.Operator == "|" {
 				in = pipes[n-1].in
 			}
 
 			// set stdout
 			// If the delimiter is a pipe, set the stdout output a io.PipeWriter.
-			if p.Oprator == "|" {
+			if p.Operator == "|" {
 				out = pipes[n].out
 
 				// add pipe num
@@ -115,7 +115,7 @@ func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 		}()
 
 		// wait channel
-		ps.wait(len(pline), ch)
+		wait(len(pline), ch)
 	}
 
 	// add ps.Count
@@ -142,7 +142,7 @@ func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 // countPipeSet count delimiter in pslice.
 func countPipeSet(pline []pipeLine, del string) (count int) {
 	for _, p := range pline {
-		if p.Oprator == del {
+		if p.Operator == del {
 			count++
 		}
 	}

@@ -128,11 +128,7 @@ func (r *Run) pshell() (err error) {
 		// Create output prompt
 		o.Create(server)
 
-		cons[i] = &psConnect{
-			Name:    server,
-			Output:  o,
-			Connect: con,
-		}
+		cons[i] = &psConnect{Name: server, Output: o, Connect: con}
 	}
 
 	// count sshlib.Connect.

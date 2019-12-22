@@ -1,6 +1,9 @@
 package conf
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
 // BelongsToGroup belongs to group or not
 func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
@@ -73,6 +76,8 @@ func (cf *Config) GroupsNames() []string {
 
 		names = append(names, k)
 	}
+
+	sort.Strings(names)
 
 	return names
 }

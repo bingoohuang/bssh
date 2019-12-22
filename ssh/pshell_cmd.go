@@ -63,7 +63,6 @@ func checkLocalCommand(cmd string) (isLocalCmd bool) {
 
 // check local or build-in command
 func checkLocalBuildInCommand(cmd string) (result bool) {
-	// check build-in command
 	result = checkBuildInCommand(cmd)
 	if result {
 		return result
@@ -117,9 +116,7 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 	}
 
 	// check and exec local command
-	buildinRegex := regexp.MustCompile(`^!.*`)
-
-	if buildinRegex.MatchString(command) {
+	if regexp.MustCompile(`^!.*`).MatchString(command) {
 		_ = ps.executeLocalPipeLine(pl, in, out, ch, kill)
 	} else {
 		ps.executeRemotePipeLine(pl, in, out, ch, kill)
@@ -243,7 +240,6 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	// create channels
 	exit := make(chan bool)
 	exitInput := make(chan bool) // Input finish channel
-	exitOutput := make(chan bool)
 
 	writers := make([]io.WriteCloser, len(ps.Connects))
 	sessions := make([]*ssh.Session, len(ps.Connects))
@@ -308,11 +304,8 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 
 		go func() {
 			_ = session.Run(command)
-			_ = session.Close()
+			//_ = session.Close()
 			exit <- true
-			if stdout == os.Stdout {
-				exitOutput <- true
-			}
 		}()
 	}
 
@@ -324,10 +317,10 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 		}
 	}()
 
-	ps.wait(len(sessions), exit)
+	wait(len(sessions), exit)
 
 	// wait time (0.500 sec)
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(5000 * time.Millisecond)
 
 	// Print message `Please input enter` (Only when input is os.Stdin and output is os.Stdout).
 	// Note: This necessary for using Blocking.IO.
@@ -412,7 +405,7 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 }
 
 // ps.wait
-func (ps *pShell) wait(num int, ch <-chan bool) {
+func wait(num int, ch <-chan bool) {
 	for i := 0; i < num; i++ {
 		<-ch
 	}

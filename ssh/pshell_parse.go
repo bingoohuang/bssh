@@ -12,21 +12,21 @@ import (
 )
 
 type pipeLine struct {
-	Args    []string
-	Oprator string
+	Args     []string
+	Operator string
 }
 
 // pipeLine return string of join
 func (p *pipeLine) String() string {
 	result := strings.Join(p.Args, " ")
-	result = result + " " + p.Oprator
 
-	return result
+	return result + " " + p.Operator
 }
 
 // joinPipeLineSlice
 func joinPipeLineSlice(pslice []pipeLine) string {
-	var result string
+	result := ""
+
 	for _, pline := range pslice {
 		result += pline.String()
 	}
@@ -67,9 +67,9 @@ func joinPipeLine(pslice []pipeLine) []pipeLine {
 			beforeLocal = false
 		case !isLocal && !beforeLocal: // RemoteCommandで前がRemoteの場合
 			// append bpline
-			bpline.Args = append(bpline.Args, bpline.Oprator)
+			bpline.Args = append(bpline.Args, bpline.Operator)
 			bpline.Args = append(bpline.Args, pline.Args...)
-			bpline.Oprator = pline.Oprator
+			bpline.Operator = pline.Operator
 			beforeLocal = false
 		}
 	}
@@ -125,7 +125,7 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 					args := parseCallExpr(cx)
 					args = append(args, parseRedirect(cxr)...)
 
-					pLine := pipeLine{Args: args, Oprator: c.Op.String()}
+					pLine := pipeLine{Args: args, Operator: c.Op.String()}
 
 					cmdLine = append(cmdLine, pLine)
 					stmtCmd = c.Y.Cmd
