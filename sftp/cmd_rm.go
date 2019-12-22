@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 )
 
@@ -27,7 +27,7 @@ func (r *RunSftp) rm(args []string) {
 	}
 
 	app.Name = "rm"
-	app.Usage = "lssh ftp build-in command: rm [remote machine rm]"
+	app.Usage = "bssh ftp build-in command: rm [remote machine rm]"
 	app.HideHelp = true
 	app.HideVersion = true
 	app.EnableBashCompletion = true

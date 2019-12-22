@@ -6,14 +6,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 
 	"github.com/bingoohuang/gou/str"
 
+	"github.com/bingoohuang/bssh"
+	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/gou/pbe"
-	"github.com/blacknon/lssh"
-	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/misc"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli"
@@ -40,13 +40,13 @@ VERSION:
     {{.Version}}
     {{end}}
 USAGE:
-    # encrypt the passwords in the default ~/.lssh.conf.
+    # encrypt the passwords in the default ~/.bssh.conf.
 	{{.Name}}
     
 	# encrypt the passwords in the conf file located at filepath.
 	{{.Name}} -F filepath...
  
-    # decrypt the passwords in the default ~/.lssh.conf.
+    # decrypt the passwords in the default ~/.bssh.conf.
 	{{.Name}} -r
     
 	# decrypt the  passwords in the conf file located at filepath.
@@ -58,14 +58,14 @@ func Lpbe() (app *cli.App) {
 	cli.AppHelpTemplate = lpbeAppHelpTemplate
 
 	app = cli.NewApp()
-	app.Name = "lssh pbe"
+	app.Name = "bssh pbe"
 	app.Usage = "{PBE} the clear passwords in the conf file"
 	app.Copyright = misc.Copyright
-	app.Version = lssh.AppVersion
+	app.Version = bssh.AppVersion
 
 	// Set options
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.conf")),
 			Usage: "config `filepath`."},
 		cli.StringFlag{Name: "passphrase,P", Usage: "passphrase used to PBE clear passwords"},
 		cli.BoolFlag{Name: "reverse,r", Usage: "reverse action to decrypt pbe"},

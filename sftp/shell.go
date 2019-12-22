@@ -12,8 +12,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/blacknon/lssh/common"
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 
 	prompt "github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
@@ -443,6 +443,6 @@ func (r *RunSftp) GetLocalComplete(path string) {
 
 // CreatePrompt creates prompt.
 func (r *RunSftp) CreatePrompt() (p string, result bool) {
-	p = "lssh ftp>> "
+	p = "bssh ftp>> "
 	return p, true
 }

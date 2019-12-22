@@ -9,9 +9,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/output"
-	sshl "github.com/blacknon/lssh/ssh"
+	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/output"
+	sshl "github.com/bingoohuang/bssh/ssh"
 	prompt "github.com/c-bata/go-prompt"
 	"github.com/pkg/sftp"
 	"github.com/vbauerster/mpb"

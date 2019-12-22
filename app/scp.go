@@ -8,14 +8,14 @@ import (
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
 
-	"github.com/blacknon/lssh/list"
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/list"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh"
-	"github.com/blacknon/lssh/check"
-	"github.com/blacknon/lssh/common"
-	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/scp"
+	"github.com/bingoohuang/bssh"
+	"github.com/bingoohuang/bssh/check"
+	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/scp"
 	"github.com/urfave/cli"
 )
 
@@ -54,14 +54,14 @@ USAGE:
 func Lscp() (app *cli.App) {
 	cli.AppHelpTemplate = lscpAppHelpTemplate
 	app = cli.NewApp()
-	app.Name = "lssh scp"
+	app.Name = "bssh scp"
 	app.Usage = "TUI list select and parallel scp client command."
 	app.Copyright = misc.Copyright
-	app.Version = lssh.AppVersion
+	app.Version = bssh.AppVersion
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.conf")),
 			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
@@ -125,10 +125,10 @@ func lscpAction(c *cli.Context) error {
 		toServer = hosts
 	// remote to remote scp
 	case isFromInRemote && isToRemote:
-		fromServer = list.ShowServersView(&data, "lssh scp(from)>>", names, false)
-		toServer = list.ShowServersView(&data, "lssh scp(to)>>", names, true)
+		fromServer = list.ShowServersView(&data, "bssh scp(from)>>", names, false)
+		toServer = list.ShowServersView(&data, "bssh scp(to)>>", names, true)
 	default:
-		selected = list.ShowServersView(&data, "lssh scp>>", names, true)
+		selected = list.ShowServersView(&data, "bssh scp>>", names, true)
 
 		if isFromInRemote {
 			fromServer = selected

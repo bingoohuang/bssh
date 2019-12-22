@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
@@ -31,7 +31,7 @@ func (r *RunSftp) get(args []string) {
 
 	// set parameter
 	app.Name = misc.Get
-	app.Usage = "lssh ftp build-in command: get"
+	app.Usage = "bssh ftp build-in command: get"
 	app.ArgsUsage = "[source(remote) target(local)]"
 	app.HideHelp = true
 	app.HideVersion = true

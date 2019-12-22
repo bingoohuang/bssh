@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 )
 
@@ -22,7 +22,7 @@ func (r *RunSftp) chmod(args []string) {
 
 	app.CustomAppHelpTemplate = helptext
 	app.Name = "chmod"
-	app.Usage = "lssh ftp build-in command: chmod [remote machine chmod]"
+	app.Usage = "bssh ftp build-in command: chmod [remote machine chmod]"
 	app.ArgsUsage = "[perm path]"
 	app.HideHelp = true
 	app.HideVersion = true

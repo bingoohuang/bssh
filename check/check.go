@@ -1,5 +1,5 @@
 /*
-check is a package used mainly for check processing required by lssh, content check of configuration file.
+check is a package used mainly for check processing required by bssh, content check of configuration file.
 */
 
 package check

@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )
@@ -28,7 +28,7 @@ func (r *RunSftp) chown(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Chown
-	app.Usage = "lssh ftp build-in command: chown [remote machine chown]"
+	app.Usage = "bssh ftp build-in command: chown [remote machine chown]"
 	app.ArgsUsage = "[user path]"
 	app.HideHelp = true
 	app.HideVersion = true

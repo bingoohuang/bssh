@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/misc"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )

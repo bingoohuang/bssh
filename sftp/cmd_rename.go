@@ -7,9 +7,9 @@ package sftp
 import (
 	"fmt"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +18,7 @@ func (r *RunSftp) rename(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Rename
-	app.Usage = "lssh ftp build-in command: rename [remote machine rename]"
+	app.Usage = "bssh ftp build-in command: rename [remote machine rename]"
 	app.ArgsUsage = "[path path]"
 	app.HideHelp = true
 	app.HideVersion = true

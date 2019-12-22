@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/spf13/pflag"
 )
 

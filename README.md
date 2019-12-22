@@ -1,7 +1,7 @@
-[![TravisCI](https://travis-ci.org/blacknon/lssh.svg?branch=master)](https://travis-ci.org/blacknon/lssh)
-[![Go Report Card](https://goreportcard.com/badge/github.com/blacknon/lssh)](https://goreportcard.com/report/github.com/blacknon/lssh)
+[![TravisCI](https://travis-ci.org/bingoohuang/bssh.svg?branch=master)](https://travis-ci.org/bingoohuang/bssh)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bingoohuang/bssh)](https://goreportcard.com/report/github.com/bingoohuang/bssh)
 
-# lssh
+# bssh
 
 TUI list select ssh/scp/sftp client tools.
 
@@ -22,54 +22,50 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 
 ## Demo
 
-<p align="center">
-<img src="./images/lssh.gif" />
-</p>
-
 ## Install
 
 ### compile
 
-compile gofile(tested go1.12.4).
+compile go file(tested go1.12.4).
 
-    go get -u github.com/bingoohuang/lssh/cmd/lssh
+    go get -u github.com/bingoohuang/bssh/cmd/bssh
 
-    # copy sample config. create `~/.lssh.conf`.
-    test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/lssh/master/example/config.toml -o ~/.lssh.conf
+    # copy sample config. create `~/.bssh.conf`.
+    test -f ~/.bssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.conf
 
 or
 
-    git clone https://github.com/bingoohuang/lssh
-    cd lssh
+    git clone https://github.com/bingoohuang/bssh
+    cd bssh
     make && sudo make install
 
-    # copy sample config. create `~/.lssh.conf`.
-    test -f ~/.lssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/lssh/master/example/config.toml -o ~/.lssh.conf
+    # copy sample config. create `~/.bssh.conf`.
+    test -f ~/.bssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.conf
 
 ## Config
 
-Please edit "~/.lssh.conf".\
+Please edit "~/.bssh.conf".\
 For details see [Config](doc/Config.md).
 
 ## Usage
 
-### lssh
+### bssh
 
 run command.
 
-    lssh
+    bssh
 
 
-option(lssh)
+option(bssh)
 
 	NAME:
-	    lssh - TUI list select and parallel ssh client command.
+	    bssh - TUI list select and parallel ssh client command.
 	USAGE:
-	    lssh [options] [commands...]
+	    bssh [options] [commands...]
 	
 	OPTIONS:
 	    --host servername, -H servername            connect servername.
-	    --file filepath, -F filepath                config filepath. (default: "/Users/blacknon/.lssh.conf")
+	    --file filepath, -F filepath                config filepath. (default: "/Users/blacknon/.bssh.conf")
 	    -L [bind_address:]port:remote_address:port  Local port forward mode.Specify a [bind_address:]port:remote_address:port.
 	    -R [bind_address:]port:remote_address:port  Remote port forward mode.Specify a [bind_address:]port:remote_address:port.
 	    -D port                                     Dynamic port forward mode(Socks5). Specify a port.
@@ -94,20 +90,20 @@ option(lssh)
 	
 	USAGE:
 	    # connect ssh
-	    lssh
+	    bssh
 	
 	    # parallel run command in select server over ssh
-	    lssh -p command...
+	    bssh -p command...
 	
 	    # parallel run command in select server over ssh, do it interactively.
-	    lssh -s
+	    bssh -s
 
 
-### lssh scp
+### bssh scp
 
 run command.
 
-    lssh scp from... to
+    bssh scp from... to
 
 option(lscp)
 	
@@ -119,7 +115,7 @@ option(lscp)
 	OPTIONS:
 	    --host value, -H value  connect servernames
 	    --list, -l              print server list from config
-	    --file value, -F value  config file path (default: "/Users/blacknon/.lssh.conf")
+	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.conf")
 	    --permission, -p        copy file permission
 	    --help, -h              print this help
 	    --version, -v           print the version
@@ -132,30 +128,30 @@ option(lscp)
 	
 	USAGE:
 	    # local to remote scp
-	    lssh scp /path/to/local... remote:/path/to/remote
+	    bssh scp /path/to/local... remote:/path/to/remote
 	
 	    # remote to local scp
-	    lssh scp remote:/path/to/remote... /path/to/local
+	    bssh scp remote:/path/to/remote... /path/to/local
 	
 	    # remote to remote scp
-	    lssh scp remote:/path/to/remote... remote:/path/to/local
+	    bssh scp remote:/path/to/remote... remote:/path/to/local
 
 
-### lsftp
+### bssh ftp
 
 run command.
 
-    lsftp
+    bssh ftp
 
-option(lsftp)
+option(bssh ftp)
 
 	NAME:
-	    lsftp - TUI list select and parallel sftp client command.
+	    bssh ftp - TUI list select and parallel sftp client command.
 	USAGE:
-	    lsftp [options]
+	    bssh ftp [options]
 	
 	OPTIONS:
-	    --file value, -F value  config file path (default: "/Users/blacknon/.lssh.conf")
+	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.conf")
 	    --help, -h              print this help
 	    --version, -v           print the version
 	
@@ -166,14 +162,14 @@ option(lsftp)
 	    0.6.0
 	
 	USAGE:
-	  # start lsftp shell
-	  lsftp
+	  # start bssh ftp shell
+	  bssh ftp
 
 
 If you specify a command as an argument, you can select multiple hosts. Select host <kbd>Tab</kbd>, select all displayed hosts <kbd>Ctrl</kbd> + <kbd>a</kbd>.
 
 
-### 1. [lssh] connect terminal
+### 1. [bssh] connect terminal
 <details>
 
 You can connect to the terminal like a normal ssh command (OpenSSH).
@@ -189,7 +185,7 @@ You can connect using a local bashrc file (if ssh login shell is bash).
 <img src="./images/1-2.gif" />
 </p>
 
-`~/.lssh.conf` example.
+`~/.bssh.conf` example.
 
     [server.localrc]
 	addr = "192.168.100.104"
@@ -210,12 +206,9 @@ You can also change the color of each host's terminal by combining it with the O
 
 if iTerm2, you can also change the profile.
 
-<p align="center">
-<img src="./images/1-3.gif" />
-</p>
 
 
-`~/.lssh.conf` example.
+`~/.bssh.conf` example.
 
     [server.iTerm2_sample]
 	addr = "192.168.100.103"
@@ -236,12 +229,12 @@ if iTerm2, you can also change the profile.
 
 A terminal log can be recorded by writing a configuration file.
 
-`~/.lssh.conf` example.
+`~/.bssh.conf` example.
 
 	[log]
 	enable = true
 	timestamp = true
-	dirpath = "~/log/lssh/<Date>/<Hostname>"
+	dirpath = "~/log/bssh/<Date>/<Hostname>"
 
 
 There are other parameters corresponding to ClientAliveInterval and ClientAliveCountMax.
@@ -256,21 +249,18 @@ There are other parameters corresponding to ClientAliveInterval and ClientAliveC
 
 </details>
 
-### 2. [lssh] run command (parallel)
+### 2. [bssh] run command (parallel)
 <details>
 
 It is possible to execute by specifying command in argument.\
 Parallel execution can be performed by adding the `-p` option.
 
-<p align="center">
-<img src="./images/2-1.gif" />
-</p>
 
 	# exec command over ssh.
-	lssh <command...>
+	bssh <command...>
 
 	# exec command over ssh, parallel.
-	lssh -p <command>
+	bssh -p <command>
 
 
 In parallel connection mode (`-p` option), Stdin can be sent to each host.\
@@ -282,27 +272,19 @@ In parallel connection mode (`-p` option), Stdin can be sent to each host.\
 
 Can be piped to send Stdin.
 
-<p align="center">
-<img src="./images/2-3.gif" />
-</p>
-
 	# You can pass values ​​in a pipe
-	command... | lssh <command...>
+	command... | bssh <command...>
 
 
 </details>
 
-### 3. [lssh] Execute commands interactively (parallel shell)
+### 3. [bssh] Execute commands interactively (parallel shell)
 <details>
 
 You can send commands to multiple servers interactively.
 
-<p align="center">
-<img src="./images/3-1.gif" />
-</p>
-
 	# parallel shell connect
-	lssh -s
+	bssh -s
 
 
 You can also combine remote and local commands.
@@ -312,15 +294,12 @@ You can also combine remote and local commands.
 
 </details>
 
-### 4. [lssh] scp (local=>remote(multi), remote(multi)=>local, remote=>remote(multi))
+### 4. [bssh] scp (local=>remote(multi), remote(multi)=>local, remote=>remote(multi))
 <details>
 
 You can do scp by selecting a list with the command lscp.\
 You can select multiple connection destinations. This program use sftp protocol.
 
-<p align="center">
-<img src="./images/4-1.gif" />
-</p>
 
 `local => remote(multiple)`
 
@@ -342,17 +321,14 @@ You can select multiple connection destinations. This program use sftp protocol.
 
 </details>
 
-### 5. [lsftp] sftp (local=>remote(multi), remote(multi)=>local)
+### 5. [bssh ftp] sftp (local=>remote(multi), remote(multi)=>local)
 <details>
 
 You can do sftp by selecting a list with the command lstp.\
 You can select multiple connection destinations.
 
-<p align="center">
-<img src="./images/5-1.gif" />
-</p>
 
-`lsftp`
+`bssh ftp`
 
 
 </details>
@@ -379,15 +355,15 @@ Alternatively, you can specify and read the path as follows: In addition to the 
 You can include server settings in another file.\
 `common` settings can be specified for each file that you went out.
 
-`~/.lssh.conf` example.
+`~/.bssh.conf` example.
 
 	[includes]
 	path = [
-    	 "~/.lssh.d/home.conf"
-    	,"~/.lssh.d/cloud.conf"
+    	 "~/.bssh.d/home.conf"
+    	,"~/.bssh.d/cloud.conf"
 	]
 
-`~/.lssh.d/home.conf` example.
+`~/.bssh.d/home.conf` example.
 
 	[common]
 	pre_cmd = 'printf "\033]50;SetProfile=dq\a"'       # iterm2 ssh theme
@@ -410,7 +386,7 @@ You can include server settings in another file.\
 
 The priority of setting values ​​is as follows.
 
-`[server.hogehoge]` > `[common] at Include file` > `[common] at ~/.lssh.conf`
+`[server.hogehoge]` > `[common] at Include file` > `[common] at ~/.bssh.conf`
 
 
 </details>
@@ -569,6 +545,7 @@ Besides this, you can also specify ProxyCommand like OpenSSH.
 
 
 ### 9. Port forwarding
+
 <details>
 
 Supported Local/Remote/Dynamic port forwarding.\
@@ -576,9 +553,9 @@ You can specify from the command line or from the configuration file.
 
 #### command line option
 
-    lssh -L 8080:localhost:80 # local port forwarding
-    lssh -R 80:localhost:8080 # remote port forwarding
-    lssh -D 10080             # dynamic port forwarding
+    bssh -L 8080:localhost:80 # local port forwarding
+    bssh -R 80:localhost:8080 # remote port forwarding
+    bssh -D 10080             # dynamic port forwarding
 
 
 #### config file
@@ -608,7 +585,7 @@ If OpenSsh config is loaded, it will be loaded as it is.
 
 ## Licence
 
-A short snippet describing the license [MIT](https://github.com/blacknon/lssh/blob/master/LICENSE.md).
+A short snippet describing the license [MIT](https://github.com/bingoohuang/bssh/blob/master/LICENSE.md).
 
 ## Author
 

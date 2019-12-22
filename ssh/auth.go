@@ -10,11 +10,11 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
+	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/gou/pbe"
 	sshlib "github.com/blacknon/go-sshlib"
-	"github.com/blacknon/lssh/common"
 	"golang.org/x/crypto/ssh"
 )
 

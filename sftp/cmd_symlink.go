@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 )
 
@@ -21,7 +21,7 @@ func (r *RunSftp) symlink(args []string) {
 
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Symlink
-	app.Usage = "lssh ftp build-in command: symlink [remote machine symlink]"
+	app.Usage = "bssh ftp build-in command: symlink [remote machine symlink]"
 	app.ArgsUsage = "[source target]"
 	app.HideHelp = true
 	app.HideVersion = true

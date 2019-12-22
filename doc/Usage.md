@@ -2,19 +2,19 @@
 
 ### ssh connect (Terminal)
 
-`lssh`
+`bssh`
 
 ### ssh connect (command exec)
 
-`lssh command...`
+`bssh command...`
 
 ### ssh connect (command exec(parallel))
 
-`lssh -p command...`
+`bssh -p command...`
 
 ### ssh connect (command exec(use stdin))
 
-`command | lssh command...`
+`command | bssh command...`
 
 ### scp (local to remote)
 

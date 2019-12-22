@@ -7,7 +7,7 @@ package list
 import (
 	"testing"
 
-	"github.com/blacknon/lssh/conf"
+	"github.com/bingoohuang/bssh/conf"
 	"github.com/stretchr/testify/assert"
 )
 

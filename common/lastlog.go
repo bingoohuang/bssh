@@ -42,13 +42,13 @@ func SaveServerNameLastLog(serverNames []string) {
 
 func saveLastLogFile() {
 	bytes, _ := json.Marshal(lastLog)
-	lastFile := ExpandHomeDir("~/.lssh.last")
+	lastFile := ExpandHomeDir("~/.bssh.last")
 	_ = ioutil.WriteFile(lastFile, bytes, 0644)
 }
 
 // ReadLastLog reads last Log
 func ReadLastLog() (*LastLogBean, bool) {
-	lastFile := ExpandHomeDir("~/.lssh.last")
+	lastFile := ExpandHomeDir("~/.bssh.last")
 	stat, _ := file.Stat(lastFile)
 
 	if stat == file.NotExists {

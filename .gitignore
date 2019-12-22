@@ -3,11 +3,7 @@
 *.sublime-*
 
 # Binary programs
-/lssh
-/lscp
-/lsftp
-/lsshfs
-/lssync
+/bssh
 *.exe
 /.idea
 /dist

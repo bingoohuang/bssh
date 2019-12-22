@@ -2,7 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-// Package conf is a package used to read configuration file (~/.lssh.conf).
+// Package conf is a package used to read configuration file (~/.bssh.conf).
 package conf
 
 import (
@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/BurntSushi/toml"
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 )
 
 // Config is Struct that stores the entire configuration file
@@ -56,11 +56,11 @@ type LogConfig struct {
 	Dir string `toml:"dirpath"`
 }
 
-// ShellConfig structure for storing lssh-shell settings.
+// ShellConfig structure for storing bssh-shell settings.
 type ShellConfig struct {
 	// prompt
-	Prompt  string `toml:"PROMPT"`  // lssh shell prompt
-	OPrompt string `toml:"OPROMPT"` // lssh shell output prompt
+	Prompt  string `toml:"PROMPT"`  // bssh shell prompt
+	OPrompt string `toml:"OPROMPT"` // bssh shell output prompt
 
 	// message,title etc...
 	Title string `toml:"title"`
@@ -83,8 +83,8 @@ type IncludeConfig struct {
 type IncludesConfig struct {
 	// example:
 	// 	path = [
-	// 		 "~/.lssh.d/home.conf"
-	// 		,"~/.lssh.d/cloud.conf"
+	// 		 "~/.bssh.d/home.conf"
+	// 		,"~/.bssh.d/cloud.conf"
 	// 	]
 	Path []string `toml:"path"`
 }
@@ -182,7 +182,7 @@ func ReadConf(confPath string) (config Config) {
 
 	if !common.IsExist(confPath) {
 		fmt.Printf("Config file(%s) Not Found.\nPlease create file.\n\n", confPath)
-		fmt.Printf("sample: %s\n", "https://raw.githubusercontent.com/bingoohuang/lssh/master/example/config.toml")
+		fmt.Printf("sample: %s\n", "https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml")
 		os.Exit(1)
 	}
 
@@ -199,7 +199,7 @@ func ReadConf(confPath string) (config Config) {
 		viper.Set(pbe.PbePwd, config.Extra.Passphrase)
 	}
 
-	// reduce common setting (in .lssh.conf servers)
+	// reduce common setting (in .bssh.conf servers)
 	config.parseConfigServers(config.Server, config.Common)
 
 	// Read Openssh configs

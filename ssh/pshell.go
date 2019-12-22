@@ -13,8 +13,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/bingoohuang/bssh/output"
 	sshlib "github.com/blacknon/go-sshlib"
-	"github.com/blacknon/lssh/output"
 	prompt "github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 )

@@ -7,10 +7,10 @@ package main
 import (
 	"os"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/app"
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/app"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 )
 

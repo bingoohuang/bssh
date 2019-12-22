@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/gonet"
 
+	"github.com/bingoohuang/bssh/conf"
 	sshlib "github.com/blacknon/go-sshlib"
-	"github.com/blacknon/lssh/conf"
 	"golang.org/x/net/proxy"
 )
 

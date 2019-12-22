@@ -1,4 +1,4 @@
-Welcome to the lssh wiki!
+Welcome to the bssh wiki!
 
-lssh is ssh client command written in golang, select the destination host from the list.
+bssh is ssh client command written in golang, select the destination host from the list.
 

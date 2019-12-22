@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 
-	"github.com/blacknon/lssh/conf"
+	"github.com/bingoohuang/bssh/conf"
 )
 
 // ShowServersView shows view for servers.

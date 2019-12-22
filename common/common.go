@@ -2,7 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-// Package common is a package that summarizes the common processing of lssh package.
+// Package common is a package that summarizes the common processing of bssh package.
 package common
 
 import (

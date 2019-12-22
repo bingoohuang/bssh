@@ -12,9 +12,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 )
 
@@ -32,7 +32,7 @@ func (r *RunSftp) mkdir(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Mkdir
-	app.Usage = "lssh ftp build-in command: mkdir [remote machine mkdir]"
+	app.Usage = "bssh ftp build-in command: mkdir [remote machine mkdir]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true
@@ -110,7 +110,7 @@ func (r *RunSftp) lmkdir(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Lmkdir
-	app.Usage = "lssh ftp build-in command: lmkdir [local machine mkdir]"
+	app.Usage = "bssh ftp build-in command: lmkdir [local machine mkdir]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true

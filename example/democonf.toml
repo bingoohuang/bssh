@@ -1,8 +1,8 @@
-# /Users/bingoobjca/.lssh.conf
+# /Users/bingoobjca/.bssh.conf
 [log]
 enable = true
 timestamp = true
-dirpath = "~/.lssh.log"
+dirpath = "~/.bssh.log"
 
 [extra]
 # passphrase = "your passphrase"

@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
@@ -37,7 +37,7 @@ func (r *RunSftp) df(args []string) {
 		cli.BoolFlag{Name: "i", Usage: "list inode information instead of block usage"},
 	}
 	app.Name = "df"
-	app.Usage = "lssh ftp build-in command: df [remote machine df]"
+	app.Usage = "bssh ftp build-in command: df [remote machine df]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true

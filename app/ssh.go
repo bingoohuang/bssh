@@ -7,14 +7,14 @@ import (
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
 
-	"github.com/blacknon/lssh/list"
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/list"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh"
-	"github.com/blacknon/lssh/check"
-	"github.com/blacknon/lssh/common"
-	"github.com/blacknon/lssh/conf"
-	sshcmd "github.com/blacknon/lssh/ssh"
+	"github.com/bingoohuang/bssh"
+	"github.com/bingoohuang/bssh/check"
+	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/conf"
+	sshcmd "github.com/bingoohuang/bssh/ssh"
 	"github.com/urfave/cli"
 )
 
@@ -55,10 +55,10 @@ func Lssh() (app *cli.App) {
 
 	app = cli.NewApp()
 	// app.UseShortOptionHandling = true
-	app.Name = "lssh"
+	app.Name = "bssh"
 	app.Usage = "TUI list select and parallel ssh client command."
 	app.Copyright = misc.Copyright
-	app.Version = lssh.AppVersion
+	app.Version = bssh.AppVersion
 
 	// TODO(blacknon): オプションの追加
 	//     -f       ... バックグラウンドでの接続(X11接続やport forwardingをバックグラウンドで実行する場合など)。
@@ -77,7 +77,7 @@ func Lssh() (app *cli.App) {
 	app.Flags = []cli.Flag{
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.conf")),
 			Usage: "config `filepath`."},
 
 		// port forward option
@@ -123,7 +123,7 @@ func lsshAction(c *cli.Context) error {
 	processListFlag(c, names)
 
 	r := new(sshcmd.Run)
-	r.ServerList = parseSelected("lssh>>", hosts, names, data, isMulti)
+	r.ServerList = parseSelected("bssh>>", hosts, names, data, isMulti)
 	r.Conf = data
 	r.Mode = parseMode(c)
 	r.ExecCmd = c.Args() // exec command
@@ -197,7 +197,7 @@ func processListFlag(c *cli.Context, names []string) {
 		return
 	}
 
-	_, _ = fmt.Fprintf(os.Stdout, "lssh Server List:\n")
+	_, _ = fmt.Fprintf(os.Stdout, "bssh Server List:\n")
 	for v := range names {
 		_, _ = fmt.Fprintf(os.Stdout, "  %s\n", names[v])
 	}

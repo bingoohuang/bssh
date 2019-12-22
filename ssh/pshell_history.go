@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 
-	"github.com/blacknon/lssh/output"
+	"github.com/bingoohuang/bssh/output"
 )
 
 type pShellHistory struct {

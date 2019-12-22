@@ -1,6 +1,6 @@
 ### configure multiple 
 
-.lssh.conf
+.bssh.conf
 
 ```
 [server.ServerName]
@@ -35,7 +35,7 @@ note = "this is a test. password auth" # note text
 
 ### grouping servers (when there is more than ~20 servers, grouping is a good chosen)
 
-.lssh.conf
+.bssh.conf
 
 ```
 [server.zonea]
@@ -49,5 +49,5 @@ tmpl = "192.168.0.(101-103):22 user/password"       # 101,102,103 server address
 note = "this is a test. password auth"              # note text
 ```
 
-the above conf has more than one groups (zonea and zoneb), the lssh will show the group list first,
+the above conf has more than one groups (zonea and zoneb), the bssh will show the group list first,
 after the grouping selected, the narrowed server list in the selected grouping will show then.

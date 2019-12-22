@@ -16,9 +16,9 @@ import (
 	"syscall"
 	"text/tabwriter"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/blacknon/textcol"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/urfave/cli"
@@ -46,7 +46,7 @@ func (r *RunSftp) lls(args []string) {
 		cli.BoolFlag{Name: "t", Usage: "sort by modification time, newest first"},
 	}
 	app.Name = misc.Lls
-	app.Usage = "lssh ftp build-in command: lls [local machine ls]"
+	app.Usage = "bssh ftp build-in command: lls [local machine ls]"
 	app.ArgsUsage = misc.Path
 	app.HideHelp = true
 	app.HideVersion = true

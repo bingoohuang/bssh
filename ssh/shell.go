@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blacknon/lssh/conf"
+	"github.com/bingoohuang/bssh/conf"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
+	"github.com/bingoohuang/bssh/common"
 	sshlib "github.com/blacknon/go-sshlib"
-	"github.com/blacknon/lssh/common"
 	"golang.org/x/crypto/ssh"
 )
 

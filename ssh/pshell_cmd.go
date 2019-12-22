@@ -17,10 +17,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
+	"github.com/bingoohuang/bssh/output"
 	sshlib "github.com/blacknon/go-sshlib"
-	"github.com/blacknon/lssh/output"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -119,12 +119,9 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 	// check and exec local command
 	buildinRegex := regexp.MustCompile(`^!.*`)
 
-	switch {
-	case buildinRegex.MatchString(command):
-		// exec local machine
+	if buildinRegex.MatchString(command) {
 		_ = ps.executeLocalPipeLine(pl, in, out, ch, kill)
-	default:
-		// exec remote machine
+	} else {
 		ps.executeRemotePipeLine(pl, in, out, ch, kill)
 	}
 
@@ -255,7 +252,6 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	m := new(sync.Mutex)
 
 	for i, c := range ps.Connects {
-		// create session
 		s, err := c.CreateSession()
 		if err != nil {
 			continue
@@ -297,7 +293,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	// multi input-writer
 	switch stdin.(type) {
 	case *os.File:
-		// push input to pararell session
+		// push input to parallel session
 		// (Only when input is os.Stdin and output is os.Stdout).
 		if stdout == os.Stdout {
 			go output.PushInput(exitInput, writers)
@@ -320,7 +316,6 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 		}()
 	}
 
-	// kill
 	go func() {
 		<-kill
 		for _, s := range sessions {
@@ -329,7 +324,6 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 		}
 	}()
 
-	// wait
 	ps.wait(len(sessions), exit)
 
 	// wait time (0.500 sec)

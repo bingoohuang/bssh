@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )
@@ -28,7 +28,7 @@ func (r *RunSftp) chgrp(args []string) {
 	// set help message
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Chgrp
-	app.Usage = "lssh ftp build-in command: chgrp [remote machine chgrp]"
+	app.Usage = "bssh ftp build-in command: chgrp [remote machine chgrp]"
 	app.ArgsUsage = "[group path]"
 	app.HideHelp = true
 	app.HideVersion = true

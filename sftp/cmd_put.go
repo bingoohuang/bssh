@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
@@ -25,7 +25,7 @@ func (r *RunSftp) put(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext
 	app.Name = misc.Put
-	app.Usage = "lssh ftp build-in command: put"
+	app.Usage = "bssh ftp build-in command: put"
 	app.ArgsUsage = "[source(local) target(remote)]"
 	app.HideHelp = true
 	app.HideVersion = true

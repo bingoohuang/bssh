@@ -1,4 +1,4 @@
-#compdef lssh
+#compdef bssh
 _lssh() {
     _arguments -s \
         '(- *)'{-h,--help}'[print this help]' \

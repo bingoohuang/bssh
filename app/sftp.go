@@ -1,15 +1,15 @@
 package app
 
 import (
+	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/gou/str"
-	"github.com/blacknon/lssh/common"
 	homedir "github.com/mitchellh/go-homedir"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/blacknon/lssh"
-	"github.com/blacknon/lssh/conf"
-	"github.com/blacknon/lssh/sftp"
+	"github.com/bingoohuang/bssh"
+	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/sftp"
 	"github.com/urfave/cli"
 )
 
@@ -42,14 +42,14 @@ USAGE:
 func Lsftp() (app *cli.App) {
 	cli.AppHelpTemplate = appHelpTemplate
 	app = cli.NewApp()
-	app.Name = "lssh ftp"
+	app.Name = "bssh ftp"
 	app.Usage = "TUI list select and parallel sftp client command."
 	app.Copyright = misc.Copyright
-	app.Version = lssh.AppVersion
+	app.Version = bssh.AppVersion
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.lssh.conf")),
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.conf")),
 			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
@@ -74,7 +74,7 @@ func lsftpAction(c *cli.Context) error {
 	// scp struct
 	r := new(sftp.RunSftp)
 	r.Config = data
-	r.SelectServer = parseSelected("lssh ftp>>", hosts, names, data, true)
+	r.SelectServer = parseSelected("bssh ftp>>", hosts, names, data, true)
 
 	r.Start()
 

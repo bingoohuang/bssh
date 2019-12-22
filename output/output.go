@@ -15,13 +15,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacknon/lssh/common"
-	"github.com/blacknon/lssh/conf"
+	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/conf"
 	"github.com/vbauerster/mpb"
 	"github.com/vbauerster/mpb/decor"
 )
 
-// Output struct. command execute and lssh-shell mode output data.
+// Output struct. command execute and bssh-shell mode output data.
 type Output struct {
 	// Template variable value (in unimplemented).
 	//     - ${COUNT}  ... Count value(int)

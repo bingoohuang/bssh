@@ -14,9 +14,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/blacknon/lssh/common"
+	"github.com/bingoohuang/bssh/common"
 
-	"github.com/blacknon/lssh/misc"
+	"github.com/bingoohuang/bssh/misc"
 	prompt "github.com/c-bata/go-prompt"
 )
 
@@ -25,7 +25,7 @@ import (
 
 // Completer parallel-shell complete function
 func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
-	// if currente line data is none.
+	// if current line data is none.
 	if len(t.CurrentLine()) == 0 {
 		return prompt.FilterHasPrefix(nil, t.GetWordBeforeCursor(), false)
 	}
@@ -63,8 +63,8 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 
 			// build-in command suggest
 			buildin := []prompt.Suggest{
-				{Text: "exit", Description: "exit lssh shell"},
-				{Text: "quit", Description: "exit lssh shell"},
+				{Text: "exit", Description: "exit bssh shell"},
+				{Text: "quit", Description: "exit bssh shell"},
 				{Text: "clear", Description: "clear screen"},
 				{Text: "%history", Description: "show history"},
 				{Text: misc.PercentOut, Description: "%out [num], show history result."},

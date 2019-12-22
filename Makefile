@@ -13,8 +13,8 @@ build:
 	$(GOMOD) tidy
 	# Place dependent libraries under vendor
 	$(GOMOD) vendor
-	# Build lssh
-	$(GOBUILD) ./cmd/lssh
+	# Build bssh
+	$(GOBUILD) ./cmd/bssh
 	# Build lscp
 	$(GOBUILD) ./cmd/lscp
 	# Build lsftp
@@ -22,18 +22,18 @@ build:
 
 clean:
 	$(GOCLEAN) ./...
-	rm -f lssh
+	rm -f bssh
 	rm -f lscp
 	rm -f lsftp
 
 install:
-	# copy lssh binary to /usr/local/bin/
-	cp lssh /usr/local/bin/
+	# copy bssh binary to /usr/local/bin/
+	cp bssh /usr/local/bin/
 	# copy lscp binary to /usr/local/bin/
 	cp lscp /usr/local/bin/
 	# copy lsftp binary to /usr/local/bin/
 	cp lsftp /usr/local/bin/
-	cp -n example/config.tml ~/.lssh.conf || true
+	cp -n example/config.tml ~/.bssh.conf || true
 
 test:
 	$(GOTEST) ./...
