@@ -28,7 +28,7 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 
 			key := tc.k
 			if len(tc.t) > 1 {
-				key += fmt.Sprintf("-%d", i+1)
+				key += fmt.Sprintf("%d", i+1)
 			}
 
 			cf.Server[key] = c
@@ -42,7 +42,7 @@ func fixNote(c *ServerConfig) {
 	}
 
 	if c.Note != "" {
-		c.Note += "-"
+		c.Note += " "
 	}
 
 	c.Note += c.User + "@" + c.Addr + ":" + c.Port
