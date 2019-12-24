@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bingoohuang/bssh/conf"
+
 	"github.com/bingoohuang/bssh/output"
 	sshlib "github.com/blacknon/go-sshlib"
 )
@@ -45,7 +47,6 @@ func (r *Run) cmd() {
 			continue
 		}
 
-		// Create sshlib.Connect
 		conn, err := r.CreateSSHConnect(server)
 		if err != nil {
 			log.Printf("Error: %s:%s\n", server, err)
@@ -79,41 +80,7 @@ func (r *Run) cmd() {
 
 		// if single server, setup port forwarding.
 		if len(r.ServerList) == 1 {
-			// OverWrite port forward mode
-			if r.PortForwardMode != "" {
-				config.PortForwardMode = r.PortForwardMode
-			}
-
-			// Overwrite port forward address
-			if r.PortForwardLocal != "" && r.PortForwardRemote != "" {
-				config.PortForwardLocal = r.PortForwardLocal
-				config.PortForwardRemote = r.PortForwardRemote
-			}
-
-			// print header
-			r.printPortForward(config.PortForwardMode, config.PortForwardLocal, config.PortForwardRemote)
-
-			// Port Forwarding
-			switch config.PortForwardMode {
-			case "L", "":
-				_ = c.TCPLocalForward(config.PortForwardLocal, config.PortForwardRemote)
-			case "R":
-				_ = c.TCPRemoteForward(config.PortForwardLocal, config.PortForwardRemote)
-			}
-
-			// Dynamic Port Forwarding
-			if config.DynamicPortForward != "" {
-				r.printDynamicPortForward(config.DynamicPortForward)
-
-				go c.TCPDynamicForward("localhost", config.DynamicPortForward)
-			}
-
-			// if tty
-			if r.IsTerm {
-				c.Stdin = os.Stdin
-				c.Stdout = os.Stdout
-				c.Stderr = os.Stderr
-			}
+			r.setupPortForwarding(&config, c)
 		} else if r.IsParallel {
 			w, _ := c.Session.StdinPipe()
 			writers = append(writers, w)
@@ -180,4 +147,42 @@ func (r *Run) cmd() {
 
 	// sleep
 	time.Sleep(300 * time.Millisecond)
+}
+
+func (r *Run) setupPortForwarding(config *conf.ServerConfig, c *sshlib.Connect) {
+	// OverWrite port forward mode
+	if r.PortForwardMode != "" {
+		config.PortForwardMode = r.PortForwardMode
+	}
+
+	// Overwrite port forward address
+	if r.PortForwardLocal != "" && r.PortForwardRemote != "" {
+		config.PortForwardLocal = r.PortForwardLocal
+		config.PortForwardRemote = r.PortForwardRemote
+	}
+
+	// print header
+	r.printPortForward(config.PortForwardMode, config.PortForwardLocal, config.PortForwardRemote)
+
+	// Port Forwarding
+	switch config.PortForwardMode {
+	case "L", "":
+		_ = c.TCPLocalForward(config.PortForwardLocal, config.PortForwardRemote)
+	case "R":
+		_ = c.TCPRemoteForward(config.PortForwardLocal, config.PortForwardRemote)
+	}
+
+	// Dynamic Port Forwarding
+	if config.DynamicPortForward != "" {
+		r.printDynamicPortForward(config.DynamicPortForward)
+
+		go c.TCPDynamicForward("localhost", config.DynamicPortForward)
+	}
+
+	// if tty
+	if r.IsTerm {
+		c.Stdin = os.Stdin
+		c.Stdout = os.Stdout
+		c.Stderr = os.Stderr
+	}
 }

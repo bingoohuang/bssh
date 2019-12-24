@@ -185,71 +185,83 @@ func (ps *pShell) GetCommandComplete() {
 
 // GetPathComplete return complete path from local or remote machine.
 // TODO(blacknon): 複数のノードにあるPATHだけ補完リストに出てる状態なので、単一ノードにしか無いファイルも出力されるよう修正する
-func (ps *pShell) GetPathComplete(remote bool, word string) (p []prompt.Suggest) {
-	compCmd := []string{"compgen", "-f", word}
-	command := strings.Join(compCmd, " ")
+func (ps *pShell) GetPathComplete(remote bool, word string) []prompt.Suggest {
+	command := strings.Join([]string{"compgen", "-f", word}, " ")
+
+	var p []prompt.Suggest
 
 	switch {
 	case remote: // is remote machine
-		// create map
-		m := map[string][]string{}
-
-		exit := make(chan bool)
-
-		// create sync mutex
-		sm := new(sync.Mutex)
-
-		// append path to m
-		for _, c := range ps.Connects {
-			con := c
-
-			go func() {
-				defer func() { exit <- true }()
-
-				// Create buffer
-				buf := new(bytes.Buffer)
-
-				// Create session, and output to buffer
-				session, _ := con.CreateSession()
-				session.Stdout = buf
-
-				// Run get complete command
-				_ = session.Run(command)
-
-				// Scan and put completed command to map.
-				sc := bufio.NewScanner(buf)
-				for sc.Scan() {
-					sm.Lock()
-					path := filepath.Base(sc.Text())
-					m[path] = append(m[path], con.Name)
-					sm.Unlock()
-				}
-			}()
-		}
-
-		for range ps.Connects {
-			<-exit
-		}
-
-		// m to suggest
-		for path, hosts := range m {
-			h := strings.Join(hosts, ",")
-			suggest := prompt.Suggest{Text: path, Description: "remote path from " + h}
-			p = append(p, suggest)
-		}
-
+		p = ps.remoteSuggest(command)
 	case !remote: // is local machine
-		sgt, _ := exec.Command("bash", "-c", command).Output()
-		rd := strings.NewReader(string(sgt))
-		sc := bufio.NewScanner(rd)
-
-		for sc.Scan() {
-			suggest := prompt.Suggest{Text: filepath.Base(sc.Text()), Description: "local path."}
-			p = append(p, suggest)
-		}
+		p = ps.localSuggest(command)
 	}
 
 	sort.SliceStable(p, func(i, j int) bool { return p[i].Text < p[j].Text })
+
+	return p
+}
+
+func (ps *pShell) localSuggest(command string) (p []prompt.Suggest) {
+	sgt, _ := exec.Command("bash", "-c", command).Output()
+	rd := strings.NewReader(string(sgt))
+	sc := bufio.NewScanner(rd)
+
+	for sc.Scan() {
+		suggest := prompt.Suggest{Text: filepath.Base(sc.Text()), Description: "local path."}
+		p = append(p, suggest)
+	}
+
+	return p
+}
+
+func (ps *pShell) remoteSuggest(command string) (p []prompt.Suggest) {
+	// create map
+	m := map[string][]string{}
+
+	exit := make(chan bool)
+
+	// create sync mutex
+	sm := new(sync.Mutex)
+
+	// append path to m
+	for _, c := range ps.Connects {
+		con := c
+
+		go func() {
+			defer func() { exit <- true }()
+
+			// Create buffer
+			buf := new(bytes.Buffer)
+
+			// Create session, and output to buffer
+			session, _ := con.CreateSession()
+			session.Stdout = buf
+
+			// Run get complete command
+			_ = session.Run(command)
+
+			// Scan and put completed command to map.
+			sc := bufio.NewScanner(buf)
+			for sc.Scan() {
+				sm.Lock()
+				path := filepath.Base(sc.Text())
+				m[path] = append(m[path], con.Name)
+				sm.Unlock()
+			}
+		}()
+	}
+
+	for range ps.Connects {
+		<-exit
+	}
+
+	// m to suggest
+	for path, hosts := range m {
+		h := strings.Join(hosts, ",")
+		suggest := prompt.Suggest{Text: path, Description: "remote path from " + h}
+		p = append(p, suggest)
+	}
 
 	return p
 }

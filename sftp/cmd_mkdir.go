@@ -39,61 +39,63 @@ func (r *RunSftp) mkdir(args []string) {
 	app.EnableBashCompletion = true
 
 	// action
-	app.Action = func(c *cli.Context) error {
-		// TODO(blacknon): 複数のディレクトリ受付(v0.6.1以降)
-		if len(c.Args()) != 1 {
-			fmt.Println("Requires one arguments")
-			fmt.Println("mkdir [path]")
-
-			return nil
-		}
-
-		exit := make(chan bool)
-
-		for s, cl := range r.Client {
-			server, client := s, cl
-			path := c.Args()[0]
-
-			go func() {
-				defer func() { exit <- true }()
-
-				// get writer
-				client.Output.Create(server)
-				w := client.Output.NewWriter()
-
-				// set arg path
-				if !filepath.IsAbs(path) {
-					path = filepath.Join(client.Pwd, path)
-				}
-
-				// create directory
-				var err error
-				if c.Bool("p") {
-					err = client.Connect.MkdirAll(path)
-				} else {
-					err = client.Connect.Mkdir(path)
-				}
-
-				// check error
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-				}
-
-				fmt.Fprintf(w, "make directory: %s\n", path)
-			}()
-		}
-
-		for range r.Client {
-			<-exit
-		}
-
-		return nil
-	}
+	app.Action = r.mkdirAction
 
 	// parse short options
 	args = common.ParseArgs(app.Flags, args)
 
 	_ = app.Run(args)
+}
+
+func (r *RunSftp) mkdirAction(c *cli.Context) error {
+	// TODO(blacknon): 複数のディレクトリ受付(v0.6.1以降)
+	if len(c.Args()) != 1 {
+		fmt.Println("Requires one arguments")
+		fmt.Println("mkdir [path]")
+
+		return nil
+	}
+
+	exit := make(chan bool)
+
+	for s, cl := range r.Client {
+		server, client := s, cl
+		path := c.Args()[0]
+
+		go func() {
+			defer func() { exit <- true }()
+
+			// get writer
+			client.Output.Create(server)
+			w := client.Output.NewWriter()
+
+			// set arg path
+			if !filepath.IsAbs(path) {
+				path = filepath.Join(client.Pwd, path)
+			}
+
+			// create directory
+			var err error
+			if c.Bool("p") {
+				err = client.Connect.MkdirAll(path)
+			} else {
+				err = client.Connect.Mkdir(path)
+			}
+
+			// check error
+			if err != nil {
+				fmt.Fprintf(w, "%s\n", err)
+			}
+
+			fmt.Fprintf(w, "make directory: %s\n", path)
+		}()
+	}
+
+	for range r.Client {
+		<-exit
+	}
+
+	return nil
 }
 
 //
