@@ -16,6 +16,9 @@ import (
 	"syscall"
 	"text/tabwriter"
 
+	"github.com/bingoohuang/gou/mat"
+	"github.com/thoas/go-funk"
+
 	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/bssh/common"
@@ -90,31 +93,13 @@ func llsAction(c *cli.Context) error {
 		tabw := new(tabwriter.Writer)
 		tabw.Init(os.Stdout, 0, 1, 1, ' ', 0)
 
-		// get maxSizeWidth
-		var maxSizeWidth int
+		maxSizeWidth, maxUserWidth, maxGroupWidth := 0, 0, 0
+		lsData := make([]*sftpLsData, len(data))
 
-		var user, group, timestr, sizestr string
-
-		for _, f := range data {
-			if c.Bool("h") {
-				sizestr = humanize.Bytes(uint64(f.Size()))
-			} else {
-				sizestr = strconv.FormatUint(uint64(f.Size()), 10)
-			}
-
-			// set sizestr max length
-			if maxSizeWidth < len(sizestr) {
-				maxSizeWidth = len(sizestr)
-			}
-		}
-
-		for _, f := range data {
+		for i, f := range data {
 			var uid, gid uint32
 
 			var size int64
-
-			timestamp := f.ModTime()
-			timestr = timestamp.Format("2006 01-02 15:04:05")
 
 			sys := f.Sys()
 			if stat, ok := sys.(*syscall.Stat_t); ok {
@@ -123,53 +108,47 @@ func llsAction(c *cli.Context) error {
 				size = stat.Size
 			}
 
-			// Switch with or without -n option.
-			if c.Bool("n") {
-				user = strconv.FormatUint(uint64(uid), 10)
-				group = strconv.FormatUint(uint64(gid), 10)
-			} else {
-				userdata, _ := pkguser.LookupId(strconv.FormatUint(uint64(uid), 10))
-				user = userdata.Username
+			user := strconv.FormatUint(uint64(uid), 10)
+			group := strconv.FormatUint(uint64(gid), 10)
 
-				groupdata, _ := pkguser.LookupGroupId(strconv.FormatUint(uint64(gid), 10))
-				group = groupdata.Name
-			}
+			userData, _ := pkguser.LookupId(user)
+			user += `(` + userData.Username + `)`
+			maxUserWidth = mat.MaxInt(maxUserWidth, len(user))
 
-			// Switch with or without -h option.
-			if c.Bool("h") {
-				sizestr = humanize.Bytes(uint64(size))
-			} else {
-				sizestr = strconv.FormatUint(uint64(size), 10)
-			}
+			groupData, _ := pkguser.LookupGroupId(group)
+			group += `(` + groupData.Name + `)`
+			maxGroupWidth = mat.MaxInt(maxGroupWidth, len(group))
+
+			sizestr := strconv.FormatUint(uint64(size), 10) + `(` + humanize.Bytes(uint64(size)) + `)`
+			maxSizeWidth = mat.MaxInt(maxSizeWidth, len(sizestr))
 
 			// set data
-			lsdata := new(sftpLsData)
-			lsdata.Mode = f.Mode().String()
-			lsdata.User = user
-			lsdata.Group = group
-			lsdata.Size = sizestr
-			lsdata.Time = timestr
-			lsdata.Path = f.Name()
+			lsData[i] = &sftpLsData{
+				Mode:  f.Mode().String(),
+				User:  user,
+				Group: group,
+				Size:  sizestr,
+				Time:  f.ModTime().Format("2006 01-02 15:04:05"),
+				Path:  f.Name(),
+			}
+		}
 
-			// set print format
-			format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
+		format := "%s\t%" + strconv.Itoa(maxUserWidth) +
+			"s%" + strconv.Itoa(maxGroupWidth) +
+			"s%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
 
+		for _, f := range lsData {
 			// write data
-			fmt.Fprintf(tabw, format, lsdata.Mode, lsdata.User, lsdata.Group, lsdata.Size, lsdata.Time, lsdata.Path)
+			fmt.Fprintf(tabw, format, f.Mode, f.User, f.Group, f.Size, f.Time, f.Path)
 		}
 
 		tabw.Flush()
 
 	case c.Bool("1"): // list 1 file per line
-		for _, f := range data {
-			fmt.Println(f.Name())
-		}
+		funk.ForEach(data, func(f os.FileInfo) { fmt.Println(f.Name()) })
 
 	default: // default
-		var item []string
-		for _, f := range data {
-			item = append(item, f.Name())
-		}
+		item := funk.Map(data, func(f os.FileInfo) string { return f.Name() }).([]string)
 
 		textcol.Output = os.Stdout
 		textcol.Padding = 0

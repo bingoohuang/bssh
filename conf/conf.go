@@ -49,10 +49,10 @@ type ExtraConfig struct {
 // The log file name is created in "YYYYmmdd_HHMMSS_servername.log" of the specified directory.
 type LogConfig struct {
 	// Enable terminal logging.
-	Enable bool `toml:"enable"`
+	Enable bool
 
 	// Add a timestamp at the beginning of the terminal log line.
-	Timestamp bool `toml:"timestamp"`
+	Timestamp bool
 
 	// Specifies the directory for creating terminal logs.
 	Dir string `toml:"dirpath"`
@@ -65,7 +65,7 @@ type ShellConfig struct {
 	OPrompt string `toml:"OPROMPT"` // bssh shell output prompt
 
 	// message,title etc...
-	Title string `toml:"title"`
+	Title string
 
 	// history file
 	HistoryFile string `toml:"histfile"`
@@ -77,7 +77,7 @@ type ShellConfig struct {
 
 // IncludeConfig specify the configuration file to include (ServerConfig only).
 type IncludeConfig struct {
-	Path string `toml:"path"`
+	Path string
 }
 
 // IncludesConfig specify the configuration file to include (ServerConfig only).
@@ -85,41 +85,41 @@ type IncludeConfig struct {
 type IncludesConfig struct {
 	// example:
 	// 	path = [
-	// 		 "~/.bssh.d/home.conf"
-	// 		,"~/.bssh.d/cloud.conf"
+	// 		 "~/.bssh.d/home.toml"
+	// 		,"~/.bssh.d/cloud.toml"
 	// 	]
-	Path []string `toml:"path"`
+	Path []string
 }
 
 // ServerConfig structure for holding SSH connection information
 type ServerConfig struct {
 	// templates, host:port user/pass
-	Tmpl  string   `toml:"tmpl"`
-	Group []string `toml:"group"`
+	Tmpl  string
+	Group []string
 
 	// Connect basic Setting
-	Addr string `toml:"addr"`
-	Port string `toml:"port"`
-	User string `toml:"user"`
+	Addr string
+	Port string
+	User string
 
 	// Connect auth Setting
-	Pass           string   `toml:"pass"`
-	Passes         []string `toml:"passes"`
-	Key            string   `toml:"key"`
+	Pass           string
+	Passes         []string
+	Key            string
 	KeyCommand     string   `toml:"keycmd"`
 	KeyCommandPass string   `toml:"keycmdpass"`
 	KeyPass        string   `toml:"keypass"`
 	Keys           []string `toml:"keys"` // "keypath::passphrase"
-	Cert           string   `toml:"cert"`
-	CertKey        string   `toml:"certkey"`
-	CertKeyPass    string   `toml:"certkeypass"`
+	Cert           string
+	CertKey        string `toml:"certkey"`
+	CertKeyPass    string `toml:"certkeypass"`
 
 	CertPKCS11  bool `toml:"certpkcs11"`
 	AgentAuth   bool `toml:"agentauth"`
 	SSHAgentUse bool `toml:"ssh_agent"`
 	PKCS11Use   bool `toml:"pkcs11"`
 	// x11 forwarding setting
-	X11 bool `toml:"x11"`
+	X11 bool
 
 	SSHAgentKeyPath []string `toml:"ssh_agent_key"` // "keypath::passphrase"
 
@@ -132,7 +132,7 @@ type ServerConfig struct {
 
 	// proxy setting
 	ProxyType    string `toml:"proxy_type"`
-	Proxy        string `toml:"proxy"`
+	Proxy        string
 	ProxyCommand string `toml:"proxy_cmd"` // OpenSSH type proxy setting
 
 	// local rcfile setting
@@ -147,7 +147,7 @@ type ServerConfig struct {
 
 	// Dynamic Port Forwarding setting
 	DynamicPortForward string `toml:"dynamic_port_forward"` // ex.) "11080"
-	Note               string `toml:"note"`
+	Note               string
 
 	// Connection Timeout second
 	ConnectTimeout int `toml:"connect_timeout"`
@@ -159,21 +159,21 @@ type ServerConfig struct {
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
 type ProxyConfig struct {
-	Addr      string `toml:"addr"`
-	Port      string `toml:"port"`
-	User      string `toml:"user"`
-	Pass      string `toml:"pass"`
-	Proxy     string `toml:"proxy"`
+	Addr      string
+	Port      string
+	User      string
+	Pass      string
+	Proxy     string
 	ProxyType string `toml:"proxy_type"`
-	Note      string `toml:"note"`
+	Note      string
 }
 
 // OpenSSHConfig to read OpenSSH configuration file.
 //
 // WARN: This struct is not use...
 type OpenSSHConfig struct {
-	Path    string `toml:"path"` // This is preferred
-	Command string `toml:"command"`
+	Path    string // This is preferred
+	Command string
 	ServerConfig
 }
 
