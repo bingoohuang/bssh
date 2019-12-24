@@ -41,7 +41,7 @@ func (r *Run) cmd() {
 	for _, server := range r.ServerList {
 		// check count AuthMethod
 		if len(r.serverAuthMethodMap[server]) == 0 {
-			_, _ = fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
+			fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
 			continue
 		}
 
@@ -143,8 +143,9 @@ func (r *Run) cmd() {
 
 		if r.IsParallel {
 			go func() {
+				defer func() { finished <- true }()
+
 				_ = conn.Command(command)
-				finished <- true
 			}()
 		} else {
 			if len(stdinData) > 0 {
@@ -154,8 +155,9 @@ func (r *Run) cmd() {
 
 				// run command
 				go func() {
+					defer func() { finished <- true }()
+
 					_ = conn.Command(command)
-					finished <- true
 				}()
 
 				// send stdin
@@ -170,7 +172,7 @@ func (r *Run) cmd() {
 	}
 
 	// wait
-	for i := 0; i < len(connMap); i++ {
+	for range connMap {
 		<-finished
 	}
 

@@ -40,13 +40,13 @@ VERSION:
     {{.Version}}
     {{end}}
 USAGE:
-    # encrypt the passwords in the default ~/.bssh.conf.
+    # encrypt the passwords in the default ~/.bssh.toml.
 	{{.Name}}
     
 	# encrypt the passwords in the conf file located at filepath.
 	{{.Name}} -F filepath...
  
-    # decrypt the passwords in the default ~/.bssh.conf.
+    # decrypt the passwords in the default ~/.bssh.toml.
 	{{.Name}} -r
     
 	# decrypt the  passwords in the conf file located at filepath.
@@ -65,7 +65,7 @@ func Lpbe() (app *cli.App) {
 
 	// Set options
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.conf")),
+		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config `filepath`."},
 		cli.StringFlag{Name: "passphrase,P", Usage: "passphrase used to PBE clear passwords"},
 		cli.BoolFlag{Name: "reverse,r", Usage: "reverse action to decrypt pbe"},

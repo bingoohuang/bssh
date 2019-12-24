@@ -153,6 +153,7 @@ func countPipeSet(pline []pipeLine, del string) (count int) {
 // createPipeSet return Returns []*PipeSet used by the process.
 func createPipeSet(count int) (pipes []*PipeSet) {
 	pipes = make([]*PipeSet, count)
+
 	for i := 0; i < count; i++ {
 		in, out := io.Pipe()
 		pipes[i] = &PipeSet{in: in, out: out}

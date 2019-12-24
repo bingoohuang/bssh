@@ -2,7 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-// Package conf is a package used to read configuration file (~/.bssh.conf).
+// Package conf is a package used to read configuration file (~/.bssh.toml).
 package conf
 
 import (
@@ -40,7 +40,9 @@ type Config struct {
 // ExtraConfig store extra configs
 type ExtraConfig struct {
 	// Passphrase used to decrypt {PBE}xxx
-	Passphrase string `toml:"passphrase"`
+	Passphrase string
+	// DisableGrouping disable server names grouping
+	DisableGrouping bool
 }
 
 // LogConfig store the contents about the terminal log.
@@ -199,7 +201,7 @@ func ReadConf(confPath string) (config Config) {
 		viper.Set(pbe.PbePwd, config.Extra.Passphrase)
 	}
 
-	// reduce common setting (in .bssh.conf servers)
+	// reduce common setting (in .bssh.toml servers)
 	config.parseConfigServers(config.Server, config.Common)
 
 	// Read Openssh configs

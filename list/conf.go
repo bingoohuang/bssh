@@ -40,7 +40,7 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 
 // showGroupsView shows view for groups.
 func showGroupsView(cf *conf.Config) string {
-	if len(cf.GetGrouping()) <= 1 {
+	if cf.Extra.DisableGrouping || len(cf.GetGrouping()) <= 1 {
 		return ""
 	}
 

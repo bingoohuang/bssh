@@ -75,7 +75,7 @@ func checkLocalBuildInCommand(cmd string) (result bool) {
 }
 
 // runBuildInCommand is run buildin or local machine command.
-func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- bool, kill chan bool) (err error) {
+func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- bool, kill chan bool) {
 	// get 1st element
 	command := pl.Args[0]
 
@@ -103,7 +103,10 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 	// %out [num]
 	case misc.PercentOut:
 		num := ps.Count - 1
+
 		if len(pl.Args) > 1 {
+			var err error
+
 			num, err = strconv.Atoi(pl.Args[1])
 			if err != nil {
 				return
@@ -117,12 +120,10 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 
 	// check and exec local command
 	if regexp.MustCompile(`^!.*`).MatchString(command) {
-		_ = ps.executeLocalPipeLine(pl, in, out, ch, kill)
+		ps.executeLocalPipeLine(pl, in, out, ch, kill)
 	} else {
 		ps.executeRemotePipeLine(pl, in, out, ch, kill)
 	}
-
-	return nil
 }
 
 // localCmd_set is set pshll option.
@@ -153,7 +154,7 @@ func (ps *pShell) buildinHistory(out *io.PipeWriter, ch chan<- bool) {
 
 	// close out
 	if _, ok := stdout.(*io.PipeWriter); ok {
-		out.CloseWithError(io.ErrClosedPipe)
+		_ = out.CloseWithError(io.ErrClosedPipe)
 	}
 
 	// send exit
@@ -174,7 +175,7 @@ func (ps *pShell) buildinOutlist(out *io.PipeWriter, ch chan<- bool) {
 
 	// close out
 	if _, ok := stdout.(*io.PipeWriter); ok {
-		out.CloseWithError(io.ErrClosedPipe)
+		_ = out.CloseWithError(io.ErrClosedPipe)
 	}
 
 	// send exit
@@ -341,7 +342,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 // executePipeLineLocal is exec command in local machine.
 // TODO(blacknon): 利用中のShellでの実行+functionや環境変数、aliasの引き継ぎを行えるように実装
 func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
-	ch chan<- bool, kill chan bool) (err error) {
+	ch chan<- bool, kill chan bool) {
 	// set stdin/stdout
 	stdin := setInput(in)
 	stdout := setOutput(out)
@@ -380,7 +381,7 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 	cmd.Stderr = os.Stderr
 
 	// run command
-	err = cmd.Start()
+	_ = cmd.Start()
 
 	// get signal and kill
 	p := cmd.Process
@@ -395,13 +396,11 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 
 	// close out, or write pShellHistory
 	if _, ok := stdout.(*io.PipeWriter); ok {
-		out.CloseWithError(io.ErrClosedPipe)
+		_ = out.CloseWithError(io.ErrClosedPipe)
 	}
 
 	// send exit
 	ch <- true
-
-	return err
 }
 
 // ps.wait
