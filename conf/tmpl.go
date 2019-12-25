@@ -27,8 +27,13 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 			fixNote(&c)
 
 			key := tc.k
+
 			if len(tc.t) > 1 {
-				key += fmt.Sprintf("%d", i+1)
+				if t.ID != "" {
+					key += t.ID
+				} else {
+					key += fmt.Sprintf("%d", i+1)
+				}
 			}
 
 			cf.Server[key] = c
@@ -50,10 +55,13 @@ func fixNote(c *ServerConfig) {
 
 // Tmpl represents the structure of remote host information for ssh.
 type Tmpl struct {
+	ID       string
 	Host     string
 	Port     string
 	User     string
 	Password string // empty when using public key
+
+	Props map[string]string
 }
 
 // ParseTmpl parses the tmpl.
@@ -69,7 +77,8 @@ func ParseTmpl(tmpl string) []Tmpl {
 	host, port := parseHostPort(fields[0])
 	user, pass := parseUserPass(fields[1])
 
-	t := Tmpl{Host: host, Port: port, User: user, Password: pass}
+	props := parseProps(fields[2:])
+	t := Tmpl{ID: findID(props), Host: host, Port: port, User: user, Password: pass, Props: props}
 	expanded := expandTmpls(t)
 	hosts = append(hosts, expanded...)
 
@@ -81,12 +90,14 @@ func expandTmpls(host Tmpl) []Tmpl {
 	ports := str.MakeExpand(host.Port).MakePart()
 	users := str.MakeExpand(host.User).MakePart()
 	passes := str.MakeExpand(host.Password).MakePart()
-	maxExpands := mat.MaxInt(hosts.Len(), ports.Len(), users.Len(), passes.Len())
+	ids := str.MakeExpand(host.ID).MakePart()
+	maxExpands := mat.MaxInt(hosts.Len(), ports.Len(), users.Len(), passes.Len(), ids.Len())
 
 	tmpls := make([]Tmpl, maxExpands)
 
 	for i := 0; i < maxExpands; i++ {
 		tmpls[i] = Tmpl{
+			ID:       ids.Part(i),
 			Host:     hosts.Part(i),
 			Port:     ports.Part(i),
 			User:     users.Part(i),
@@ -94,6 +105,25 @@ func expandTmpls(host Tmpl) []Tmpl {
 	}
 
 	return tmpls
+}
+
+func findID(props map[string]string) string {
+	if v, ok := props["id"]; ok {
+		return v
+	}
+
+	return ""
+}
+
+func parseProps(fields []string) map[string]string {
+	props := make(map[string]string)
+
+	for i := 0; i < len(fields); i++ {
+		k, v := str.Split2(fields[i], "=", true, true)
+		props[k] = v
+	}
+
+	return props
 }
 
 func parseUserPass(userpass string) (string, string) {
