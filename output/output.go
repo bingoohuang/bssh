@@ -8,7 +8,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -151,38 +150,31 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 	path = strings.TrimSpace(path)
 
 	// set progress
-	bar := o.Progress.AddBar((size),
+	bar := o.Progress.AddBar(size,
 		mpb.BarClearOnComplete(),
-		mpb.PrependDecorators(
-			name,
+		mpb.PrependDecorators(name,
 			decor.OnComplete(decor.Name(path, decor.WCSyncSpaceR), fmt.Sprintf("%s done!", path)),
-			decor.OnComplete(decor.EwmaETA(decor.ET_STYLE_MMSS, 0, decor.WCSyncWidth), ""),
 		),
 		mpb.AppendDecorators(
 			decor.OnComplete(decor.Percentage(decor.WC{W: 5}), ""),
+			decor.Elapsed(decor.ET_STYLE_HHMMSS, decor.WC{W: 10}),
 		),
 	)
 
-	// set start, and max time
-	start := time.Now()
-	max := 10 * time.Millisecond
-
-	var sum int
+	sum := 0
+	startTime := time.Now()
 
 	// print out progress
 	defer o.ProgressWG.Done()
 
 	for {
-		time.Sleep(time.Duration(rand.Intn(10)+1) * max / 10)
-
 		// read byte (1mb)
 		b := make([]byte, 1048576)
 		s, err := reader.Read(b)
 
 		sum += s
 
-		// add size
-		bar.IncrBy(s, time.Since(start))
+		bar.IncrBy(s, time.Since(startTime))
 
 		// check exit
 		if err == io.EOF {
