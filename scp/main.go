@@ -133,10 +133,7 @@ func (cp *Scp) push() {
 
 		sort.Strings(data)
 
-		pathset[i] = PathSet{
-			Base:      filepath.Dir(p),
-			PathSlice: data,
-		}
+		pathset[i] = PathSet{Base: filepath.Dir(p), PathSlice: data}
 	}
 
 	// parallel push data
@@ -145,12 +142,9 @@ func (cp *Scp) push() {
 
 		go func() {
 			defer func() { exit <- true }()
-			// TDXX(blacknon): Parallelで指定した数までは同時コピーできるようにする
 
-			// set ftp client
 			ftp := client.Connect
 
-			// get output writer
 			client.Output.Create(client.Server)
 			ow := client.Output.NewWriter()
 
@@ -185,23 +179,25 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 
 	// get local file info
 	fInfo, _ := os.Lstat(path)
-	if fInfo.IsDir() { // directory
-		_ = ftp.Mkdir(rpath)
-	} else { //file
-		// open local file
+	if fInfo.IsDir() {
+		err = ftp.Mkdir(rpath)
+		if err != nil {
+			fmt.Fprintf(ow, "%s\n", err)
+			return err
+		}
+	} else {
 		lf, err := os.Open(path)
 		if err != nil {
 			fmt.Fprintf(ow, "%s\n", err)
 			return err
 		}
+
 		defer lf.Close()
 
 		// get file size
 		lstat, _ := os.Lstat(path)
 		size := lstat.Size()
 
-		// copy file
-		// TDXX(blacknon): Outputからプログレスバーで出力できるようにする(io.MultiWriterを利用して書き込み？)
 		err = cp.pushFile(lf, ftp, output, rpath, size)
 		if err != nil {
 			fmt.Fprintf(ow, "%s\n", err)
@@ -209,17 +205,13 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 		}
 	}
 
-	_ = ftp.Chmod(rpath, fInfo.Mode())
-
-	return err
+	return ftp.Chmod(rpath, fInfo.Mode())
 }
 
 // pushfile put file to path.
 func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, path string, size int64) (err error) {
-	// get output writer
 	ow := output.NewWriter()
 
-	// mkdir all
 	dir := filepath.Dir(path)
 	err = ftp.MkdirAll(dir)
 
@@ -228,14 +220,14 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 		return
 	}
 
-	// open remote file
 	rf, err := ftp.OpenFile(path, os.O_RDWR|os.O_CREATE)
 	if err != nil {
 		fmt.Fprintf(ow, "%s\n", err)
 		return
 	}
 
-	// set tee reader
+	defer rf.Close()
+
 	rd := io.TeeReader(lf, rf)
 
 	// copy to data
@@ -245,13 +237,10 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 	return
 }
 
-//
 func (cp *Scp) viaPush() {
-	// get server name
 	from := cp.From.Server[0] // string
 	to := cp.To.Server        // []string
 
-	// create client
 	fclient := cp.createScpConnects([]string{from})
 	tclient := cp.createScpConnects(to)
 
@@ -298,30 +287,34 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 				_ = tc.Connect.Mkdir(p)
 			}
 		} else { // is file
-			// open from server file
-			file, err := ftp.Open(p)
-			if err != nil {
-				fmt.Fprintf(fow, "Error: %s\n", err)
-				continue
-			}
-			size := stat.Size()
+			func() {
+				// open from server file
+				file, err := ftp.Open(p)
+				if err != nil {
+					fmt.Fprintf(fow, "Error: %s\n", err)
+					return
+				}
+				defer file.Close()
 
-			exit := make(chan bool)
-			for _, tc := range tclients {
-				tclient := tc
+				size := stat.Size()
 
-				go func() {
-					defer func() { exit <- true }()
+				exit := make(chan bool)
+				for _, tc := range tclients {
+					tclient := tc
 
-					tclient.Output.Create(tclient.Server)
+					go func() {
+						defer func() { exit <- true }()
 
-					_ = cp.pushFile(file, tclient.Connect, tclient.Output, p, size)
-				}()
-			}
+						tclient.Output.Create(tclient.Server)
 
-			for range tclients {
-				<-exit
-			}
+						_ = cp.pushFile(file, tclient.Connect, tclient.Output, p, size)
+					}()
+				}
+
+				for range tclients {
+					<-exit
+				}
+			}()
 		}
 	}
 }
@@ -347,7 +340,6 @@ func (cp *Scp) pull() {
 		go func() {
 			defer func() { exit <- true }()
 
-			// pull data
 			cp.pullPath(client)
 		}()
 	}
@@ -412,28 +404,33 @@ func (cp *Scp) pullPath(client *Connect) {
 				if stat.IsDir() { // create dir
 					_ = os.MkdirAll(lpath, 0755)
 				} else { // create file
-					// get size
-					size := stat.Size()
+					func() {
+						size := stat.Size()
 
-					// open remote file
-					rf, err := ftp.Open(p)
-					if err != nil {
-						fmt.Fprintf(ow, "Error: %s\n", err)
-						continue
-					}
+						// open remote file
+						rf, err := ftp.Open(p)
+						if err != nil {
+							fmt.Fprintf(ow, "Error: %s\n", err)
+							return
+						}
 
-					// open local file
-					lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE, 0644)
-					if err != nil {
-						fmt.Fprintf(ow, "Error: %s\n", err)
-						continue
-					}
+						defer rf.Close()
 
-					// set tee reader
-					rd := io.TeeReader(rf, lf)
+						// open local file
+						lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE, 0644)
+						if err != nil {
+							fmt.Fprintf(ow, "Error: %s\n", err)
+							return
+						}
 
-					cp.ProgressWG.Add(1)
-					client.Output.ProgressPrinter(size, rd, p)
+						defer lf.Close()
+
+						// set tee reader
+						rd := io.TeeReader(rf, lf)
+
+						cp.ProgressWG.Add(1)
+						client.Output.ProgressPrinter(size, rd, p)
+					}()
 				}
 
 				_ = os.Chmod(lpath, stat.Mode())
