@@ -20,8 +20,8 @@ import (
 	prompt "github.com/c-bata/go-prompt"
 )
 
-// TODO(blacknon): `!!`や`!$`についても実装を行う
-// TODO(blacknon): `!command`だとまとめてパイプ経由でデータを渡すことになっているが、`!!command`で個別のローカルコマンドにデータを渡すように実装する
+// TDXX(blacknon): `!!`や`!$`についても実装を行う
+// TDXX(blacknon): `!command`だとまとめてパイプ経由でデータを渡すことになっているが、`!!command`で個別のローカルコマンドにデータを渡すように実装する
 
 // Completer parallel-shell complete function
 func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
@@ -184,7 +184,7 @@ func (ps *pShell) GetCommandComplete() {
 }
 
 // GetPathComplete return complete path from local or remote machine.
-// TODO(blacknon): 複数のノードにあるPATHだけ補完リストに出てる状態なので、単一ノードにしか無いファイルも出力されるよう修正する
+// TDXX(blacknon): 複数のノードにあるPATHだけ補完リストに出てる状態なので、単一ノードにしか無いファイルも出力されるよう修正する
 func (ps *pShell) GetPathComplete(remote bool, word string) []prompt.Suggest {
 	command := strings.Join([]string{"compgen", "-f", word}, " ")
 

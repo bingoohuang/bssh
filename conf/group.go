@@ -87,7 +87,7 @@ func (cf *Config) GroupsNames() []string {
 }
 
 func (cf *Config) pickOthersGroupName() string {
-	otherGroupNames := []string{"others", "default", "else", "todo"} // no blanks allowed among the names
+	otherGroupNames := []string{"others", "default", "else", "TDXX"} // no blanks allowed among the names
 	otherGroupName := ""
 
 	for _, groupName := range otherGroupNames {

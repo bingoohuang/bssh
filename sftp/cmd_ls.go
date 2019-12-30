@@ -231,7 +231,7 @@ func (r *RunSftp) lsAction(c *cli.Context) error {
 			for _, f := range lsdata[server].Files {
 				sys := f.Sys()
 
-				// TODO(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
+				// TDXX(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
 				var uid, gid uint32
 
 				var size uint64

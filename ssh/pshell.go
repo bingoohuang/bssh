@@ -19,10 +19,10 @@ import (
 	"github.com/c-bata/go-prompt/completer"
 )
 
-// TODO(blacknon): 接続が切れた場合の再接続処理、および再接続ができなかった場合のsliceからの削除対応の追加(v0.6.1)
-// TODO(blacknon): pShellのログ(実行コマンド及び出力結果)をログとしてファイルに記録する機能の追加(v0.6.1)
-// TODO(blacknon): グループ化(`()`で囲んだりする)や三項演算子への対応(v0.6.1)
-// TODO(blacknon): `サーバ名:command...` で、指定したサーバでのみコマンドを実行させる機能の追加(v0.6.1)
+// TDXX(blacknon): 接続が切れた場合の再接続処理、および再接続ができなかった場合のsliceからの削除対応の追加(v0.6.1)
+// TDXX(blacknon): pShellのログ(実行コマンド及び出力結果)をログとしてファイルに記録する機能の追加(v0.6.1)
+// TDXX(blacknon): グループ化(`()`で囲んだりする)や三項演算子への対応(v0.6.1)
+// TDXX(blacknon): `サーバ名:command...` で、指定したサーバでのみコマンドを実行させる機能の追加(v0.6.1)
 
 // Pshell is Parallel-Shell struct
 type pShell struct {
@@ -40,7 +40,7 @@ type pShell struct {
 }
 
 // pShellOption is optitons pshell.
-// TODO(blacknon): つくる。
+// TDXX(blacknon): つくる。
 type pShellOption struct {
 	// local command実行時の結果をHistoryResultに記録しない(os.Stdoutに直接出す)
 	LocalCommandNotRecordResult bool
@@ -161,7 +161,7 @@ func (r *Run) pshell() (err error) {
 	}
 
 	// create complete data
-	// TODO(blacknon): 定期的に裏で取得するよう処理を加える(v0.6.1)
+	// TDXX(blacknon): 定期的に裏で取得するよう処理を加える(v0.6.1)
 	ps.GetCommandComplete()
 
 	// create go-prompt

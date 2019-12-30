@@ -178,7 +178,7 @@ type OpenSSHConfig struct {
 }
 
 // ReadConf load configuration file and return Config structure
-// TODO(blacknon): リファクタリング！(v0.6.1) 外出しや処理のまとめなど
+// TDXX(blacknon): リファクタリング！(v0.6.1) 外出しや処理のまとめなど
 func ReadConf(confPath string) (config Config) {
 	confPath = common.ExpandHomeDir(confPath)
 
@@ -381,8 +381,8 @@ func serverConfigReduct(perConfig, childConfig ServerConfig) ServerConfig {
 }
 
 // GetNameList return a list of server names from the Config structure.
-func GetNameList(listConf Config) (nameList []string) {
-	for k := range listConf.Server {
+func (cf *Config) GetNameList() (nameList []string) {
+	for k := range cf.Server {
 		nameList = append(nameList, k)
 	}
 
@@ -390,8 +390,8 @@ func GetNameList(listConf Config) (nameList []string) {
 }
 
 // GetNameSortedList return a list of server names from the Config structure.
-func GetNameSortedList(listConf Config) (nameList []string) {
-	nameList = GetNameList(listConf)
+func (cf *Config) GetNameSortedList() (nameList []string) {
+	nameList = cf.GetNameList()
 	sort.Strings(nameList)
 
 	return nameList

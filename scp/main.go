@@ -145,7 +145,7 @@ func (cp *Scp) push() {
 
 		go func() {
 			defer func() { exit <- true }()
-			// TODO(blacknon): Parallelで指定した数までは同時コピーできるようにする
+			// TDXX(blacknon): Parallelで指定した数までは同時コピーできるようにする
 
 			// set ftp client
 			ftp := client.Connect
@@ -201,7 +201,7 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 		size := lstat.Size()
 
 		// copy file
-		// TODO(blacknon): Outputからプログレスバーで出力できるようにする(io.MultiWriterを利用して書き込み？)
+		// TDXX(blacknon): Outputからプログレスバーで出力できるようにする(io.MultiWriterを利用して書き込み？)
 		err = cp.pushFile(lf, ftp, output, rpath, size)
 		if err != nil {
 			fmt.Fprintf(ow, "%s\n", err)

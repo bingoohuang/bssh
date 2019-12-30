@@ -20,7 +20,7 @@ import (
 	shellwords "github.com/mattn/go-shellwords"
 )
 
-// TODO(blacknon): catコマンド相当の機能を追加する
+// TDXX(blacknon): catコマンド相当の機能を追加する
 
 // shell Shell mode function
 func (r *RunSftp) shell() {
@@ -160,9 +160,9 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		case "cd":
 			return r.PathComplete(true, 1, t)
 		case misc.Chgrp:
-			// TODO(blacknon): そのうち追加 ver0.6.1
+			// TDXX(blacknon): そのうち追加 ver0.6.1
 		case misc.Chown:
-			// TODO(blacknon): そのうち追加 ver0.6.1
+			// TDXX(blacknon): そのうち追加 ver0.6.1
 		case "df":
 			suggest = []prompt.Suggest{
 				{Text: "-h", Description: "print sizes in powers of 1024 (e.g., 1023M)"},
@@ -170,7 +170,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			}
 			return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
 		case misc.Get:
-			// TODO(blacknon): オプションを追加したら引数の数から減らす処理が必要
+			// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
 			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
 			case 1: // remote
 				return r.PathComplete(true, 1, t)
@@ -248,8 +248,8 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			}
 
 		case misc.Put:
-			// TODO(blacknon): オプションを追加したら引数の数から減らす処理が必要
-			// TODO（blacknon）：添加选项后，有必要减少参数数量
+			// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
+			// TDXX（blacknon）：添加选项后，有必要减少参数数量
 			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
 			case 1: // local
 				return r.PathComplete(false, 1, t)
@@ -265,7 +265,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		case misc.Rmdir:
 			return r.PathComplete(true, 1, t)
 		case misc.Symlink:
-			// TODO(blacknon): そのうち追加 ver0.6.1
+			// TDXX(blacknon): そのうち追加 ver0.6.1
 		// case "tree":
 
 		default:

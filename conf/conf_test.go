@@ -164,7 +164,7 @@ func TestGetNameList(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := GetNameList(v.listConf)
+		got := v.listConf.GetNameList()
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }

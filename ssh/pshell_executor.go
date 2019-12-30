@@ -38,7 +38,7 @@ func (ps *pShell) Executor(command string) {
 }
 
 // parseExecutor assemble and execute the parsed command line.
-// TODO(blacknon): 現状はパイプにしか対応していないので、`&&`や`||`にも対応できるよう変更する(v0.6.1)
+// TDXX(blacknon): 現状はパイプにしか対応していないので、`&&`や`||`にも対応できるよう変更する(v0.6.1)
 func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 	// Create History
 	ps.History[ps.Count] = map[string]*pShellHistory{}

@@ -86,7 +86,7 @@ func (r *Run) CreateAuthMethodMap() {
 
 		// Public Key Command
 		if config.KeyCommand != "" {
-			// TODO(blacknon): keyCommandの追加
+			// TDXX(blacknon): keyCommandの追加
 			err := r.registerAuthMapPublicKeyCommand(server, config.KeyCommand, config.KeyCommandPass)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)

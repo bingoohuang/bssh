@@ -24,7 +24,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// TODO(blacknon): 以下のBuild-in Commandを追加する
+// TDXX(blacknon): 以下のBuild-in Commandを追加する
 //     - %cd <PATH>         ... リモートのディレクトリを変更する(事前のチェックにsftpを使用か？)
 //     - %lcd <PATH>        ... ローカルのディレクトリを変更する
 //     - %save <num> <PATH> ... 指定したnumの履歴をPATHに記録する (v0.6.1)
@@ -127,13 +127,13 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 }
 
 // localCmd_set is set pshll option.
-// TODO(blacknon): Optionsの値などについて、あとから変更できるようにする。
+// TDXX(blacknon): Optionsの値などについて、あとから変更できるようにする。
 // func (ps *pShell) buildin_set(args []string, out *io.PipeWriter, ch chan<- bool) {
 // }
 
 // localCmd_save is save HistoryResult results as a file local.
 //     %save num PATH(独自の環境変数を利用して個別のファイルに保存できるようにする)
-// TODO(blacknon): Optionsの値などについて、あとから変更できるようにする。
+// TDXX(blacknon): Optionsの値などについて、あとから変更できるようにする。
 // func (ps *pShell) buildin_save(args []string, out *io.PipeWriter, ch chan<- bool) {
 // }
 
@@ -205,7 +205,7 @@ func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 			h.Output.Count = num
 			op := h.Output.GetPrompt()
 
-			// TODO(blacknon): Outputを利用させてOPROMPTを生成
+			// TDXX(blacknon): Outputを利用させてOPROMPTを生成
 			sc := bufio.NewScanner(strings.NewReader(h.Result))
 			for sc.Scan() {
 				_, _ = fmt.Fprintf(stdout, "%s %s\n", op, sc.Text())
@@ -340,7 +340,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 }
 
 // executePipeLineLocal is exec command in local machine.
-// TODO(blacknon): 利用中のShellでの実行+functionや環境変数、aliasの引き継ぎを行えるように実装
+// TDXX(blacknon): 利用中のShellでの実行+functionや環境変数、aliasの引き継ぎを行えるように実装
 func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
 	ch chan<- bool, kill chan bool) {
 	// set stdin/stdout

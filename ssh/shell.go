@@ -74,7 +74,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	// switch check Not-execute flag
-	// TODO(blacknon): Backgroundフラグを実装したら追加
+	// TDXX(blacknon): Backgroundフラグを実装したら追加
 	switch {
 	case r.IsNone:
 		r.noneExecute()
@@ -97,7 +97,7 @@ func (r *Run) shell() (err error) {
 			connect.SetLog(logPath, logConf.Timestamp)
 		}
 
-		// TODO(blacknon): local rc file add
+		// TDXX(blacknon): local rc file add
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {

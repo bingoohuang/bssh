@@ -21,7 +21,7 @@ func (r *RunSftp) rm(args []string) {
 	app.CustomAppHelpTemplate = helptext
 
 	// set parameter
-	// TODO(blacknon): walkerでPATHを取得して各個削除する
+	// TDXX(blacknon): walkerでPATHを取得して各個削除する
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{Name: "r", Usage: "remove directories and their contents recursively"},
 	}

@@ -54,7 +54,7 @@ type Output struct {
 	Conf conf.ServerConfig
 
 	// Progress bar
-	// TODO(blacknon): プログレスバーを出力させるための項目を追加
+	// TDXX(blacknon): プログレスバーを出力させるための項目を追加
 	Progress   *mpb.Progress
 	ProgressWG *sync.WaitGroup
 
@@ -63,13 +63,13 @@ type Output struct {
 	DisableHeader bool
 
 	// Auto Colorize flag
-	// TODO(blacknon): colormodeに応じて、パイプ経由だった場合は色分けしないなどの対応ができるように条件分岐する(v0.6.1)
+	// TDXX(blacknon): colormodeに応じて、パイプ経由だった場合は色分けしないなどの対応ができるように条件分岐する(v0.6.1)
 	AutoColor bool
 }
 
 // Create template, set variable value.
 func (o *Output) Create(server string) {
-	// TODO(blacknon): Replaceでの処理ではなく、Text templateを作ってそちらで処理させる(置換処理だと脆弱性がありそうなので)
+	// TDXX(blacknon): Replaceでの処理ではなく、Text templateを作ってそちらで処理させる(置換処理だと脆弱性がありそうなので)
 	o.Server = server
 
 	// get max length at server name

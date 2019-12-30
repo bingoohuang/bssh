@@ -77,7 +77,7 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 	}
 
 	// append ServerConfig
-	// TODO(blacknon): port forwardingとx11の設定も読み込むよう処理を追加！！
+	// TDXX(blacknon): port forwardingとx11の設定も読み込むよう処理を追加！！
 	for _, host := range hostList {
 		serverConfig := ServerConfig{
 			Addr:         ssh_config.Get(host, "HostName"),
@@ -88,7 +88,7 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 			Note:         "from:" + ele,
 		}
 
-		// TODO(blacknon): OpenSshの設定ファイルだと、Certificateは複数指定可能な模様。ただ、あまり一般的な使い方ではないようなので、現状は複数のファイルを受け付けるように作っていない。
+		// TDXX(blacknon): OpenSshの設定ファイルだと、Certificateは複数指定可能な模様。ただ、あまり一般的な使い方ではないようなので、現状は複数のファイルを受け付けるように作っていない。
 		key := ssh_config.Get(host, "IdentityFile")
 		cert := ssh_config.Get(host, "Certificate")
 

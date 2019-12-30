@@ -60,7 +60,7 @@ func Lssh() (app *cli.App) {
 	app.Copyright = misc.Copyright
 	app.Version = bssh.AppVersion
 
-	// TODO(blacknon): オプションの追加
+	// TDXX(blacknon): オプションの追加
 	//     -f       ... バックグラウンドでの接続(X11接続やport forwardingをバックグラウンドで実行する場合など)。
 	//                  「ssh -f」と同じ。 (v0.6.1)
 	//                  (https://github.com/sevlyar/go-daemon)
@@ -71,7 +71,7 @@ func Lssh() (app *cli.App) {
 	//     --read_profile
 	//              ... デフォルトではlocalrc読み込みでのshellではsshサーバ上のprofileは読み込まないが、このオプションを指定することで読み込まれるようになる (v0.6.1)
 
-	// TODO(blacknon): コマンドオプションの指定方法(特にポートフォワーディング)をOpenSSHに合わせる
+	// TDXX(blacknon): コマンドオプションの指定方法(特にポートフォワーディング)をOpenSSHに合わせる
 
 	// Set options
 	app.Flags = []cli.Flag{
@@ -113,12 +113,12 @@ func Lssh() (app *cli.App) {
 func lsshAction(c *cli.Context) error {
 	common.CheckHelpFlag(c)
 
-	hosts := c.StringSlice("host")
 	confpath := c.String("file")
 
 	data := conf.ReadConf(confpath)
 	isMulti := parseMultiFlag(c)
-	names := conf.GetNameSortedList(data)
+	names := data.GetNameSortedList()
+	hosts := data.ExpandHosts(c)
 
 	processListFlag(c, names)
 

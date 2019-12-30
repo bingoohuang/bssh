@@ -15,7 +15,7 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-// TODO(blacknon):
+// TDXX(blacknon):
 //     - 外部のライブラリとして外出しする
 //     - tomlやjsonなどを渡して、出力項目を指定できるようにする
 //     - 指定した項目だけでの検索などができるようにする

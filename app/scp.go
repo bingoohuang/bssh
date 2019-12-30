@@ -102,14 +102,14 @@ func lscpAction(c *cli.Context) error {
 
 	isToRemote, _ := check.ParseScpPath(toArg)
 
-	hosts := c.StringSlice("host")
 	confpath := c.String("file")
+
+	data := conf.ReadConf(confpath)
+	names := data.GetNameSortedList()
+	hosts := data.ExpandHosts(c)
 
 	// Check from and to Type
 	check.TypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
-
-	data := conf.ReadConf(confpath)
-	names := conf.GetNameSortedList(data)
 
 	var selected, toServer, fromServer []string
 

@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// TODO(blacknon): 転送時の進捗状況を表示するプログレスバーの表示はさせること
+// TDXX(blacknon): 転送時の進捗状況を表示するプログレスバーの表示はさせること
 func (r *RunSftp) symlink(args []string) {
 	app := cli.NewApp()
 	// app.UseShortOptionHandling = true

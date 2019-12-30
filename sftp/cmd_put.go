@@ -20,7 +20,7 @@ import (
 	"github.com/vbauerster/mpb"
 )
 
-// TODO(blacknon): リファクタリング(v0.6.1)
+// TDXX(blacknon): リファクタリング(v0.6.1)
 func (r *RunSftp) put(args []string) {
 	app := cli.NewApp()
 	app.CustomAppHelpTemplate = helptext

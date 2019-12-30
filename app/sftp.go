@@ -65,11 +65,11 @@ func Lsftp() (app *cli.App) {
 func lsftpAction(c *cli.Context) error {
 	common.CheckHelpFlag(c)
 
-	hosts := c.StringSlice("host")
 	confpath := c.String("file")
 
 	data := conf.ReadConf(confpath)
-	names := conf.GetNameSortedList(data)
+	names := data.GetNameSortedList()
+	hosts := data.ExpandHosts(c)
 
 	// scp struct
 	r := new(sftp.RunSftp)

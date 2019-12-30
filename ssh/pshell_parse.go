@@ -131,7 +131,7 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 					stmtCmd = c.Y.Cmd
 					stmtRedirs = c.Y.Redirs
 
-				case *syntax.BinaryCmd: // TODO(blacknon): &&や||に対応させる(対処方法がわからん…)
+				case *syntax.BinaryCmd: // TDXX(blacknon): &&や||に対応させる(対処方法がわからん…)
 					stmtCmd = cx
 					stmtRedirs = c.X.Redirs
 				}
