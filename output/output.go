@@ -131,7 +131,7 @@ func (o *Output) Printer(reader io.Reader) {
 			break
 		}
 
-		<-time.After(50 * time.Millisecond)
+		<-time.After(50 * time.Millisecond) // nolint gomnd
 	}
 }
 
@@ -141,9 +141,9 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 	oPrompt := ""
 	name := decor.Name(oPrompt)
 
-	if len(o.ServerList) > 1 {
+	if len(o.ServerList) > 1 { // nolint gomnd
 		oPrompt = o.GetPrompt()
-		name = decor.Name(oPrompt, decor.WC{W: len(path) + 1, C: decor.DSyncWidth})
+		name = decor.Name(oPrompt, decor.WC{W: len(path) + 1, C: decor.DSyncWidth}) // nolint gomnd
 	}
 
 	// trim space
@@ -156,8 +156,8 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 			decor.OnComplete(decor.Name(path, decor.WCSyncSpaceR), fmt.Sprintf("%s done!", path)),
 		),
 		mpb.AppendDecorators(
-			decor.OnComplete(decor.Percentage(decor.WC{W: 5}), ""),
-			decor.Elapsed(decor.ET_STYLE_HHMMSS, decor.WC{W: 10}),
+			decor.OnComplete(decor.Percentage(decor.WC{W: 5}), ""), // nolint gomnd
+			decor.Elapsed(decor.ET_STYLE_HHMMSS, decor.WC{W: 10}),  // nolint gomnd
 		),
 	)
 
@@ -187,7 +187,7 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 // OutColorStrings ...
 func OutColorStrings(num int, inStrings string) (str string) {
 	// 1=Red,2=Yellow,3=Blue,4=Magenta,0=Cyan
-	color := 31 + num%5
+	color := 31 + num%5 // nolint gomnd
 
 	str = fmt.Sprintf("\x1b[%dm%s\x1b[0m", color, inStrings)
 
@@ -220,7 +220,7 @@ loop:
 		select {
 		case <-isExit:
 			break loop
-		case <-time.After(10 * time.Millisecond):
+		case <-time.After(10 * time.Millisecond): // nolint gomnd
 			continue
 		}
 	}
@@ -245,7 +245,7 @@ loop:
 		select {
 		case <-isExit:
 			break loop
-		case <-time.After(10 * time.Millisecond):
+		case <-time.After(10 * time.Millisecond): // nolint gomnd
 			continue
 		}
 	}

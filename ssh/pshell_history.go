@@ -61,7 +61,7 @@ func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r io.Rea
 			break
 		}
 
-		<-time.After(50 * time.Millisecond)
+		<-time.After(50 * time.Millisecond) // nolint gomnd
 	}
 
 	// Add Result
@@ -89,7 +89,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 		line := sc.Text()
 		text := strings.SplitN(line, " ", 2)
 
-		if len(text) < 2 {
+		if len(text) < 2 { // nolint gomnd
 			continue
 		}
 

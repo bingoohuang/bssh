@@ -95,6 +95,7 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connec
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s connect error: %s\n", server, err)
 				ch <- true
+
 				return
 			}
 
@@ -103,6 +104,7 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connec
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s create client error: %s\n", server, err)
 				ch <- true
+
 				return
 			}
 

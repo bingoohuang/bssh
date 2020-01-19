@@ -29,6 +29,7 @@ func (r *RunSftp) pwd() {
 
 			// get current directory
 			pwd, _ := client.Connect.Getwd()
+
 			if len(client.Pwd) != 0 {
 				if filepath.IsAbs(client.Pwd) {
 					pwd = client.Pwd

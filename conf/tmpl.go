@@ -28,11 +28,11 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 
 			key := tc.k
 
-			if len(tc.t) > 1 {
+			if len(tc.t) > 1 { // nolint gomnd
 				if t.ID != "" {
 					key += t.ID
 				} else {
-					key += fmt.Sprintf("%d", i+1)
+					key += fmt.Sprintf("%d", i+1) // nolint gomnd
 				}
 			}
 
@@ -69,7 +69,7 @@ func ParseTmpl(tmpl string) []Tmpl {
 	hosts := make([]Tmpl, 0)
 
 	fields := str.FieldsX(tmpl, "(", ")", -1)
-	if len(fields) < 2 {
+	if len(fields) < 2 { // nolint gomnd
 		logrus.Warnf("bad format for host %s", tmpl)
 		return hosts
 	}

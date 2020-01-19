@@ -14,8 +14,8 @@ import (
 
 // Draw a string based on the specified coordinate information
 func drawLine(x, y int, str string, colorNum int, backColorNum int) {
-	color := termbox.Attribute(colorNum + 1)
-	backColor := termbox.Attribute(backColorNum + 1)
+	color := termbox.Attribute(colorNum + 1)         // nolint gomnd
+	backColor := termbox.Attribute(backColorNum + 1) // nolint gomnd
 	// View Multi-Byte
 	for _, char := range str {
 		termbox.SetCell(x, y, char, color, backColor)
@@ -77,14 +77,14 @@ func (l *Info) draw() {
 	l.Term.Color = 255
 	l.Term.BackgroundColor = 255
 
-	_ = termbox.Clear(termbox.Attribute(l.Term.Color+1), termbox.Attribute(l.Term.BackgroundColor+1))
+	_ = termbox.Clear(termbox.Attribute(l.Term.Color+1), termbox.Attribute(l.Term.BackgroundColor+1)) // nolint gomnd
 
 	// Get Terminal Size
 	_, height := termbox.Size()
 	height -= l.Term.Headline
 
 	// Set View List Range
-	firstLine := (l.CursorLine/height)*height + 1
+	firstLine := (l.CursorLine/height)*height + 1 // nolint gomnd
 	lastLine := firstLine + height
 
 	var viewList []string
@@ -94,7 +94,7 @@ func (l *Info) draw() {
 		viewList = l.ViewText[firstLine:lastLine]
 	}
 
-	cursor := l.CursorLine - firstLine + 1
+	cursor := l.CursorLine - firstLine + 1 // nolint gomnd
 
 	l.drawViewHead()
 	l.drawViewList(viewList, cursor)

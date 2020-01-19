@@ -94,7 +94,7 @@ func (r *RunSftp) pullPath(client *Connect, path, target string) {
 }
 
 func (r *RunSftp) getAction(c *cli.Context) error {
-	if len(c.Args()) != 2 {
+	if len(c.Args()) != 2 { // nolint gomnd
 		fmt.Println("Requires two arguments")
 		fmt.Println("get source(remote) target(local)")
 
@@ -130,7 +130,7 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 		server, client := s, c
 
 		targetdir := target
-		if len(r.Client) > 1 {
+		if len(r.Client) > 1 { // nolint gomnd
 			targetdir = filepath.Join(target, server)
 			// mkdir local target directory
 			err = os.MkdirAll(targetdir, 0755)
@@ -166,7 +166,7 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 	r.Progress.Wait()
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond) // nolint gomnd
 
 	return nil
 }
@@ -194,7 +194,7 @@ func pullFile(stat os.FileInfo, client *Connect, localpath, p string, r *RunSftp
 	// set tee reader
 	rd := io.TeeReader(remotefile, localfile)
 
-	r.ProgressWG.Add(1)
+	r.ProgressWG.Add(1) // nolint gomnd
 	client.Output.ProgressPrinter(size, rd, p)
 
 	return nil

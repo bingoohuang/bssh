@@ -41,7 +41,7 @@ func (r *RunSftp) chown(args []string) {
 }
 
 func (r *RunSftp) chownAction(c *cli.Context) error {
-	if len(c.Args()) != 2 {
+	if len(c.Args()) != 2 { // nolint gomnd
 		fmt.Println("Requires two arguments")
 		fmt.Println("chown group path")
 
@@ -68,9 +68,10 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 				path = filepath.Join(client.Pwd, path)
 			}
 
-			//
 			userid, err := strconv.Atoi(user)
+
 			var gid, uid int
+
 			if err != nil {
 				// read /etc/passwd
 				passwdFile, err := client.Connect.Open("/etc/passwd")
@@ -78,11 +79,14 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 					fmt.Fprintf(w, "%s\n", err)
 					return
 				}
+
 				passwdByte, err := ioutil.ReadAll(passwdFile)
+
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
 					return
 				}
+
 				passwd := string(passwdByte)
 
 				// get gid

@@ -38,7 +38,7 @@ func (r *RunSftp) put(args []string) {
 }
 
 func (r *RunSftp) putAction(c *cli.Context) error {
-	if len(c.Args()) != 2 {
+	if len(c.Args()) != 2 { // nolint gomnd
 		fmt.Println("Requires two arguments")
 		fmt.Println("put source(local) target(remote)")
 
@@ -95,7 +95,7 @@ func (r *RunSftp) putAction(c *cli.Context) error {
 
 	r.Progress.Wait() // wait Progress
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond) // nolint gomnd
 
 	return nil
 }
@@ -148,7 +148,7 @@ func (r *RunSftp) pushFile(c *Connect, localFile io.Reader, path string, size in
 
 	rd := io.TeeReader(localFile, remoteFile)
 
-	r.ProgressWG.Add(1)
+	r.ProgressWG.Add(1) // nolint gomnd
 	c.Output.ProgressPrinter(size, rd, path)
 
 	return nil

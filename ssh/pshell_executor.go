@@ -123,7 +123,7 @@ func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 	isBuildInOnly := true
 
 	for _, pline := range pslice {
-		if len(pline) > 1 {
+		if len(pline) > 1 { // nolint gomnd
 			isBuildInOnly = false
 			break
 		}

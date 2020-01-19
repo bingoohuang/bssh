@@ -41,7 +41,7 @@ func (r *RunSftp) chgrp(args []string) {
 }
 
 func (r *RunSftp) chgrpAction(c *cli.Context) error {
-	if len(c.Args()) != 2 {
+	if len(c.Args()) != 2 { // nolint gomnd
 		fmt.Println("Requires two arguments")
 		fmt.Println("chgrp group path")
 
@@ -69,7 +69,9 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 			}
 
 			groupid, err := strconv.Atoi(group)
+
 			var gid, uid int
+
 			if err != nil {
 				// read /etc/group
 				groupFile, err := client.Connect.Open("/etc/group")
@@ -77,11 +79,13 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 					fmt.Fprintf(w, "%s\n", err)
 					return
 				}
+
 				groupByte, err := ioutil.ReadAll(groupFile)
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
 					return
 				}
+
 				groups := string(groupByte)
 
 				// get gid

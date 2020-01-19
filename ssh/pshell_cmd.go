@@ -102,9 +102,9 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 
 	// %out [num]
 	case misc.PercentOut:
-		num := ps.Count - 1
+		num := ps.Count - 1 // nolint gomnd
 
-		if len(pl.Args) > 1 {
+		if len(pl.Args) > 1 { // nolint gomnd
 			var err error
 
 			num, err = strconv.Atoi(pl.Args[1])
@@ -312,6 +312,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 
 	go func() {
 		<-kill
+
 		for _, s := range sessions {
 			_ = s.Signal(ssh.SIGINT)
 			_ = s.Close()
@@ -321,7 +322,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	wait(len(sessions), exit)
 
 	// wait time (0.500 sec)
-	time.Sleep(5000 * time.Millisecond)
+	time.Sleep(5000 * time.Millisecond) // nolint gomnd
 
 	// Print message `Please input enter` (Only when input is os.Stdin and output is os.Stdout).
 	// Note: This necessary for using Blocking.IO.
@@ -388,6 +389,7 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 
 	go func() {
 		<-kill
+
 		_ = p.Kill()
 	}()
 

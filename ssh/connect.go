@@ -33,7 +33,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 	}
 
 	// setup dialer
-	var dialer proxy.Dialer = gonet.DialerTimeoutBean{ConnTimeout: 10 * time.Second}
+	var dialer proxy.Dialer = gonet.DialerTimeoutBean{ConnTimeout: 10 * time.Second} // nolint gomnd
 
 	// Connect loop proxy server
 	for _, p := range proxyRoute {
@@ -147,7 +147,7 @@ proxyLoop:
 	}
 
 	// reverse proxy slice
-	for i, j := 0, len(proxyRoute)-1; i < j; i, j = i+1, j-1 {
+	for i, j := 0, len(proxyRoute)-1; i < j; i, j = i+1, j-1 { // nolint gomnd
 		proxyRoute[i], proxyRoute[j] = proxyRoute[j], proxyRoute[i]
 	}
 

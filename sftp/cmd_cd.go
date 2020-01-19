@@ -18,7 +18,7 @@ import (
 func (r *RunSftp) cd(args []string) {
 	path := "./"
 	// cd command only
-	if len(args) == 1 {
+	if len(args) == 1 { // nolint gomnd
 		// set pwd
 		for _, c := range r.Client {
 			c.Pwd = path
@@ -82,7 +82,7 @@ func (r *RunSftp) lcd(args []string) {
 	usr, _ := user.Current()
 
 	path := usr.HomeDir
-	if len(args) > 1 {
+	if len(args) > 1 { // nolint gomnd
 		path = args[1]
 	}
 

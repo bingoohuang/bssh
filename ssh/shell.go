@@ -229,7 +229,7 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 
 // noneExecute is not execute command and shell.
 func (r *Run) noneExecute() {
-	for range time.After(500 * time.Millisecond) {
+	for range time.After(500 * time.Millisecond) { // nolint gomnd
 
 	}
 }

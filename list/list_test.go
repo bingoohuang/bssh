@@ -118,6 +118,7 @@ func TestAllToggle(t *testing.T) {
 	}
 }
 
+// nolint funlen
 func TestGetText(t *testing.T) {
 	type TestData struct {
 		desc   string
@@ -225,6 +226,7 @@ func TestGetText(t *testing.T) {
 	}
 }
 
+// nolint funlen
 func TestGetFilterText(t *testing.T) {
 	type TestData struct {
 		desc   string

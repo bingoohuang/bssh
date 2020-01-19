@@ -185,7 +185,7 @@ func ReadConf(confPath string) (config Config) {
 	if !common.IsExist(confPath) {
 		fmt.Printf("Config file(%s) Not Found.\nPlease create file.\n\n", confPath)
 		fmt.Printf("sample: %s\n", "https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	config.Server = map[string]ServerConfig{}
@@ -194,7 +194,7 @@ func ReadConf(confPath string) (config Config) {
 	// Read config file
 	if _, err := toml.DecodeFile(confPath, &config); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	if config.Extra.Passphrase != "" {
@@ -224,7 +224,7 @@ func ReadConf(confPath string) (config Config) {
 
 	// Check Config Parameter
 	if !checkFormatServerConf(config) {
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	config.parseGroups()

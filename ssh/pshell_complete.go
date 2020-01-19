@@ -48,7 +48,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	ll := 0
 	num := 0
 
-	if sl >= 1 {
+	if sl >= 1 { // nolint gomnd
 		ll = len(pslice[sl-1])             // pline count
 		num = len(pslice[sl-1][ll-1].Args) // pline args count
 	}

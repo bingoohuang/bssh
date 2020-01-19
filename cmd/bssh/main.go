@@ -20,7 +20,7 @@ func main() {
 	args := os.Args
 
 HERE:
-	if len(args) > 1 {
+	if len(args) > 1 { // nolint gomnd
 		sub := args[1]
 		switch sub {
 		case "scp":

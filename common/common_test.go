@@ -75,11 +75,11 @@ func TestStructToMap(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "Converts struct to map", val: A{S: "a", I: 1},
+		{desc: "Converts struct to map", val: A{S: "a", I: 1}, // nolint gomnd
 			mapVal: map[string]interface{}{"S": "a", "I": 1}, ok: false},
 		{desc: "Sets zero value if val is a empty struct", val: A{},
 			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false},
-		{desc: "Private field doesn't set", val: A{f: 1.0},
+		{desc: "Private field doesn't set", val: A{f: 1.0}, // nolint gomnd
 			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false},
 	}
 
@@ -106,7 +106,7 @@ func TestMapToStruct(t *testing.T) {
 
 	tds := []TestData{
 		{desc: "Converts map to struct",
-			mapVal: map[string]interface{}{"S": "a", "I": 1}, val: A{S: "a", I: 1}, ok: false},
+			mapVal: map[string]interface{}{"S": "a", "I": 1}, val: A{S: "a", I: 1}, ok: false}, // nolint gomnd
 		{desc: "Empty map",
 			mapVal: map[string]interface{}{}, val: A{S: "", I: 0}, ok: false},
 		// mapVal: map[string]interface{}{"f":1.0} raises panic
@@ -129,9 +129,9 @@ func TestGetMaxLength(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "list has 1 value", list: []string{"abc"}, expect: 3},
-		{desc: "list has 2 value", list: []string{"abc", "abcde"}, expect: 5},
-		{desc: "Multibyte", list: []string{"あいうえお"}, expect: 15},
+		{desc: "list has 1 value", list: []string{"abc"}, expect: 3},          // nolint gomnd
+		{desc: "list has 2 value", list: []string{"abc", "abcde"}, expect: 5}, // nolint gomnd
+		{desc: "Multibyte", list: []string{"あいうえお"}, expect: 15},              // nolint gomnd
 		{desc: "list is empty", list: []string{}, expect: 0},
 		{desc: "list is nil", list: nil, expect: 0},
 	}

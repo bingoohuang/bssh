@@ -38,7 +38,7 @@ func (r *RunSftp) shell() {
 		prompt.OptionLivePrefix(r.CreatePrompt),
 		prompt.OptionInputTextColor(prompt.Green),
 		prompt.OptionPrefixTextColor(prompt.Blue),
-		prompt.OptionMaxSuggestion(16),
+		prompt.OptionMaxSuggestion(16),                                              // nolint gomnd
 		prompt.OptionCompletionWordSeparator(completer.FilePathCompletionSeparator), // test
 	)
 
@@ -120,7 +120,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 	}
 
 	cmdline := strings.Split(left, " ")
-	if len(cmdline) == 1 {
+	if len(cmdline) == 1 { // nolint gomnd
 		suggest = []prompt.Suggest{
 			{Text: "bye", Description: "Quit lsftp"},
 			// {Text: "cat", Description: "Open file"},
@@ -172,9 +172,9 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		case misc.Get:
 			// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
 			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
-			case 1: // remote
+			case 1: // nolint gomnd remote
 				return r.PathComplete(true, 1, t)
-			case 2: // local
+			case 2: // nolint gomnd local
 				return r.PathComplete(false, 2, t)
 			}
 
@@ -251,9 +251,9 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 			// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
 			// TDXX（blacknon）：添加选项后，有必要减少参数数量
 			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
-			case 1: // local
+			case 1: // nolint gomnd local
 				return r.PathComplete(false, 1, t)
-			case 2: // remote
+			case 2: // nolint gomnd remote
 				return r.PathComplete(true, 2, t)
 			}
 		case "pwd":
@@ -350,6 +350,7 @@ func (r *RunSftp) GetRemoteComplete(path string) {
 			// set glob list
 			for _, p := range globlist {
 				p = filepath.Base(p)
+
 				sm.Lock()
 				m[p] = append(m[p], server)
 				sm.Unlock()

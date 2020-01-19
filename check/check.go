@@ -40,7 +40,7 @@ func ParseScpPath(arg string) (isRemote bool, path string) {
 	argArray := strings.SplitN(arg, ":", 2)
 
 	// check split count
-	if len(argArray) < 2 {
+	if len(argArray) < 2 { // nolint gomnd
 		return false, argArray[0]
 	}
 
@@ -51,7 +51,7 @@ func ParseScpPath(arg string) (isRemote bool, path string) {
 		return true, argArray[1]
 	default: // false
 		_, _ = fmt.Fprintln(os.Stderr, "The format of the specified argument is incorrect.")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	return false, ""
@@ -71,18 +71,18 @@ func TypeError(isFromInRemote, isFromInLocal, isToRemote bool, countHosts int) {
 	// from in local and remote
 	if isFromInRemote && isFromInLocal {
 		fmt.Fprintln(os.Stderr, "Can not set LOCAL and REMOTE to FROM path.")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	// local only
 	if !isFromInRemote && !isToRemote {
 		fmt.Fprintln(os.Stderr, "It does not correspond LOCAL to LOCAL copy.")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	// remote 2 remote and set host option
 	if isFromInRemote && isToRemote && countHosts != 0 {
 		fmt.Fprintln(os.Stderr, "In the case of REMOTE to REMOTE copy, it does not correspond to host option.")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 }

@@ -88,7 +88,7 @@ func lpbeAction(c *cli.Context) error {
 	if err != nil {
 		fmt.Println(confpath, "read error", err.Error())
 
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	data := conf.ReadConf(confpath)
@@ -115,7 +115,7 @@ func lpbeAction(c *cli.Context) error {
 	if err != nil {
 		fmt.Println(confpath, "write error", err.Error())
 
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	return nil

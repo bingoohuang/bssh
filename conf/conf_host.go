@@ -24,6 +24,7 @@ func (cf *Config) ExpandHosts(c *cli.Context) []string {
 			}
 
 			count := 0
+
 			if strings.Contains(sh, "*") {
 				for k := range cf.Server {
 					if ok, _ := filepath.Match(sh, k); ok {

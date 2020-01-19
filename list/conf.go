@@ -30,7 +30,7 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 
 	if selected[0] == "ServerName" {
 		fmt.Fprintln(os.Stderr, "Server not selected.")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	common.SaveServerNameLastLog(selected)
@@ -57,7 +57,7 @@ func showGroupsView(cf *conf.Config) string {
 
 	if selected[0] == "GroupName" {
 		fmt.Fprintln(os.Stderr, "Group not selected.")
-		os.Exit(1)
+		os.Exit(1) // nolint gomnd
 	}
 
 	return selected[0]

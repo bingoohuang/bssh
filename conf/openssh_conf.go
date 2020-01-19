@@ -25,7 +25,6 @@ func openOpenSSHConfig(path, command string) (cfg *ssh_config.Config, err error)
 
 	switch {
 	case path != "": // 1st
-		// Read Openssh Config
 		sshConfigFile := common.GetFullPath(path)
 		rd, err = os.Open(sshConfigFile)
 	case command != "": // 2nd
@@ -41,16 +40,13 @@ func openOpenSSHConfig(path, command string) (cfg *ssh_config.Config, err error)
 		return
 	}
 
-	cfg, err = ssh_config.Decode(rd)
-
-	return
+	return ssh_config.Decode(rd)
 }
 
 // getOpenSSHConfig loads the specified OpenSsh configuration file and returns it in conf.ServerConfig format
 func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err error) {
 	config = map[string]ServerConfig{}
 
-	// open openssh config
 	cfg, err := openOpenSSHConfig(path, command)
 	if err != nil {
 		return
@@ -76,8 +72,6 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 		}
 	}
 
-	// append ServerConfig
-	// TDXX(blacknon): port forwardingとx11の設定も読み込むよう処理を追加！！
 	for _, host := range hostList {
 		serverConfig := ServerConfig{
 			Addr:         ssh_config.Get(host, "HostName"),
@@ -88,7 +82,10 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 			Note:         "from:" + ele,
 		}
 
-		// TDXX(blacknon): OpenSshの設定ファイルだと、Certificateは複数指定可能な模様。ただ、あまり一般的な使い方ではないようなので、現状は複数のファイルを受け付けるように作っていない。
+		if serverConfig.Addr == "" {
+			serverConfig.Addr = host
+		}
+
 		key := ssh_config.Get(host, "IdentityFile")
 		cert := ssh_config.Get(host, "Certificate")
 
@@ -99,14 +96,12 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 			serverConfig.Key = key
 		}
 
-		// PKCS11 provider
 		pkcs11Provider := ssh_config.Get(host, "PKCS11Provider")
 		if pkcs11Provider != "" {
 			serverConfig.PKCS11Use = true
 			serverConfig.PKCS11Provider = pkcs11Provider
 		}
 
-		// x11 forwarding
 		x11 := ssh_config.Get(host, "ForwardX11")
 		if x11 == misc.Yes {
 			serverConfig.X11 = true
@@ -116,7 +111,8 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 		localForward := ssh_config.Get(host, "LocalForward")
 		if localForward != "" {
 			array := strings.SplitN(localForward, " ", 2)
-			if len(array) > 1 {
+
+			if len(array) > 1 { // nolint gomnd
 				var e error
 
 				_, e = strconv.Atoi(array[0])
@@ -139,7 +135,8 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 		remoteForward := ssh_config.Get(host, "RemoteForward")
 		if remoteForward != "" {
 			array := strings.SplitN(remoteForward, " ", 2)
-			if len(array) > 1 {
+
+			if len(array) > 1 { // nolint gomnd
 				var e error
 
 				_, e = strconv.Atoi(array[0])

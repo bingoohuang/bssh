@@ -304,10 +304,10 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 
 	// switch count
 	switch count {
-	case 3: // `localhost:8000:localhost:18000`
+	case 3: // nolint gomnd `localhost:8000:localhost:18000`
 		local = data[0] + ":" + data[1]
 		remote = data[2] + ":" + data[3]
-	case 2:
+	case 2: // nolint gomnd
 		// check 1st column is int
 		_, e := strconv.Atoi(data[0])
 		if e == nil { // 1st column is port (int)
@@ -342,7 +342,7 @@ func ParseArgs(options []cli.Flag, args []string) []string {
 
 		for _, n := range names {
 			// add hyphen
-			if len(n) == 1 {
+			if len(n) == 1 { // nolint gomnd
 				n = "-" + n
 			} else {
 				n = "--" + n

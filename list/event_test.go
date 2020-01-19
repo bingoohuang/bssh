@@ -40,6 +40,8 @@ func TestDeleteRune(t *testing.T) {
 		{desc: "Delete alphabet rune", l: Info{Keyword: "abc"}, expect: "ab"},
 		{desc: "Delete multibyte rune", l: Info{Keyword: "あいう"}, expect: "あい"},
 		{desc: "Expect is empty", l: Info{Keyword: "a"}, expect: ""},
+
+		// nolint godox
 		// FIXME raise panic {desc: "Delete empty", l: Info{Keyword: ""}, expect: ""},
 	}
 

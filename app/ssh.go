@@ -223,7 +223,7 @@ func parseSelected(prompt string, hosts []string, names []string, data conf.Conf
 	if len(hosts) > 0 {
 		if !check.ExistServer(hosts, names) {
 			_, _ = fmt.Fprintln(os.Stderr, "Input Server not found from list.")
-			os.Exit(1)
+			os.Exit(1) // nolint gomnd
 		} else {
 			selected = hosts
 		}

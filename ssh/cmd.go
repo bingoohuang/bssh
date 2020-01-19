@@ -35,7 +35,7 @@ func (r *Run) cmd() {
 	r.PrintSelectServer()
 	r.printRunCommand()
 
-	if len(r.ServerList) == 1 {
+	if len(r.ServerList) == 1 { // nolint gomnd
 		r.printProxy(r.ServerList[0])
 	}
 
@@ -79,7 +79,7 @@ func (r *Run) cmd() {
 		c.Stderr = o.NewWriter()
 
 		// if single server, setup port forwarding.
-		if len(r.ServerList) == 1 {
+		if len(r.ServerList) == 1 { // nolint gomnd
 			r.setupPortForwarding(&config, c)
 		} else if r.IsParallel {
 			w, _ := c.Session.StdinPipe()
@@ -145,8 +145,7 @@ func (r *Run) cmd() {
 
 	close(exitInput)
 
-	// sleep
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond) // nolint gomnd
 }
 
 func (r *Run) setupPortForwarding(config *conf.ServerConfig, c *sshlib.Connect) {

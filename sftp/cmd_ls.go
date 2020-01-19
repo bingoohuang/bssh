@@ -148,6 +148,7 @@ func (r *RunSftp) lsAction(c *cli.Context) error {
 
 			// set path
 			path := client.Pwd
+
 			if len(argpath) > 0 {
 				if !filepath.IsAbs(argpath) {
 					path = filepath.Join(path, argpath)
@@ -271,7 +272,7 @@ func (r *RunSftp) lsAction(c *cli.Context) error {
 				data.Time = timestr
 				data.Path = f.Name()
 
-				if len(lsdata) == 1 {
+				if len(lsdata) == 1 { // nolint gomnd
 					// set print format
 					format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
 

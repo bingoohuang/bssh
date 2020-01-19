@@ -70,12 +70,10 @@ func (r *Run) CreateAuthMethodMap() {
 				keyName := pair[0]
 				keyPass := ""
 
-				//
-				if len(pair) > 1 {
+				if len(pair) > 1 { // nolint gomnd
 					keyPass = pair[1]
 				}
 
-				//
 				err := r.registerAuthMapPublicKey(server, keyName, keyPass)
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)

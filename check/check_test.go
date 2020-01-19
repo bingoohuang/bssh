@@ -104,10 +104,10 @@ func TestCheckTypeError(t *testing.T) {
 		// exit 1 {r: true, l: true, toR: true, countHosts: 0},
 
 		// exit 1 {r: false, l: false, toR: false, countHosts: 1},
-		{r: false, l: false, toR: true, countHosts: 1},
+		{r: false, l: false, toR: true, countHosts: 1}, // nolint gomnd
 		// exit 1 {r: false, l: true, toR: false, countHosts: 1},
-		{r: false, l: true, toR: true, countHosts: 1},
-		{r: true, l: false, toR: false, countHosts: 1},
+		{r: false, l: true, toR: true, countHosts: 1},  // nolint gomnd
+		{r: true, l: false, toR: false, countHosts: 1}, // nolint gomnd
 		// exit 1 {r: true, l: false, toR: true, countHosts: 1},
 		// exit 1 {r: true, l: true, toR: false, countHosts: 1},
 		// exit 1 {r: true, l: true, toR: true, countHosts: 1},
