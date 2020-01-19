@@ -1,4 +1,4 @@
-# /Users/bingoobjca/.bssh.conf
+# /Users/bingoobjca/.bssh.toml
 [log]
 enable = true
 timestamp = true

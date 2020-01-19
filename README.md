@@ -30,8 +30,8 @@ compile go file(tested go1.12.4).
 
     go get -u github.com/bingoohuang/bssh/cmd/bssh
 
-    # copy sample config. create `~/.bssh.conf`.
-    test -f ~/.bssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.conf
+    # copy sample config. create `~/.bssh.toml`.
+    test -f ~/.bssh.toml||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.toml
 
 or
 
@@ -39,12 +39,12 @@ or
     cd bssh
     make && sudo make install
 
-    # copy sample config. create `~/.bssh.conf`.
-    test -f ~/.bssh.conf||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.conf
+    # copy sample config. create `~/.bssh.toml`.
+    test -f ~/.bssh.toml||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.toml
 
 ## Config
 
-Please edit "~/.bssh.conf".\
+Please edit "~/.bssh.toml".\
 For details see [Config](doc/Config.md).
 
 ## Usage
@@ -65,7 +65,7 @@ option(bssh)
 	
 	OPTIONS:
 	    --host servername, -H servername            connect servername.
-	    --file filepath, -F filepath                config filepath. (default: "/Users/blacknon/.bssh.conf")
+	    --file filepath, -F filepath                config filepath. (default: "/Users/blacknon/.bssh.toml")
 	    -L [bind_address:]port:remote_address:port  Local port forward mode.Specify a [bind_address:]port:remote_address:port.
 	    -R [bind_address:]port:remote_address:port  Remote port forward mode.Specify a [bind_address:]port:remote_address:port.
 	    -D port                                     Dynamic port forward mode(Socks5). Specify a port.
@@ -115,7 +115,7 @@ option(lscp)
 	OPTIONS:
 	    --host value, -H value  connect servernames
 	    --list, -l              print server list from config
-	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.conf")
+	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.toml")
 	    --permission, -p        copy file permission
 	    --help, -h              print this help
 	    --version, -v           print the version
@@ -151,7 +151,7 @@ option(bssh ftp)
 	    bssh ftp [options]
 	
 	OPTIONS:
-	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.conf")
+	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.toml")
 	    --help, -h              print this help
 	    --version, -v           print the version
 	
@@ -185,7 +185,7 @@ You can connect using a local bashrc file (if ssh login shell is bash).
 <img src="./images/1-2.gif" />
 </p>
 
-`~/.bssh.conf` example.
+`~/.bssh.toml` example.
 
     [server.localrc]
 	addr = "192.168.100.104"
@@ -208,7 +208,7 @@ if iTerm2, you can also change the profile.
 
 
 
-`~/.bssh.conf` example.
+`~/.bssh.toml` example.
 
     [server.iTerm2_sample]
 	addr = "192.168.100.103"
@@ -229,7 +229,7 @@ if iTerm2, you can also change the profile.
 
 A terminal log can be recorded by writing a configuration file.
 
-`~/.bssh.conf` example.
+`~/.bssh.toml` example.
 
 	[log]
 	enable = true
@@ -355,7 +355,7 @@ Alternatively, you can specify and read the path as follows: In addition to the 
 You can include server settings in another file.\
 `common` settings can be specified for each file that you went out.
 
-`~/.bssh.conf` example.
+`~/.bssh.toml` example.
 
 	[includes]
 	path = [
@@ -386,7 +386,7 @@ You can include server settings in another file.\
 
 The priority of setting values ​​is as follows.
 
-`[server.hogehoge]` > `[common] at Include file` > `[common] at ~/.bssh.conf`
+`[server.hogehoge]` > `[common] at Include file` > `[common] at ~/.bssh.toml`
 
 
 </details>

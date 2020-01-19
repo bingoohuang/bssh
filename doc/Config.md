@@ -1,8 +1,8 @@
-The default PATH of the configuration file is ~ /.bssh.conf. This is a sample at configuration file.
+The default PATH of the configuration file is ~ /.bssh.toml. This is a sample at configuration file.
 
 ### Basic Setting
 
-#### .bssh.conf
+#### .bssh.toml
 
 ```
 [server.ServerName1]
@@ -58,20 +58,20 @@ note = "this is a test. key auth"
 
 Include config file settings and path. (only common,server config)
 
-#### .bssh.conf
+#### .bssh.toml
 
 ```
 # [include.include1] # When writing individually
-# path = "~/.bssh.conf.include1"
+# path = "~/.bssh.toml.include1"
 
 [includes]
 path = [
-     "~/.bssh.conf.include1"
-    ,"~/.bssh.conf.include2"
+     "~/.bssh.toml.include1"
+    ,"~/.bssh.toml.include2"
 ]
 ```
 
-#### .bssh.conf.include1
+#### .bssh.toml.include1
 
 ```
 [server.ServerName1]
@@ -89,7 +89,7 @@ You can record the terminal log. The following variables can be specified in the
 * \<Date\> ... YYYYMMDD
 * \<Hostname\> ... ServerName
 
-#### .bssh.conf
+#### .bssh.toml
 ```
 [log]
 enable = true       # bool logging
@@ -101,7 +101,7 @@ dirpath = "/path/to/<Date>_<Hostname>/logdir"
 
 You can connect via http, socks 5, ssh proxy. Supported multiple proxy. (html, socks5 only 1st proxy).
 
-#### .bssh.conf
+#### .bssh.toml
 
 ```
 [server.sshProxyServer]

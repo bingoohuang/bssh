@@ -1,6 +1,6 @@
 ### configure multiple 
 
-.bssh.conf
+.bssh.toml
 
 ```
 [server.ServerName]
@@ -35,7 +35,7 @@ note = "this is a test. password auth" # note text
 
 ### grouping servers (when there is more than ~20 servers, grouping is a good chosen)
 
-.bssh.conf
+.bssh.toml
 
 ```
 [server.zonea]
