@@ -11,6 +11,8 @@ builds:
       post: ./upx.sh
     goos:
       - darwin
+    goarch:
+      - amd64
 env:
   - CGO_ENABLED=0
 archives:
