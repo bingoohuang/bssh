@@ -42,3 +42,8 @@ tmpl = "192.168.8.(22-26):22 footstone/na"
 note = "A区-API网关测试"
 proxy = "aliyun-jumper"
 # 阿里云环境 -- end ---
+
+
+[server.rke]
+tmpl = "192.168.1.(16 18 182) rke id=(16 18 182)"
+key  = "~/.ssh/rke_id_rsa"
