@@ -184,7 +184,7 @@ func (r *Run) pshell() (err error) {
 // CreatePrompt is create shell prompt.
 // default value is `[${COUNT}] <<< `
 func (ps *pShell) CreatePrompt() (p string, result bool) {
-	// set prompt templete (from conf)
+	// set prompt template (from conf)
 	p = ps.PROMPT
 	if p == "" {
 		p = defaultPrompt

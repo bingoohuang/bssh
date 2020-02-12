@@ -26,10 +26,7 @@ const cmdOPROMPT = "${SERVER} :: "
 func (r *Run) cmd() {
 	command := strings.Join(r.ExecCmd, " ")
 	connMap := map[string]*sshlib.Connect{}
-
-	// make channel
-	finished := make(chan bool)
-	exitInput := make(chan bool)
+	finished, exitInput := make(chan bool), make(chan bool)
 
 	// print header
 	r.PrintSelectServer()
@@ -65,18 +62,13 @@ func (r *Run) cmd() {
 		config := r.Conf.Server[s]
 
 		o := &output.Output{
-			Templete:      cmdOPROMPT,
-			Count:         0,
-			ServerList:    r.ServerList,
-			Conf:          r.Conf.Server[s],
-			EnableHeader:  r.EnableHeader,
-			DisableHeader: r.DisableHeader,
-			AutoColor:     true,
+			Templete: cmdOPROMPT, Count: 0, AutoColor: true,
+			ServerList: r.ServerList, Conf: r.Conf.Server[s],
+			EnableHeader: r.EnableHeader, DisableHeader: r.DisableHeader,
 		}
 		o.Create(s)
 
-		c.Stdout = o.NewWriter()
-		c.Stderr = o.NewWriter()
+		c.Stdout, c.Stderr = o.NewWriter(), o.NewWriter()
 
 		// if single server, setup port forwarding.
 		if len(r.ServerList) == 1 { // nolint gomnd
@@ -106,36 +98,7 @@ func (r *Run) cmd() {
 
 	// run command
 	for _, c := range connMap {
-		conn := c
-
-		if r.IsParallel {
-			go func() {
-				defer func() { finished <- true }()
-
-				_ = conn.Command(command)
-			}()
-		} else {
-			if len(stdinData) > 0 {
-				// get stdin
-				rd := bytes.NewReader(stdinData)
-				w, _ := conn.Session.StdinPipe()
-
-				// run command
-				go func() {
-					defer func() { finished <- true }()
-
-					_ = conn.Command(command)
-				}()
-
-				// send stdin
-				_, _ = io.Copy(w, rd)
-				_ = w.Close()
-			} else {
-				// run command
-				_ = conn.Command(command)
-				go func() { finished <- true }()
-			}
-		}
+		r.runCommand(c, finished, command, stdinData)
 	}
 
 	// wait
@@ -146,6 +109,39 @@ func (r *Run) cmd() {
 	close(exitInput)
 
 	time.Sleep(300 * time.Millisecond) // nolint gomnd
+}
+
+func (r *Run) runCommand(conn *sshlib.Connect, finished chan bool, command string, stdinData []byte) {
+	if r.IsParallel {
+		go func() {
+			defer func() { finished <- true }()
+
+			_ = conn.Command(command)
+		}()
+
+		return
+	}
+
+	if len(stdinData) > 0 {
+		// get stdin
+		rd := bytes.NewReader(stdinData)
+		w, _ := conn.Session.StdinPipe()
+
+		// run command
+		go func() {
+			defer func() { finished <- true }()
+
+			_ = conn.Command(command)
+		}()
+
+		// send stdin
+		_, _ = io.Copy(w, rd)
+		_ = w.Close()
+	} else {
+		// run command
+		_ = conn.Command(command)
+		go func() { finished <- true }()
+	}
 }
 
 func (r *Run) setupPortForwarding(config *conf.ServerConfig, c *sshlib.Connect) {
@@ -175,7 +171,7 @@ func (r *Run) setupPortForwarding(config *conf.ServerConfig, c *sshlib.Connect) 
 	if config.DynamicPortForward != "" {
 		r.printDynamicPortForward(config.DynamicPortForward)
 
-		go c.TCPDynamicForward("localhost", config.DynamicPortForward)
+		go func() { _ = c.TCPDynamicForward("localhost", config.DynamicPortForward) }()
 	}
 
 	// if tty

@@ -111,7 +111,6 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 			switch c := stmtCmd.(type) {
 			case *syntax.CallExpr:
 				args := parseCallExpr(c)
-
 				args = append(args, parseRedirect(stmtRedirs)...)
 				pLine := pipeLine{Args: args}
 				cmdLine = append(cmdLine, pLine)
@@ -120,17 +119,12 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 			case *syntax.BinaryCmd:
 				switch cx := c.X.Cmd.(type) {
 				case *syntax.CallExpr:
-					cxr := c.X.Redirs
-
 					args := parseCallExpr(cx)
-					args = append(args, parseRedirect(cxr)...)
-
+					args = append(args, parseRedirect(c.X.Redirs)...)
 					pLine := pipeLine{Args: args, Operator: c.Op.String()}
-
 					cmdLine = append(cmdLine, pLine)
 					stmtCmd = c.Y.Cmd
 					stmtRedirs = c.Y.Redirs
-
 				case *syntax.BinaryCmd: // TDXX(blacknon): &&や||に対応させる(対処方法がわからん…)
 					stmtCmd = cx
 					stmtRedirs = c.X.Redirs

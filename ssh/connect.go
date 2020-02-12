@@ -42,13 +42,10 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 		switch p.Type {
 		case misc.HTTP, misc.HTTPS, misc.Socks, misc.Socks5:
 			c := config.Proxy[p.Name]
-
-			pxy := &sshlib.Proxy{Type: p.Type, Forwarder: dialer,
-				Addr: c.Addr, Port: c.Port, User: c.User, Password: c.Pass}
+			pxy := &sshlib.Proxy{Type: p.Type, Forwarder: dialer, Addr: c.Addr, Port: c.Port, User: c.User, Password: c.Pass}
 			dialer, err = pxy.CreateProxyDialer()
 		case misc.Command:
-			pxy := &sshlib.Proxy{Type: p.Type, Command: p.Name}
-			dialer, err = pxy.CreateProxyDialer()
+			dialer, err = (&sshlib.Proxy{Type: p.Type, Command: p.Name}).CreateProxyDialer()
 		default:
 			c := config.Server[p.Name]
 			pxy := &sshlib.Connect{ProxyDialer: dialer}
@@ -71,14 +68,9 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 
 	// connect target server
 	connect = &sshlib.Connect{
-		ProxyDialer:           dialer,
-		ForwardAgent:          s.SSHAgentUse,
-		Agent:                 r.agent,
-		ForwardX11:            x11,
-		TTY:                   r.IsTerm,
-		ConnectTimeout:        s.ConnectTimeout,
-		SendKeepAliveMax:      s.ServerAliveCountMax,
-		SendKeepAliveInterval: s.ServerAliveCountInterval,
+		ProxyDialer: dialer, ForwardAgent: s.SSHAgentUse,
+		Agent: r.agent, ForwardX11: x11, TTY: r.IsTerm, ConnectTimeout: s.ConnectTimeout,
+		SendKeepAliveMax: s.ServerAliveCountMax, SendKeepAliveInterval: s.ServerAliveCountInterval,
 	}
 
 	err = connect.CreateClient(s.Addr, s.Port, s.User, r.serverAuthMethodMap[server])

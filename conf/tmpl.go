@@ -36,6 +36,14 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 				}
 			}
 
+			if proxy := t.Props["proxy"]; proxy != "" && c.Proxy == "" {
+				c.Proxy = proxy
+			}
+
+			if group := t.Props["group"]; group != "" && len(c.Group) == 0 {
+				c.Group = str.SplitTrim(group, ",")
+			}
+
 			cf.Server[key] = c
 		}
 	}
@@ -78,14 +86,13 @@ func ParseTmpl(tmpl string) []Tmpl {
 	user, pass := parseUserPass(fields[1])
 
 	props := parseProps(fields[2:])
-	t := Tmpl{ID: findID(props), Host: host, Port: port, User: user, Password: pass, Props: props}
-	expanded := expandTmpls(t)
-	hosts = append(hosts, expanded...)
+	t := Tmpl{ID: props["id"], Host: host, Port: port, User: user, Password: pass, Props: props}
+	hosts = append(hosts, expandTmpl(t)...)
 
 	return hosts
 }
 
-func expandTmpls(host Tmpl) []Tmpl {
+func expandTmpl(host Tmpl) []Tmpl {
 	hosts := str.MakeExpand(host.Host).MakePart()
 	ports := str.MakeExpand(host.Port).MakePart()
 	users := str.MakeExpand(host.User).MakePart()
@@ -101,18 +108,12 @@ func expandTmpls(host Tmpl) []Tmpl {
 			Host:     hosts.Part(i),
 			Port:     ports.Part(i),
 			User:     users.Part(i),
-			Password: passes.Part(i)}
+			Password: passes.Part(i),
+			Props:    host.Props,
+		}
 	}
 
 	return tmpls
-}
-
-func findID(props map[string]string) string {
-	if v, ok := props["id"]; ok {
-		return v
-	}
-
-	return ""
 }
 
 func parseProps(fields []string) map[string]string {
@@ -126,8 +127,8 @@ func parseProps(fields []string) map[string]string {
 	return props
 }
 
-func parseUserPass(userpass string) (string, string) {
-	return str.Split2(userpass, "/", false, false)
+func parseUserPass(userPass string) (string, string) {
+	return str.Split2(userPass, "/", false, false)
 }
 
 func parseHostPort(addr string) (string, string) {

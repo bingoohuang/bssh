@@ -35,6 +35,21 @@ type sftpLs struct {
 	Groups string
 }
 
+// ClientReadFile read file from client
+func ClientReadFile(client *Connect, file string) (string, error) {
+	f, err := client.Connect.Open(file)
+	if err != nil {
+		return "", err
+	}
+
+	bytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
+}
+
 // getRemoteLsData
 func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, err error) {
 	// get symlink
@@ -43,7 +58,6 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 		path = p
 	}
 
-	// get stat
 	lstat, err := client.Connect.Lstat(path)
 	if err != nil {
 		return
@@ -61,43 +75,17 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 		data = []os.FileInfo{lstat}
 	}
 
-	// read /etc/passwd
-	passwdFile, err := client.Connect.Open("/etc/passwd")
+	passwd, err := ClientReadFile(client, "/etc/passwd")
 	if err != nil {
 		return
 	}
 
-	passwdByte, err := ioutil.ReadAll(passwdFile)
-
+	groups, err := ClientReadFile(client, "/etc/group")
 	if err != nil {
 		return
 	}
 
-	passwd := string(passwdByte)
-
-	// read /etc/group
-	groupFile, err := client.Connect.Open("/etc/group")
-	if err != nil {
-		return
-	}
-
-	groupByte, err := ioutil.ReadAll(groupFile)
-
-	if err != nil {
-		return
-	}
-
-	groups := string(groupByte)
-
-	// set lsdata
-	lsdata = sftpLs{
-		Client: client,
-		Files:  data,
-		Passwd: passwd,
-		Groups: groups,
-	}
-
-	return lsdata, err
+	return sftpLs{Client: client, Files: data, Passwd: passwd, Groups: groups}, err
 }
 
 // ls exec and print out remote ls data.

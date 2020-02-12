@@ -47,7 +47,7 @@ func (r *RunSftp) shell() {
 }
 
 // Executor sftp Shell mode function
-func (r *RunSftp) Executor(command string) {
+func (r *RunSftp) Executor(command string) { // nolint funlen
 	p := shellwords.NewParser()
 	p.ParseEnv = true
 	cmdline, _ := p.Parse(command)

@@ -8,7 +8,6 @@ package sftp
 
 import (
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 	"strconv"
 
@@ -52,9 +51,7 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 
 	for s, cl := range r.Client {
 		server, client := s, cl
-
-		user := c.Args()[0]
-		path := c.Args()[1]
+		user, path := c.Args()[0], c.Args()[1]
 
 		go func() {
 			defer func() { exit <- true }()
@@ -74,20 +71,11 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 
 			if err != nil {
 				// read /etc/passwd
-				passwdFile, err := client.Connect.Open("/etc/passwd")
+				passwd, err := ClientReadFile(client, "/etc/passwd")
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
 					return
 				}
-
-				passwdByte, err := ioutil.ReadAll(passwdFile)
-
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				passwd := string(passwdByte)
 
 				// get gid
 				uid32, err := common.GetIDFromName(passwd, user)
@@ -108,14 +96,12 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 				return
 			}
 
-			sys := stat.Sys()
-			if fstat, ok := sys.(*sftp.FileStat); ok {
+			if fstat, ok := stat.Sys().(*sftp.FileStat); ok {
 				gid = int(fstat.GID)
 			}
 
 			// set gid
-			err = client.Connect.Chown(path, uid, gid)
-			if err != nil {
+			if err := client.Connect.Chown(path, uid, gid); err != nil {
 				fmt.Fprintf(w, "%s\n", err)
 				return
 			}

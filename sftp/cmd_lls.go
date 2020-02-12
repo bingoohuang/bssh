@@ -17,7 +17,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/bingoohuang/gou/mat"
-	"github.com/thoas/go-funk"
+	funk "github.com/thoas/go-funk"
 
 	"github.com/bingoohuang/bssh/misc"
 
@@ -76,15 +76,14 @@ func llsAction(c *cli.Context) error {
 
 	// check is directory
 	var data []os.FileInfo
+
 	if stat.IsDir() {
-		data, err = ioutil.ReadDir(argpath)
+		if data, err = ioutil.ReadDir(argpath); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			return nil
+		}
 	} else {
 		data = append(data, stat)
-	}
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		return nil
 	}
 
 	switch {
@@ -103,9 +102,7 @@ func llsAction(c *cli.Context) error {
 
 			sys := f.Sys()
 			if stat, ok := sys.(*syscall.Stat_t); ok {
-				uid = stat.Uid
-				gid = stat.Gid
-				size = stat.Size
+				uid, gid, size = stat.Uid, stat.Gid, stat.Size
 			}
 
 			user := strconv.FormatUint(uint64(uid), 10)
@@ -124,29 +121,21 @@ func llsAction(c *cli.Context) error {
 
 			// set data
 			lsData[i] = &sftpLsData{
-				Mode:  f.Mode().String(),
-				User:  user,
-				Group: group,
-				Size:  sizestr,
-				Time:  f.ModTime().Format("2006 01-02 15:04:05"),
-				Path:  f.Name(),
+				Mode: f.Mode().String(), User: user, Group: group, Size: sizestr,
+				Time: f.ModTime().Format("2006 01-02 15:04:05"), Path: f.Name(),
 			}
 		}
 
-		format := "%s\t%" + strconv.Itoa(maxUserWidth) +
-			"s%" + strconv.Itoa(maxGroupWidth) +
+		format := "%s\t%" + strconv.Itoa(maxUserWidth) + "s%" + strconv.Itoa(maxGroupWidth) +
 			"s%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
 
 		for _, f := range lsData {
-			// write data
 			fmt.Fprintf(tabw, format, f.Mode, f.User, f.Group, f.Size, f.Time, f.Path)
 		}
 
 		tabw.Flush()
-
 	case c.Bool("1"): // list 1 file per line
 		funk.ForEach(data, func(f os.FileInfo) { fmt.Println(f.Name()) })
-
 	default: // default
 		item := funk.Map(data, func(f os.FileInfo) string { return f.Name() }).([]string)
 

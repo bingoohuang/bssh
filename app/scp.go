@@ -86,14 +86,11 @@ func lscpAction(c *cli.Context) error {
 
 	// Set args path
 	fromArgs, toArg := args[:c.NArg()-1], args[c.NArg()-1]
-
 	isFromInRemote, isFromInLocal := false, false
 
 	for _, from := range fromArgs {
 		// parse args
-		isFromRemote, _ := check.ParseScpPath(from)
-
-		if isFromRemote {
+		if isFromRemote, _ := check.ParseScpPath(from); isFromRemote {
 			isFromInRemote = true
 		} else {
 			isFromInLocal = true
@@ -101,9 +98,7 @@ func lscpAction(c *cli.Context) error {
 	}
 
 	isToRemote, _ := check.ParseScpPath(toArg)
-
 	confpath := c.String("file")
-
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()
 	hosts := data.ExpandHosts(c)

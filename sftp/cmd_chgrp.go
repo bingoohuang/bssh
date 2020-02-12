@@ -8,7 +8,6 @@ package sftp
 
 import (
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 	"strconv"
 
@@ -53,8 +52,7 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 	for s, cl := range r.Client {
 		server, client := s, cl
 
-		group := c.Args()[0]
-		path := c.Args()[1]
+		group, path := c.Args()[0], c.Args()[1]
 
 		go func() {
 			defer func() { exit <- true }()
@@ -73,22 +71,12 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 			var gid, uid int
 
 			if err != nil {
-				// read /etc/group
-				groupFile, err := client.Connect.Open("/etc/group")
+				groups, err := ClientReadFile(client, "/etc/group")
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
 					return
 				}
 
-				groupByte, err := ioutil.ReadAll(groupFile)
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				groups := string(groupByte)
-
-				// get gid
 				gid32, err := common.GetIDFromName(groups, group)
 				if err != nil {
 					fmt.Fprintf(w, "%s\n", err)
@@ -107,8 +95,7 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 				return
 			}
 
-			sys := stat.Sys()
-			if fstat, ok := sys.(*sftp.FileStat); ok {
+			if fstat, ok := stat.Sys().(*sftp.FileStat); ok {
 				uid = int(fstat.UID)
 			}
 

@@ -107,7 +107,7 @@ func (cp *Scp) Start() {
 	}
 }
 
-// local machine to remote machine push data
+// push data from local to remote machine
 func (cp *Scp) push() {
 	// set target hosts
 	targets := cp.To.Server
@@ -143,17 +143,15 @@ func (cp *Scp) push() {
 		go func() {
 			defer func() { exit <- true }()
 
-			ftp := client.Connect
-
 			client.Output.Create(client.Server)
 			ow := client.Output.NewWriter()
+			ftp := client.Connect
 
 			// push path
 			for _, p := range pathset {
 				base := p.Base
-				data := p.PathSlice
 
-				for _, path := range data {
+				for _, path := range p.PathSlice {
 					_ = cp.pushPath(ftp, ow, client.Output, base, path)
 				}
 			}

@@ -343,12 +343,10 @@ func ParseArgs(options []cli.Flag, args []string) []string {
 		for _, n := range names {
 			// add hyphen
 			if len(n) == 1 { // nolint gomnd
-				n = "-" + n
+				optionMap["-"+n] = op
 			} else {
-				n = "--" + n
+				optionMap["--"+n] = op
 			}
-
-			optionMap[n] = op
 		}
 	}
 

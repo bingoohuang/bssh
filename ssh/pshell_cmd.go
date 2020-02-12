@@ -268,14 +268,12 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 			c.Output.Count = ps.Count
 			w := c.Output.NewWriter()
 
-			defer w.CloseWithError(io.ErrClosedPipe)
-
 			// create pShellHistory Writer
 			hw := ps.NewHistoryWriter(c.Output.Server, c.Output, m)
 
-			defer hw.CloseWithError(io.ErrClosedPipe)
-
 			ow = io.MultiWriter(w, hw)
+			_ = w.CloseWithError(io.ErrClosedPipe)
+			_ = hw.CloseWithError(io.ErrClosedPipe)
 		}
 
 		s.Stdout = ow
@@ -355,21 +353,18 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 
 	if stdout == os.Stdout {
 		pw := ps.NewHistoryWriter("localhost", nil, m)
-		defer pw.CloseWithError(io.ErrClosedPipe)
+
+		defer func() { _ = pw.CloseWithError(io.ErrClosedPipe) }()
+
 		stdoutw = io.MultiWriter(pw, stdout)
 	} else {
 		stdoutw = stdout
 	}
 
 	// delete command prefix(`!`)
-	rep := regexp.MustCompile(`^!`)
-	pline.Args[0] = rep.ReplaceAllString(pline.Args[0], "")
+	pline.Args[0] = regexp.MustCompile(`^!`).ReplaceAllString(pline.Args[0], "")
 
-	// join command
-	command := strings.Join(pline.Args, " ")
-
-	// execute command
-	cmd := exec.Command("sh", "-c", command)
+	cmd := exec.Command("sh", "-c", strings.Join(pline.Args, " ")) // nolint gosec
 
 	// set stdin, stdout, stderr
 	cmd.Stdin = stdin
