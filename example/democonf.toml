@@ -5,7 +5,9 @@ timestamp = true
 dirpath = "~/.bssh.log"
 
 [extra]
-# passphrase = "your passphrase"
+# Passphrase = "your passphrase"
+DisableGrouping = true
+# DisableAutoEncryptPwd = false
 
 # 机房测试环境 -- start ---
 [server.mysqlm]

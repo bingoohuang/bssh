@@ -5,6 +5,10 @@
 
 TUI list select ssh/scp/sftp client tools.
 
+## Install
+
+`go get -v github.com/bingoohuang/bssh/cmd/bssh@ded39df`
+
 ## Description
 
 command to read a prepared list in advance and connect ssh/scp/sftp the selected host. List file is set in yaml format. When selecting a host, you can filter by keywords. Can execute commands concurrently to multiple hosts. Supported multiple ssh proxy, http/socks5 proxy, x11 forward, and port forwarding.
@@ -19,6 +23,7 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 * Supported ssh-agent.
 * Supported Port forward, x11 forward.
 * Can use bashrc of local machine at ssh connection destination.
+* Auto encrypt clear password in the config file. (can be disabled by DisableAutoEncryptPwd=true, see [example](example/democonf.toml))
 
 ## Demo
 
