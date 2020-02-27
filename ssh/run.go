@@ -6,10 +6,15 @@ package ssh
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/gou/pbe"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
@@ -89,6 +94,19 @@ type Run struct {
 	// ServerAuthMethodMap is
 	// Map of AuthMethod used by target server
 	serverAuthMethodMap map[string][]ssh.AuthMethod
+
+	decodedPasswordMap map[string]bool
+	confFile           string
+}
+
+// NewRun news a Run struct.
+func NewRun(confFile string) *Run {
+	r := &Run{
+		decodedPasswordMap: make(map[string]bool),
+		confFile:           confFile,
+	}
+
+	return r
 }
 
 // AuthKey define auth key\
@@ -249,6 +267,73 @@ func (r *Run) printProxy(server string) {
 	// print header
 	header := strings.Join(array, " => ")
 	fmt.Fprintf(os.Stderr, "Proxy         :%s\n", header)
+}
+
+func (r *Run) registerAutoEncryptPwd(oldPwd, newPwd string) {
+	if r.Conf.Extra.DisableAutoEncryptPwd || oldPwd != newPwd {
+		return
+	}
+
+	if _, ok := r.decodedPasswordMap[oldPwd]; ok {
+		return
+	}
+
+	r.decodedPasswordMap[oldPwd] = true
+}
+
+func readConfContent(confPath string) (string, error) {
+	confPath = common.ExpandHomeDir(confPath)
+	bytes, err := ioutil.ReadFile(confPath)
+
+	return string(bytes), err
+}
+
+func writeConfContent(confPath, content string) error {
+	confPath = common.ExpandHomeDir(confPath)
+	stat, err := os.Stat(confPath)
+
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(confPath, []byte(content), stat.Mode())
+}
+
+func (r *Run) autoEncryptPwd() {
+	if r.Conf.Extra.DisableAutoEncryptPwd || len(r.decodedPasswordMap) == 0 {
+		return
+	}
+
+	content, err := readConfContent(r.confFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
+		return
+	}
+
+	newContent := content
+
+	for pwd := range r.decodedPasswordMap {
+		reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
+		newPwd, err := pbe.Pbe(pwd)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
+			return
+		}
+
+		newContent = reg.ReplaceAllString(newContent, newPwd)
+	}
+
+	if newContent != content {
+		if err := writeConfContent(r.confFile, newContent); err != nil {
+			fmt.Fprintf(os.Stderr, "write conf file %s, error %v\n", r.confFile, err)
+			return
+		}
+	}
+
+	for pwd := range r.decodedPasswordMap {
+		r.decodedPasswordMap[pwd] = false
+	}
 }
 
 // runCmdLocal exec command local machine.

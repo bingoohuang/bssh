@@ -66,9 +66,9 @@ const (
 )
 
 // Start starts the sftp app
-func (r *RunSftp) Start() {
+func (r *RunSftp) Start(confpath string) {
 	// Create AuthMap
-	r.Run = new(sshl.Run)
+	r.Run = sshl.NewRun(confpath)
 	r.Run.ServerList = r.SelectServer
 	r.Run.Conf = r.Config
 	r.Run.CreateAuthMethodMap()

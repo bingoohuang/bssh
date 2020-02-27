@@ -78,12 +78,10 @@ type PathSet struct {
 }
 
 // Start scp, switching process.
-func (cp *Scp) Start() {
-	// Create server list
+func (cp *Scp) Start(confpath string) {
 	slist := append(cp.To.Server, cp.From.Server...)
 
-	// Create AuthMap
-	cp.Run = new(sshl.Run)
+	cp.Run = sshl.NewRun(confpath)
 	cp.Run.ServerList = slist
 	cp.Run.Conf = cp.Config
 	cp.Run.CreateAuthMethodMap()

@@ -32,9 +32,6 @@ HERE:
 		case misc.SSH:
 			args = append(args[0:1], args[2:]...)
 			ap = app.Lssh()
-		case "pbe":
-			args = append(args[0:1], args[2:]...)
-			ap = app.Lpbe()
 		case "l", "last":
 			args = append(args[0:1], args[2:]...)
 			if lastArgs, ok := app.Last(); ok {

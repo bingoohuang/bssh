@@ -122,7 +122,7 @@ func lsshAction(c *cli.Context) error {
 
 	processListFlag(c, names)
 
-	r := new(sshcmd.Run)
+	r := sshcmd.NewRun(confpath)
 	r.ServerList = parseSelected("bssh>>", hosts, names, data, isMulti)
 	r.Conf = data
 	r.Mode = parseMode(c)

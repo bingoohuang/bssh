@@ -38,6 +38,8 @@ func (r *Run) CreateAuthMethodMap() {
 	r.authMethodMap = map[AuthKey][]ssh.AuthMethod{}
 	r.serverAuthMethodMap = map[string][]ssh.AuthMethod{}
 
+	defer r.autoEncryptPwd()
+
 	for _, server := range srvs {
 		// get server config
 		config := r.Conf.Server[server]
@@ -124,7 +126,7 @@ func (r *Run) SetupSSHAgent() {
 
 // registerAuthMapPassword ...
 func (r *Run) registerAuthMapPassword(server, password string) {
-	password = decodePassword(password)
+	password = r.decodePassword(password)
 
 	authKey := AuthKey{AuthKeyPassword, password}
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -138,10 +140,12 @@ func (r *Run) registerAuthMapPassword(server, password string) {
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 }
 
-func decodePassword(password string) string {
+func (r *Run) decodePassword(password string) string {
 	if pwd, err := pbe.Ebp(password); err != nil {
 		panic(err)
 	} else {
+		r.registerAutoEncryptPwd(password, pwd)
+
 		return pwd
 	}
 }

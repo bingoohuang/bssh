@@ -189,7 +189,7 @@ func lscpAction(c *cli.Context) error {
 		_, _ = fmt.Fprintf(os.Stderr, "To   remote(%s):%s\n", strings.Join(scp.To.Server, ","), scp.To.Path)
 	}
 
-	scp.Start()
+	scp.Start(confpath)
 
 	return nil
 }

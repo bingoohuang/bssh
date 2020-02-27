@@ -43,6 +43,8 @@ type ExtraConfig struct {
 	Passphrase string
 	// DisableGrouping disable server names grouping
 	DisableGrouping bool
+	// DisableAutoEncryptPwd disable auto PBE passwords in config file.
+	DisableAutoEncryptPwd bool
 }
 
 // LogConfig store the contents about the terminal log.
@@ -197,9 +199,7 @@ func ReadConf(confPath string) (config Config) {
 		os.Exit(1) // nolint gomnd
 	}
 
-	if config.Extra.Passphrase != "" {
-		viper.Set(pbe.PbePwd, config.Extra.Passphrase)
-	}
+	viper.Set(pbe.PbePwd, config.Extra.Passphrase)
 
 	// reduce common setting (in .bssh.toml servers)
 	config.parseConfigServers(config.Server, config.Common)

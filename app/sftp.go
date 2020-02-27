@@ -76,7 +76,7 @@ func lsftpAction(c *cli.Context) error {
 	r.Config = data
 	r.SelectServer = parseSelected("bssh ftp>>", hosts, names, data, true)
 
-	r.Start()
+	r.Start(confpath)
 
 	return nil
 }
