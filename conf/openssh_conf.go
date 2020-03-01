@@ -58,6 +58,127 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 		ele = "generate_sshconfig"
 	}
 
+	hostList := createHostList(cfg)
+
+	for _, host := range hostList {
+		serverName, serverConfig := createServerConfig(host, ele)
+		config[serverName] = serverConfig
+	}
+
+	return config, err
+}
+
+func createServerConfig(host string, ele string) (string, ServerConfig) {
+	serverConfig := ServerConfig{
+		Addr:         ssh_config.Get(host, "HostName"),
+		Port:         ssh_config.Get(host, "Port"),
+		User:         ssh_config.Get(host, "User"),
+		ProxyCommand: ssh_config.Get(host, "ProxyCommand"),
+		PreCmd:       ssh_config.Get(host, "LocalCommand"),
+		Note:         "from:" + ele,
+	}
+
+	if serverConfig.Addr == "" {
+		serverConfig.Addr = host
+	}
+
+	key := ssh_config.Get(host, "IdentityFile")
+	cert := ssh_config.Get(host, "Certificate")
+
+	if cert != "" {
+		serverConfig.Cert = cert
+		serverConfig.CertKey = key
+	} else {
+		serverConfig.Key = key
+	}
+
+	pkcs11Provider := ssh_config.Get(host, "PKCS11Provider")
+	if pkcs11Provider != "" {
+		serverConfig.PKCS11Use = true
+		serverConfig.PKCS11Provider = pkcs11Provider
+	}
+
+	x11 := ssh_config.Get(host, "ForwardX11")
+	if x11 == misc.Yes {
+		serverConfig.X11 = true
+	}
+
+	parseLocalPortForwarding(host, &serverConfig)
+
+	parseRemotePortForwarding(host, &serverConfig)
+
+	// Port forwarding (Dynamic forward)
+	dynamicForward := ssh_config.Get(host, "DynamicForward")
+	if dynamicForward != "" {
+		serverConfig.DynamicPortForward = dynamicForward
+	}
+
+	serverName := ele + ":" + host
+
+	return serverName, serverConfig
+}
+
+func parseRemotePortForwarding(host string, serverConfig *ServerConfig) {
+	// Port forwarding (Remote forward)
+	remoteForward := ssh_config.Get(host, "RemoteForward")
+	if remoteForward == "" {
+		return
+	}
+
+	array := strings.SplitN(remoteForward, " ", 2)
+
+	if len(array) <= 1 { // nolint gomnd
+		return
+	}
+
+	var e error
+
+	_, e = strconv.Atoi(array[0])
+	if e != nil { // localhost:8080
+		serverConfig.PortForwardLocal = array[0]
+	} else { // 8080
+		serverConfig.PortForwardLocal = "localhost:" + array[0]
+	}
+
+	_, e = strconv.Atoi(array[1])
+	if e != nil { // localhost:8080
+		serverConfig.PortForwardRemote = array[1]
+	} else { // 8080
+		serverConfig.PortForwardRemote = "localhost:" + array[1]
+	}
+}
+
+func parseLocalPortForwarding(host string, serverConfig *ServerConfig) {
+	// Port forwarding (Local forward)
+	localForward := ssh_config.Get(host, "LocalForward")
+	if localForward == "" {
+		return
+	}
+
+	array := strings.SplitN(localForward, " ", 2)
+
+	if len(array) <= 1 { // nolint gomnd
+		return
+	}
+
+	var e error
+
+	_, e = strconv.Atoi(array[0])
+	if e != nil { // localhost:8080
+		serverConfig.PortForwardLocal = array[0]
+	} else { // 8080
+		serverConfig.PortForwardLocal = "localhost:" + array[0]
+	}
+
+	_, e = strconv.Atoi(array[1])
+	if e != nil { // localhost:8080
+		serverConfig.PortForwardRemote = array[1]
+	} else { // 8080
+		serverConfig.PortForwardRemote = "localhost:" + array[1]
+	}
+}
+
+func createHostList(cfg *ssh_config.Config) []string {
 	// Get Node names
 	var hostList []string
 
@@ -72,98 +193,5 @@ func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err
 		}
 	}
 
-	for _, host := range hostList {
-		serverConfig := ServerConfig{
-			Addr:         ssh_config.Get(host, "HostName"),
-			Port:         ssh_config.Get(host, "Port"),
-			User:         ssh_config.Get(host, "User"),
-			ProxyCommand: ssh_config.Get(host, "ProxyCommand"),
-			PreCmd:       ssh_config.Get(host, "LocalCommand"),
-			Note:         "from:" + ele,
-		}
-
-		if serverConfig.Addr == "" {
-			serverConfig.Addr = host
-		}
-
-		key := ssh_config.Get(host, "IdentityFile")
-		cert := ssh_config.Get(host, "Certificate")
-
-		if cert != "" {
-			serverConfig.Cert = cert
-			serverConfig.CertKey = key
-		} else {
-			serverConfig.Key = key
-		}
-
-		pkcs11Provider := ssh_config.Get(host, "PKCS11Provider")
-		if pkcs11Provider != "" {
-			serverConfig.PKCS11Use = true
-			serverConfig.PKCS11Provider = pkcs11Provider
-		}
-
-		x11 := ssh_config.Get(host, "ForwardX11")
-		if x11 == misc.Yes {
-			serverConfig.X11 = true
-		}
-
-		// Port forwarding (Local forward)
-		localForward := ssh_config.Get(host, "LocalForward")
-		if localForward != "" {
-			array := strings.SplitN(localForward, " ", 2)
-
-			if len(array) > 1 { // nolint gomnd
-				var e error
-
-				_, e = strconv.Atoi(array[0])
-				if e != nil { // localhost:8080
-					serverConfig.PortForwardLocal = array[0]
-				} else { // 8080
-					serverConfig.PortForwardLocal = "localhost:" + array[0]
-				}
-
-				_, e = strconv.Atoi(array[1])
-				if e != nil { // localhost:8080
-					serverConfig.PortForwardRemote = array[1]
-				} else { // 8080
-					serverConfig.PortForwardRemote = "localhost:" + array[1]
-				}
-			}
-		}
-
-		// Port forwarding (Remote forward)
-		remoteForward := ssh_config.Get(host, "RemoteForward")
-		if remoteForward != "" {
-			array := strings.SplitN(remoteForward, " ", 2)
-
-			if len(array) > 1 { // nolint gomnd
-				var e error
-
-				_, e = strconv.Atoi(array[0])
-				if e != nil { // localhost:8080
-					serverConfig.PortForwardLocal = array[0]
-				} else { // 8080
-					serverConfig.PortForwardLocal = "localhost:" + array[0]
-				}
-
-				_, e = strconv.Atoi(array[1])
-				if e != nil { // localhost:8080
-					serverConfig.PortForwardRemote = array[1]
-				} else { // 8080
-					serverConfig.PortForwardRemote = "localhost:" + array[1]
-				}
-			}
-		}
-
-		// Port forwarding (Dynamic forward)
-		dynamicForward := ssh_config.Get(host, "DynamicForward")
-		if dynamicForward != "" {
-			serverConfig.DynamicPortForward = dynamicForward
-		}
-
-		serverName := ele + ":" + host
-		config[serverName] = serverConfig
-	}
-
-	return config, err
+	return hostList
 }

@@ -7,7 +7,11 @@ package sftp
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
 	"sync"
+
+	"github.com/urfave/cli"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/output"
@@ -138,4 +142,56 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connec
 	}
 
 	return result
+}
+
+func (r *RunSftp) doLs(lsdata map[string]sftpLs, c *cli.Context, exit chan bool, m sync.Locker,
+	client *Connect, server, argpath string) {
+	defer func() { exit <- true }()
+
+	// get output
+	client.Output.Create(server)
+	w := client.Output.NewWriter()
+
+	// set path
+	path := client.Pwd
+
+	if len(argpath) > 0 {
+		if !filepath.IsAbs(argpath) {
+			path = filepath.Join(path, argpath)
+		} else {
+			path = argpath
+		}
+	}
+
+	// get ls data
+	data, err := r.getRemoteLsData(client, path)
+	if err != nil {
+		fmt.Fprintf(w, "Error: %s\n", err)
+		return
+	}
+
+	// if `a` flag disable, delete Hidden files...
+	if !c.Bool("a") {
+		// hidden delete data slice
+		hddata := []os.FileInfo{}
+
+		// regex
+		rgx := regexp.MustCompile(`^\.`)
+
+		for _, f := range data.Files {
+			if !rgx.MatchString(f.Name()) {
+				hddata = append(hddata, f)
+			}
+		}
+
+		data.Files = hddata
+	}
+
+	// sort
+	r.SortLsData(c, data.Files)
+
+	// write lsdata
+	m.Lock()
+	lsdata[server] = data
+	m.Unlock()
 }

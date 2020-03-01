@@ -24,6 +24,7 @@ import (
 // TDXX(blacknon): `!command`だとまとめてパイプ経由でデータを渡すことになっているが、`!!command`で個別のローカルコマンドにデータを渡すように実装する
 
 // Completer parallel-shell complete function
+// nolint funlen
 func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	// if current line data is none.
 	if len(t.CurrentLine()) == 0 {
@@ -38,11 +39,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 		return prompt.FilterHasPrefix(nil, t.GetWordBeforeCursor(), false)
 	}
 
-	// Get cursor char(string)
-	char := ""
-	if len(left) > 0 {
-		char = string(left[len(left)-1])
-	}
+	char := getCursorChar(left)
 
 	sl := len(pslice) // pline slice count
 	ll := 0
@@ -59,10 +56,8 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 		// switch suggest
 		switch {
 		case num <= 1 && !common.Contains([]string{" ", "|"}, char): // if command
-			var c []prompt.Suggest
-
 			// build-in command suggest
-			buildin := []prompt.Suggest{
+			c := []prompt.Suggest{
 				{Text: "exit", Description: "exit bssh shell"},
 				{Text: "quit", Description: "exit bssh shell"},
 				{Text: "clear", Description: "clear screen"},
@@ -72,7 +67,6 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 				// outの出力でdiffをするためのローカルコマンド。すべての出力と比較するのはあまりに辛いと思われるため、最初の出力との比較、といった方式で対応するのが良いか？？
 				// {Text: "%diff", Description: "%diff [num], show history result list."},
 			}
-			c = append(c, buildin...)
 
 			// get remote and local command complete data
 			c = append(c, ps.CmdComplete...)
@@ -81,24 +75,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 			return prompt.FilterHasPrefix(c, t.GetWordBeforeCursor(), false)
 
 		case checkBuildInCommand(c): // if build-in command.
-			var a []prompt.Suggest
-
-			if c == misc.PercentOut {
-				for i := 0; i < len(ps.History); i++ {
-					var cmd string
-					for _, h := range ps.History[i] {
-						cmd = h.Command
-					}
-
-					suggest := prompt.Suggest{
-						Text:        strconv.Itoa(i),
-						Description: cmd,
-					}
-					a = append(a, suggest)
-				}
-			}
-
-			return prompt.FilterHasPrefix(a, t.GetWordBeforeCursor(), false)
+			return ps.buildinSuggests(c, t)
 
 		default:
 			switch {
@@ -121,6 +98,36 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	}
 
 	return prompt.FilterHasPrefix(nil, t.GetWordBeforeCursor(), false)
+}
+
+func (ps *pShell) buildinSuggests(c string, t prompt.Document) []prompt.Suggest {
+	var a []prompt.Suggest
+
+	if c == misc.PercentOut {
+		for i := 0; i < len(ps.History); i++ {
+			var cmd string
+			for _, h := range ps.History[i] {
+				cmd = h.Command
+			}
+
+			suggest := prompt.Suggest{
+				Text:        strconv.Itoa(i),
+				Description: cmd,
+			}
+			a = append(a, suggest)
+		}
+	}
+
+	return prompt.FilterHasPrefix(a, t.GetWordBeforeCursor(), false)
+}
+
+func getCursorChar(left string) string {
+	// Get cursor char(string)
+	if len(left) == 0 {
+		return ""
+	}
+
+	return string(left[len(left)-1])
 }
 
 // GetCommandComplete get command list remote machine.

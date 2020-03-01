@@ -50,63 +50,9 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 	exit := make(chan bool)
 
 	for s, cl := range r.Client {
-		server, client := s, cl
-
 		group, path := c.Args()[0], c.Args()[1]
 
-		go func() {
-			defer func() { exit <- true }()
-
-			// get writer
-			client.Output.Create(server)
-			w := client.Output.NewWriter()
-
-			// set arg path
-			if !filepath.IsAbs(path) {
-				path = filepath.Join(client.Pwd, path)
-			}
-
-			groupid, err := strconv.Atoi(group)
-
-			var gid, uid int
-
-			if err != nil {
-				groups, err := ClientReadFile(client, "/etc/group")
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				gid32, err := common.GetIDFromName(groups, group)
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				gid = int(gid32)
-			} else {
-				gid = groupid
-			}
-
-			// ge`t current uid
-			stat, err := client.Connect.Lstat(path)
-			if err != nil {
-				fmt.Fprintf(w, "%s\n", err)
-				return
-			}
-
-			if fstat, ok := stat.Sys().(*sftp.FileStat); ok {
-				uid = int(fstat.UID)
-			}
-
-			// set gid
-			if err = client.Connect.Chown(path, uid, gid); err != nil {
-				fmt.Fprintf(w, "%s\n", err)
-				return
-			}
-
-			fmt.Fprintf(w, "chgrp: set %s's group as %s\n", path, group)
-		}()
+		go r.doChgrp(exit, cl, s, path, group)
 	}
 
 	for range r.Client {
@@ -114,4 +60,59 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+// nolint dupl
+func (r *RunSftp) doChgrp(exit chan bool, client *Connect, server, path, group string) {
+	defer func() { exit <- true }()
+
+	// get writer
+	client.Output.Create(server)
+	w := client.Output.NewWriter()
+
+	// set arg path
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(client.Pwd, path)
+	}
+
+	groupid, err := strconv.Atoi(group)
+
+	var gid, uid int
+
+	if err != nil {
+		groups, err := ClientReadFile(client, "/etc/group")
+		if err != nil {
+			fmt.Fprintf(w, "%s\n", err)
+			return
+		}
+
+		gid32, err := common.GetIDFromName(groups, group)
+		if err != nil {
+			fmt.Fprintf(w, "%s\n", err)
+			return
+		}
+
+		gid = int(gid32)
+	} else {
+		gid = groupid
+	}
+
+	// ge`t current uid
+	stat, err := client.Connect.Lstat(path)
+	if err != nil {
+		fmt.Fprintf(w, "%s\n", err)
+		return
+	}
+
+	if fstat, ok := stat.Sys().(*sftp.FileStat); ok {
+		uid = int(fstat.UID)
+	}
+
+	// set gid
+	if err = client.Connect.Chown(path, uid, gid); err != nil {
+		fmt.Fprintf(w, "%s\n", err)
+		return
+	}
+
+	fmt.Fprintf(w, "chgrp: set %s's group as %s\n", path, group)
 }

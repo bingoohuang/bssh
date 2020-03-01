@@ -25,7 +25,6 @@ const cmdOPROMPT = "${SERVER} :: "
 // cmd is run command.
 func (r *Run) cmd() {
 	command := strings.Join(r.ExecCmd, " ")
-	connMap := map[string]*sshlib.Connect{}
 	finished, exitInput := make(chan bool), make(chan bool)
 
 	// print header
@@ -36,48 +35,9 @@ func (r *Run) cmd() {
 		r.printProxy(r.ServerList[0])
 	}
 
-	// Create sshlib.Connect to connMap
-	for _, server := range r.ServerList {
-		// check count AuthMethod
-		if len(r.serverAuthMethodMap[server]) == 0 {
-			fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
-			continue
-		}
+	connMap := r.createConnMap()
 
-		conn, err := r.CreateSSHConnect(server)
-		if err != nil {
-			log.Printf("Error: %s:%s\n", server, err)
-			continue
-		}
-
-		connMap[server] = conn
-	}
-
-	// Run command and print loop
-	var writers []io.WriteCloser
-
-	for s, c := range connMap {
-		c.Session, _ = c.CreateSession()
-
-		config := r.Conf.Server[s]
-
-		o := &output.Output{
-			Templete: cmdOPROMPT, Count: 0, AutoColor: true,
-			ServerList: r.ServerList, Conf: r.Conf.Server[s],
-			EnableHeader: r.EnableHeader, DisableHeader: r.DisableHeader,
-		}
-		o.Create(s)
-
-		c.Stdout, c.Stderr = o.NewWriter(), o.NewWriter()
-
-		// if single server, setup port forwarding.
-		if len(r.ServerList) == 1 { // nolint gomnd
-			r.setupPortForwarding(&config, c)
-		} else if r.IsParallel {
-			w, _ := c.Session.StdinPipe()
-			writers = append(writers, w)
-		}
-	}
+	writers := r.createWriter(connMap)
 
 	// if parallel flag true, and select server is not single,
 	// set send stdin.
@@ -109,6 +69,59 @@ func (r *Run) cmd() {
 	close(exitInput)
 
 	time.Sleep(300 * time.Millisecond) // nolint gomnd
+}
+
+func (r *Run) createWriter(connMap map[string]*sshlib.Connect) []io.WriteCloser {
+	// Run command and print loop
+	var writers []io.WriteCloser
+
+	for s, c := range connMap {
+		c.Session, _ = c.CreateSession()
+
+		config := r.Conf.Server[s]
+
+		o := &output.Output{
+			Templete: cmdOPROMPT, Count: 0, AutoColor: true,
+			ServerList: r.ServerList, Conf: r.Conf.Server[s],
+			EnableHeader: r.EnableHeader, DisableHeader: r.DisableHeader,
+		}
+		o.Create(s)
+
+		c.Stdout, c.Stderr = o.NewWriter(), o.NewWriter()
+
+		// if single server, setup port forwarding.
+		if len(r.ServerList) == 1 { // nolint gomnd
+			r.setupPortForwarding(&config, c)
+		} else if r.IsParallel {
+			w, _ := c.Session.StdinPipe()
+			writers = append(writers, w)
+		}
+	}
+
+	return writers
+}
+
+func (r *Run) createConnMap() map[string]*sshlib.Connect {
+	connMap := map[string]*sshlib.Connect{}
+
+	// Create sshlib.Connect to connMap
+	for _, server := range r.ServerList {
+		// check count AuthMethod
+		if len(r.serverAuthMethodMap[server]) == 0 {
+			fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
+			continue
+		}
+
+		conn, err := r.CreateSSHConnect(server)
+		if err != nil {
+			log.Printf("Error: %s:%s\n", server, err)
+			continue
+		}
+
+		connMap[server] = conn
+	}
+
+	return connMap
 }
 
 func (r *Run) runCommand(conn *sshlib.Connect, finished chan bool, command string, stdinData []byte) {

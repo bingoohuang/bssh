@@ -24,6 +24,7 @@ import (
 )
 
 // run shell
+// nolint funlen
 func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
 	config := r.Conf.Server[server]

@@ -53,61 +53,7 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 		server, client := s, cl
 		user, path := c.Args()[0], c.Args()[1]
 
-		go func() {
-			defer func() { exit <- true }()
-
-			// get writer
-			client.Output.Create(server)
-			w := client.Output.NewWriter()
-
-			// set arg path
-			if !filepath.IsAbs(path) {
-				path = filepath.Join(client.Pwd, path)
-			}
-
-			userid, err := strconv.Atoi(user)
-
-			var gid, uid int
-
-			if err != nil {
-				// read /etc/passwd
-				passwd, err := ClientReadFile(client, "/etc/passwd")
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				// get gid
-				uid32, err := common.GetIDFromName(passwd, user)
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-
-				uid = int(uid32)
-			} else {
-				uid = userid
-			}
-
-			// get current uid
-			stat, err := client.Connect.Lstat(path)
-			if err != nil {
-				fmt.Fprintf(w, "%s\n", err)
-				return
-			}
-
-			if fstat, ok := stat.Sys().(*sftp.FileStat); ok {
-				gid = int(fstat.GID)
-			}
-
-			// set gid
-			if err := client.Connect.Chown(path, uid, gid); err != nil {
-				fmt.Fprintf(w, "%s\n", err)
-				return
-			}
-
-			fmt.Fprintf(w, "chown: set %s's user as %s\n", path, user)
-		}()
+		go r.doChown(exit, client, server, path, user)
 	}
 
 	for range r.Client {
@@ -115,4 +61,61 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+// nolint dupl
+func (r *RunSftp) doChown(exit chan bool, client *Connect, server string, path string, user string) {
+	defer func() { exit <- true }()
+
+	// get writer
+	client.Output.Create(server)
+	w := client.Output.NewWriter()
+
+	// set arg path
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(client.Pwd, path)
+	}
+
+	userid, err := strconv.Atoi(user)
+
+	var gid, uid int
+
+	if err != nil {
+		// read /etc/passwd
+		passwd, err := ClientReadFile(client, "/etc/passwd")
+		if err != nil {
+			fmt.Fprintf(w, "%s\n", err)
+			return
+		}
+
+		// get gid
+		uid32, err := common.GetIDFromName(passwd, user)
+		if err != nil {
+			fmt.Fprintf(w, "%s\n", err)
+			return
+		}
+
+		uid = int(uid32)
+	} else {
+		uid = userid
+	}
+
+	// get current uid
+	stat, err := client.Connect.Lstat(path)
+	if err != nil {
+		fmt.Fprintf(w, "%s\n", err)
+		return
+	}
+
+	if fstat, ok := stat.Sys().(*sftp.FileStat); ok {
+		gid = int(fstat.GID)
+	}
+
+	// set gid
+	if err := client.Connect.Chown(path, uid, gid); err != nil {
+		fmt.Fprintf(w, "%s\n", err)
+		return
+	}
+
+	fmt.Fprintf(w, "chown: set %s's user as %s\n", path, user)
 }

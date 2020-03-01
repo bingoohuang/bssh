@@ -15,6 +15,7 @@ import (
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/gou/pbe"
+	sshlib "github.com/blacknon/go-sshlib"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
@@ -269,8 +270,8 @@ func (r *Run) printProxy(server string) {
 	fmt.Fprintf(os.Stderr, "Proxy         :%s\n", header)
 }
 
-func (r *Run) registerAutoEncryptPwd(oldPwd, newPwd string) {
-	if r.Conf.Extra.DisableAutoEncryptPwd || oldPwd != newPwd {
+func (r *Run) registerAutoEncryptPwd(oldPwd string) {
+	if r.Conf.Extra.DisableAutoEncryptPwd || strings.HasPrefix(oldPwd, `{PBE}`) {
 		return
 	}
 
@@ -313,14 +314,13 @@ func (r *Run) autoEncryptPwd() {
 	newContent := content
 
 	for pwd := range r.decodedPasswordMap {
-		reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
 		newPwd, err := pbe.Pbe(pwd)
-
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
 			return
 		}
 
+		reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
 		newContent = reg.ReplaceAllString(newContent, newPwd)
 	}
 
@@ -333,6 +333,67 @@ func (r *Run) autoEncryptPwd() {
 
 	for pwd := range r.decodedPasswordMap {
 		r.decodedPasswordMap[pwd] = false
+	}
+}
+
+func (r *Run) createAuthMethodMapForServer(server string) {
+	// get server config
+	config := r.Conf.Server[server]
+
+	// Password
+	r.registerAuthMapPassword(server, config.Pass)
+
+	// Multiple Password
+	for _, pass := range config.Passes {
+		r.registerAuthMapPassword(server, pass)
+	}
+
+	// PublicKey
+	if err := r.registerAuthMapPublicKey(server, config.Key, config.KeyPass); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	// Multiple PublicKeys
+	for _, key := range config.Keys {
+		pair := strings.SplitN(key, "::", 2)
+		keyName := pair[0]
+		keyPass := ""
+
+		if len(pair) > 1 { // nolint gomnd
+			keyPass = pair[1]
+		}
+
+		if err := r.registerAuthMapPublicKey(server, keyName, keyPass); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+	}
+
+	// Public Key Command
+	// TDXX(blacknon): keyCommandの追加
+	if err := r.registerAuthMapPublicKeyCommand(server, config.KeyCommand, config.KeyCommandPass); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	// Certificate
+	if config.Cert != "" {
+		keySigner, err := sshlib.CreateSignerPublicKeyPrompt(config.CertKey, config.CertKeyPass)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+
+		if err := r.registerAuthMapCertificate(server, config.Cert, keySigner); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+	}
+
+	// PKCS11
+	if config.PKCS11Use {
+		if err := r.registerAuthMapPKCS11(server, config.PKCS11Provider, config.PKCS11PIN); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}
 }
 

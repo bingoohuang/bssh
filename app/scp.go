@@ -86,16 +86,7 @@ func lscpAction(c *cli.Context) error {
 
 	// Set args path
 	fromArgs, toArg := args[:c.NArg()-1], args[c.NArg()-1]
-	isFromInRemote, isFromInLocal := false, false
-
-	for _, from := range fromArgs {
-		// parse args
-		if isFromRemote, _ := check.ParseScpPath(from); isFromRemote {
-			isFromInRemote = true
-		} else {
-			isFromInLocal = true
-		}
-	}
+	isFromInRemote, isFromInLocal := parseFromLocation(fromArgs)
 
 	isToRemote, _ := check.ParseScpPath(toArg)
 	confpath := c.String("file")
@@ -106,6 +97,52 @@ func lscpAction(c *cli.Context) error {
 	// Check from and to Type
 	check.TypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
 
+	toServer, fromServer := parseFromToServer(hosts, names, isFromInRemote, isToRemote, data)
+
+	// scp struct
+	scp := new(scp.Scp)
+
+	setFrom(fromArgs, scp)
+
+	scp.From.Server = fromServer
+
+	// set to info
+	isToRemote, toPath := check.ParseScpPath(toArg)
+	scp.To.IsRemote = isToRemote
+
+	if isToRemote {
+		toPath = check.EscapePath(toPath)
+	}
+
+	scp.To.Path = []string{toPath}
+	scp.To.Server = toServer
+
+	scp.Config = data
+
+	printFromTo(isFromInRemote, scp, isToRemote)
+
+	scp.Start(confpath)
+
+	return nil
+}
+
+func printFromTo(isFromInRemote bool, scp *scp.Scp, isToRemote bool) {
+	// print from
+	if !isFromInRemote {
+		_, _ = fmt.Fprintf(os.Stderr, "From local:%s\n", scp.From.Path)
+	} else {
+		_, _ = fmt.Fprintf(os.Stderr, "From remote(%s):%s\n", strings.Join(scp.From.Server, ","), scp.From.Path)
+	}
+
+	// print to
+	if !isToRemote {
+		_, _ = fmt.Fprintf(os.Stderr, "To   local:%s\n", scp.To.Path)
+	} else {
+		_, _ = fmt.Fprintf(os.Stderr, "To   remote(%s):%s\n", strings.Join(scp.To.Server, ","), scp.To.Path)
+	}
+}
+
+func parseFromToServer(hosts, names []string, isFromInRemote, isToRemote bool, data conf.Config) ([]string, []string) {
 	var selected, toServer, fromServer []string
 
 	// view server list
@@ -132,9 +169,25 @@ func lscpAction(c *cli.Context) error {
 		}
 	}
 
-	// scp struct
-	scp := new(scp.Scp)
+	return toServer, fromServer
+}
 
+func parseFromLocation(fromArgs cli.Args) (bool, bool) {
+	isFromInRemote, isFromInLocal := false, false
+
+	for _, from := range fromArgs {
+		// parse args
+		if isFromRemote, _ := check.ParseScpPath(from); isFromRemote {
+			isFromInRemote = true
+		} else {
+			isFromInLocal = true
+		}
+	}
+
+	return isFromInRemote, isFromInLocal
+}
+
+func setFrom(fromArgs cli.Args, scp *scp.Scp) {
 	// set from info
 	for _, from := range fromArgs {
 		isFromRemote, fromPath := check.ParseScpPath(from)
@@ -159,37 +212,4 @@ func lscpAction(c *cli.Context) error {
 
 		scp.From.Path = append(scp.From.Path, fromPath)
 	}
-
-	scp.From.Server = fromServer
-
-	// set to info
-	isToRemote, toPath := check.ParseScpPath(toArg)
-	scp.To.IsRemote = isToRemote
-
-	if isToRemote {
-		toPath = check.EscapePath(toPath)
-	}
-
-	scp.To.Path = []string{toPath}
-	scp.To.Server = toServer
-
-	scp.Config = data
-
-	// print from
-	if !isFromInRemote {
-		_, _ = fmt.Fprintf(os.Stderr, "From local:%s\n", scp.From.Path)
-	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "From remote(%s):%s\n", strings.Join(scp.From.Server, ","), scp.From.Path)
-	}
-
-	// print to
-	if !isToRemote {
-		_, _ = fmt.Fprintf(os.Stderr, "To   local:%s\n", scp.To.Path)
-	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "To   remote(%s):%s\n", strings.Join(scp.To.Server, ","), scp.To.Path)
-	}
-
-	scp.Start(confpath)
-
-	return nil
 }

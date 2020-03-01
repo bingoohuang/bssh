@@ -107,9 +107,63 @@ func (r *RunSftp) Executor(command string) { // nolint funlen
 
 // Completer sftp Shell mode function
 func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
-	// result
-	var suggest []prompt.Suggest
+	left, char := r.getCursorLeft(t)
 
+	cmdline := strings.Split(left, " ")
+	if len(cmdline) == 1 { // nolint gomnd
+		suggest := r.createSuggest()
+
+		// return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), true)
+		return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
+	}
+
+	// command pattern
+	switch cmdline[0] {
+	case "cd":
+		return r.PathComplete(true, 1, t)
+	case "df":
+		return r.cmdDf(t)
+	case misc.Get:
+		switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
+		case 1: // nolint gomnd remote
+			return r.PathComplete(true, 1, t)
+		case 2: // nolint gomnd local
+			return r.PathComplete(false, 2, t)
+		}
+	case "lcd":
+		return r.PathComplete(false, 1, t)
+	case misc.Lls:
+		return r.cmdLls(char, t)
+	case misc.Lmkdir:
+		return r.cmdLmkdir(char, t)
+	case "ls":
+		return r.cmdLs(char, t)
+	// case "lumask":
+	case misc.Mkdir:
+		return r.cmdMkdir(char, t)
+	case misc.Put:
+		// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
+		// TDXX（blacknon）：添加选项后，有必要减少参数数量
+		switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
+		case 1: // nolint gomnd local
+			return r.PathComplete(false, 1, t)
+		case 2: // nolint gomnd remote
+			return r.PathComplete(true, 2, t)
+		}
+	case misc.Rename:
+		return r.PathComplete(true, 1, t)
+	case "rm":
+		return r.PathComplete(true, 1, t)
+	case misc.Rmdir:
+		return r.PathComplete(true, 1, t)
+	default:
+	}
+
+	// return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), true)
+	return prompt.FilterHasPrefix(nil, t.GetWordBeforeCursor(), false)
+}
+
+func (r *RunSftp) getCursorLeft(t prompt.Document) (string, string) {
 	// Get cursor left
 	left := t.CurrentLineBeforeCursor()
 
@@ -119,161 +173,129 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		char = string(left[len(left)-1])
 	}
 
-	cmdline := strings.Split(left, " ")
-	if len(cmdline) == 1 { // nolint gomnd
-		suggest = []prompt.Suggest{
-			{Text: "bye", Description: "Quit lsftp"},
-			// {Text: "cat", Description: "Open file"},
-			{Text: "cd", Description: "Change remote directory to 'path'"},
-			{Text: misc.Chgrp, Description: "Change group of file 'path' to 'grp'"},
-			{Text: misc.Chown, Description: "Change owner of file 'path' to 'own'"},
-			// {Text: "copy", Description: "Copy to file from 'remote' or 'local' to 'remote' or 'local'"},
-			{Text: "df", Description: "Display statistics for current directory or filesystem containing 'path'"},
-			{Text: "exit", Description: "Quit lsftp"},
-			{Text: misc.Get, Description: "Download file"},
-			// {Text: "reget", Description: "Resume download file"},
-			// {Text: "reput", Description: "Resume upload file"},
-			{Text: "help", Description: "Display this help text"},
-			{Text: "lcd", Description: "Change local directory to 'path'"},
-			{Text: misc.Lls, Description: "Display local directory listing"},
-			{Text: misc.Lmkdir, Description: "Create local directory"},
-			// {Text: "ln", Description: "Link remote file (-s for symlink)"},
-			{Text: "lpwd", Description: "Print local working directory"},
-			{Text: "ls", Description: "Display remote directory listing"},
-			// {Text: "lumask", Description: "Set local umask to 'umask'"},
-			{Text: misc.Mkdir, Description: "Create remote directory"},
-			// {Text: "progress", Description: "Toggle display of progress meter"},
-			{Text: misc.Put, Description: "Upload file"},
-			{Text: "pwd", Description: "Display remote working directory"},
-			{Text: "quit", Description: "Quit sftp"},
-			{Text: misc.Rename, Description: "Rename remote file"},
-			{Text: "rm", Description: "Delete remote file"},
-			{Text: misc.Rmdir, Description: "Remove remote directory"},
-			{Text: misc.Symlink, Description: "Create symbolic link"},
-			// {Text: "tree", Description: "Tree view remote directory"},
-			// {Text: "!command", Description: "Execute 'command' in local shell"},
-			{Text: "!", Description: "Escape to local shell"},
-			{Text: "?", Description: "Display this help text"},
+	return left, char
+}
+
+func (r *RunSftp) cmdMkdir(char string, t prompt.Document) []prompt.Suggest {
+	switch {
+	case common.Contains([]string{"-"}, char):
+		suggest := []prompt.Suggest{
+			{Text: "-p", Description: "no error if existing, make parent directories as needed"},
 		}
-	} else { // command pattern
-		switch cmdline[0] {
-		case "cd":
-			return r.PathComplete(true, 1, t)
-		case misc.Chgrp:
-			// TDXX(blacknon): そのうち追加 ver0.6.1
-		case misc.Chown:
-			// TDXX(blacknon): そのうち追加 ver0.6.1
-		case "df":
-			suggest = []prompt.Suggest{
-				{Text: "-h", Description: "print sizes in powers of 1024 (e.g., 1023M)"},
-				{Text: "-i", Description: "list inode information instead of block usage"},
-			}
-			return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
-		case misc.Get:
-			// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
-			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
-			case 1: // nolint gomnd remote
-				return r.PathComplete(true, 1, t)
-			case 2: // nolint gomnd local
-				return r.PathComplete(false, 2, t)
-			}
 
-		case "lcd":
-			return r.PathComplete(false, 1, t)
-		case misc.Lls:
-			// switch options or path
-			switch {
-			case common.Contains([]string{"-"}, char):
-				suggest = []prompt.Suggest{
-					{Text: "-1", Description: "list one file per line"},
-					{Text: "-a", Description: "do not ignore entries starting with"},
-					{Text: "-f", Description: "do not sort"},
-					{Text: "-h", Description: "with -l, print sizes like 1K 234M 2G etc."},
-					{Text: "-l", Description: "use a long listing format"},
-					{Text: "-n", Description: "list numeric user and group IDs"},
-					{Text: "-r", Description: "reverse order while sorting"},
-					{Text: "-S", Description: "sort by file size, largest first"},
-					{Text: "-t", Description: "sort by modification time, newest first"},
-				}
-				return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
-
-			default:
-				return r.PathComplete(false, 1, t)
-			}
-		case misc.Lmkdir:
-			switch {
-			case common.Contains([]string{"-"}, char):
-				suggest = []prompt.Suggest{
-					{Text: "-p", Description: "no error if existing, make parent directories as needed"},
-				}
-				return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
-
-			default:
-				return r.PathComplete(false, 1, t)
-			}
-
-		// case "ln":
-		case "lpwd":
-		case "ls":
-			// switch options or path
-			switch {
-			case common.Contains([]string{"-"}, char):
-				suggest = []prompt.Suggest{
-					{Text: "-1", Description: "list one file per line"},
-					{Text: "-a", Description: "do not ignore entries starting with"},
-					{Text: "-f", Description: "do not sort"},
-					{Text: "-h", Description: "with -l, print sizes like 1K 234M 2G etc."},
-					{Text: "-l", Description: "use a long listing format"},
-					{Text: "-n", Description: "list numeric user and group IDs"},
-					{Text: "-r", Description: "reverse order while sorting"},
-					{Text: "-S", Description: "sort by file size, largest first"},
-					{Text: "-t", Description: "sort by modification time, newest first"},
-				}
-				return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
-
-			default:
-				return r.PathComplete(true, 1, t)
-			}
-
-		// case "lumask":
-		case misc.Mkdir:
-			switch {
-			case common.Contains([]string{"-"}, char):
-				suggest = []prompt.Suggest{
-					{Text: "-p", Description: "no error if existing, make parent directories as needed"},
-				}
-
-			default:
-				return r.PathComplete(true, 1, t)
-			}
-
-		case misc.Put:
-			// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
-			// TDXX（blacknon）：添加选项后，有必要减少参数数量
-			switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
-			case 1: // nolint gomnd local
-				return r.PathComplete(false, 1, t)
-			case 2: // nolint gomnd remote
-				return r.PathComplete(true, 2, t)
-			}
-		case "pwd":
-		case "quit":
-		case misc.Rename:
-			return r.PathComplete(true, 1, t)
-		case "rm":
-			return r.PathComplete(true, 1, t)
-		case misc.Rmdir:
-			return r.PathComplete(true, 1, t)
-		case misc.Symlink:
-			// TDXX(blacknon): そのうち追加 ver0.6.1
-		// case "tree":
-
-		default:
-		}
+		return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
+	default:
 	}
 
-	// return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), true)
+	return r.PathComplete(true, 1, t)
+}
+
+func (r *RunSftp) cmdLmkdir(char string, t prompt.Document) []prompt.Suggest {
+	switch {
+	case common.Contains([]string{"-"}, char):
+		suggest := []prompt.Suggest{
+			{Text: "-p", Description: "no error if existing, make parent directories as needed"},
+		}
+
+		return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
+
+	default:
+	}
+
+	return r.PathComplete(false, 1, t)
+}
+
+func (r *RunSftp) cmdLs(char string, t prompt.Document) []prompt.Suggest {
+	// switch options or path
+	switch {
+	case common.Contains([]string{"-"}, char):
+		suggest := []prompt.Suggest{
+			{Text: "-1", Description: "list one file per line"},
+			{Text: "-a", Description: "do not ignore entries starting with"},
+			{Text: "-f", Description: "do not sort"},
+			{Text: "-h", Description: "with -l, print sizes like 1K 234M 2G etc."},
+			{Text: "-l", Description: "use a long listing format"},
+			{Text: "-n", Description: "list numeric user and group IDs"},
+			{Text: "-r", Description: "reverse order while sorting"},
+			{Text: "-S", Description: "sort by file size, largest first"},
+			{Text: "-t", Description: "sort by modification time, newest first"},
+		}
+
+		return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
+	default:
+	}
+
+	return r.PathComplete(true, 1, t)
+}
+
+func (r *RunSftp) cmdLls(char string, t prompt.Document) []prompt.Suggest {
+	// switch options or path
+	switch {
+	case common.Contains([]string{"-"}, char):
+		suggest := []prompt.Suggest{
+			{Text: "-1", Description: "list one file per line"},
+			{Text: "-a", Description: "do not ignore entries starting with"},
+			{Text: "-f", Description: "do not sort"},
+			{Text: "-h", Description: "with -l, print sizes like 1K 234M 2G etc."},
+			{Text: "-l", Description: "use a long listing format"},
+			{Text: "-n", Description: "list numeric user and group IDs"},
+			{Text: "-r", Description: "reverse order while sorting"},
+			{Text: "-S", Description: "sort by file size, largest first"},
+			{Text: "-t", Description: "sort by modification time, newest first"},
+		}
+
+		return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
+
+	default:
+	}
+
+	return r.PathComplete(false, 1, t)
+}
+
+func (r *RunSftp) cmdDf(t prompt.Document) []prompt.Suggest {
+	suggest := []prompt.Suggest{
+		{Text: "-h", Description: "print sizes in powers of 1024 (e.g., 1023M)"},
+		{Text: "-i", Description: "list inode information instead of block usage"},
+	}
+
 	return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
+}
+
+func (r *RunSftp) createSuggest() []prompt.Suggest {
+	return []prompt.Suggest{
+		{Text: "bye", Description: "Quit lsftp"},
+		// {Text: "cat", Description: "Open file"},
+		{Text: "cd", Description: "Change remote directory to 'path'"},
+		{Text: misc.Chgrp, Description: "Change group of file 'path' to 'grp'"},
+		{Text: misc.Chown, Description: "Change owner of file 'path' to 'own'"},
+		// {Text: "copy", Description: "Copy to file from 'remote' or 'local' to 'remote' or 'local'"},
+		{Text: "df", Description: "Display statistics for current directory or filesystem containing 'path'"},
+		{Text: "exit", Description: "Quit lsftp"},
+		{Text: misc.Get, Description: "Download file"},
+		// {Text: "reget", Description: "Resume download file"},
+		// {Text: "reput", Description: "Resume upload file"},
+		{Text: "help", Description: "Display this help text"},
+		{Text: "lcd", Description: "Change local directory to 'path'"},
+		{Text: misc.Lls, Description: "Display local directory listing"},
+		{Text: misc.Lmkdir, Description: "Create local directory"},
+		// {Text: "ln", Description: "Link remote file (-s for symlink)"},
+		{Text: "lpwd", Description: "Print local working directory"},
+		{Text: "ls", Description: "Display remote directory listing"},
+		// {Text: "lumask", Description: "Set local umask to 'umask'"},
+		{Text: misc.Mkdir, Description: "Create remote directory"},
+		// {Text: "progress", Description: "Toggle display of progress meter"},
+		{Text: misc.Put, Description: "Upload file"},
+		{Text: "pwd", Description: "Display remote working directory"},
+		{Text: "quit", Description: "Quit sftp"},
+		{Text: misc.Rename, Description: "Rename remote file"},
+		{Text: "rm", Description: "Delete remote file"},
+		{Text: misc.Rmdir, Description: "Remove remote directory"},
+		{Text: misc.Symlink, Description: "Create symbolic link"},
+		// {Text: "tree", Description: "Tree view remote directory"},
+		// {Text: "!command", Description: "Execute 'command' in local shell"},
+		{Text: "!", Description: "Escape to local shell"},
+		{Text: "?", Description: "Display this help text"},
+	}
 }
 
 // PathComplete ...

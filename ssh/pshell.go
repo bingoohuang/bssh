@@ -13,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/bingoohuang/bssh/conf"
+
 	"github.com/bingoohuang/bssh/output"
 	sshlib "github.com/blacknon/go-sshlib"
 	prompt "github.com/c-bata/go-prompt"
@@ -77,6 +79,7 @@ const (
 	defaultHistoryFile = "~/.lssh_history"
 )
 
+// nolint funlen
 func (r *Run) pshell() (err error) {
 	// print header
 	fmt.Println("Start parallel-shell...")
@@ -104,34 +107,7 @@ func (r *Run) pshell() (err error) {
 	execLocalCommand(config.PreCmd)
 	defer execLocalCommand(config.PostCmd)
 
-	// Connect
-	cons := make([]*psConnect, len(r.ServerList))
-
-	for i, server := range r.ServerList {
-		con, err := r.CreateSSHConnect(server)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		// TTY enable
-		con.TTY = true
-
-		// Create Output
-		o := &output.Output{
-			Templete:   config.OPrompt,
-			ServerList: r.ServerList,
-			Conf:       r.Conf.Server[server],
-			AutoColor:  true,
-		}
-
-		// Create output prompt
-		o.Create(server)
-
-		cons[i] = &psConnect{Name: server, Output: o, Connect: con}
-	}
-
-	// count sshlib.Connect.
+	cons := r.createPsConnects(config)
 	if len(cons) == 0 {
 		return
 	}
@@ -179,6 +155,37 @@ func (r *Run) pshell() (err error) {
 	p.Run()
 
 	return nil
+}
+
+func (r *Run) createPsConnects(config conf.ShellConfig) []*psConnect {
+	// Connect
+	cons := make([]*psConnect, len(r.ServerList))
+
+	for i, server := range r.ServerList {
+		con, err := r.CreateSSHConnect(server)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		// TTY enable
+		con.TTY = true
+
+		// Create Output
+		o := &output.Output{
+			Templete:   config.OPrompt,
+			ServerList: r.ServerList,
+			Conf:       r.Conf.Server[server],
+			AutoColor:  true,
+		}
+
+		// Create output prompt
+		o.Create(server)
+
+		cons[i] = &psConnect{Name: server, Output: o, Connect: con}
+	}
+
+	return cons
 }
 
 // CreatePrompt is create shell prompt.

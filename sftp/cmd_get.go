@@ -107,27 +107,20 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 
 	// set path
 	source := c.Args()[0]
-	target := common.ExpandHomeDir(c.Args()[1])
+	target, err := r.parseTarget(c)
 
-	// get target directory abs
-	target, err := filepath.Abs(target)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		return nil
+		return err
 	}
 
-	// mkdir local target directory
-	err = os.MkdirAll(target, 0755)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		return nil
-	}
+	// local target
+	target, _ = filepath.Abs(target)
 
 	// get directory data, copy remote to local
 	exit := make(chan bool)
 
 	for s, c := range r.Client {
-		server, client := s, c
+		server := s
 
 		targetdir := target
 		if len(r.Client) > 1 { // nolint gomnd
@@ -140,21 +133,7 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 			}
 		}
 
-		go func() {
-			defer func() { exit <- true }()
-
-			// set Progress
-			client.Output.Progress = r.Progress
-			client.Output.ProgressWG = r.ProgressWG
-
-			// create output
-			client.Output.Create(server)
-
-			// local target
-			target, _ = filepath.Abs(target)
-
-			r.pullPath(client, source, targetdir)
-		}()
+		go r.doGet(exit, c, server, source, targetdir)
 	}
 
 	// wait exit
@@ -169,6 +148,39 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 	time.Sleep(300 * time.Millisecond) // nolint gomnd
 
 	return nil
+}
+
+func (r *RunSftp) doGet(exit chan bool, client *Connect, server, source, targetdir string) {
+	defer func() { exit <- true }()
+
+	// set Progress
+	client.Output.Progress = r.Progress
+	client.Output.ProgressWG = r.ProgressWG
+
+	// create output
+	client.Output.Create(server)
+
+	r.pullPath(client, source, targetdir)
+}
+
+func (r *RunSftp) parseTarget(c *cli.Context) (string, error) {
+	target := common.ExpandHomeDir(c.Args()[1])
+
+	// get target directory abs
+	target, err := filepath.Abs(target)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		return "", err
+	}
+
+	// mkdir local target directory
+	err = os.MkdirAll(target, 0755)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		return "", err
+	}
+
+	return target, nil
 }
 
 func pullFile(stat os.FileInfo, client *Connect, localpath, p string, r *RunSftp) error {

@@ -5,10 +5,7 @@
 package ssh
 
 import (
-	"fmt"
-	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/bingoohuang/bssh/misc"
 
@@ -20,6 +17,20 @@ import (
 
 // CreateAuthMethodMap Create ssh.AuthMethod, into r.AuthMethodMap.
 func (r *Run) CreateAuthMethodMap() {
+	srvs := r.getSSHServers()
+
+	// Init r.AuthMethodMap
+	r.authMethodMap = map[AuthKey][]ssh.AuthMethod{}
+	r.serverAuthMethodMap = map[string][]ssh.AuthMethod{}
+
+	defer r.autoEncryptPwd()
+
+	for _, server := range srvs {
+		r.createAuthMethodMapForServer(server)
+	}
+}
+
+func (r *Run) getSSHServers() []string {
 	srvs := r.ServerList
 
 	for _, server := range r.ServerList {
@@ -32,90 +43,7 @@ func (r *Run) CreateAuthMethodMap() {
 		}
 	}
 
-	srvs = common.GetUniqueSlice(srvs)
-
-	// Init r.AuthMethodMap
-	r.authMethodMap = map[AuthKey][]ssh.AuthMethod{}
-	r.serverAuthMethodMap = map[string][]ssh.AuthMethod{}
-
-	defer r.autoEncryptPwd()
-
-	for _, server := range srvs {
-		// get server config
-		config := r.Conf.Server[server]
-
-		// Password
-		if config.Pass != "" {
-			r.registerAuthMapPassword(server, config.Pass)
-		}
-
-		// Multiple Password
-		if len(config.Passes) > 0 {
-			for _, pass := range config.Passes {
-				r.registerAuthMapPassword(server, pass)
-			}
-		}
-
-		// PublicKey
-		if config.Key != "" {
-			err := r.registerAuthMapPublicKey(server, config.Key, config.KeyPass)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		}
-
-		// Multiple PublicKeys
-		if len(config.Keys) > 0 {
-			for _, key := range config.Keys {
-				//
-				pair := strings.SplitN(key, "::", 2)
-				keyName := pair[0]
-				keyPass := ""
-
-				if len(pair) > 1 { // nolint gomnd
-					keyPass = pair[1]
-				}
-
-				err := r.registerAuthMapPublicKey(server, keyName, keyPass)
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					continue
-				}
-			}
-		}
-
-		// Public Key Command
-		if config.KeyCommand != "" {
-			// TDXX(blacknon): keyCommandの追加
-			err := r.registerAuthMapPublicKeyCommand(server, config.KeyCommand, config.KeyCommandPass)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		}
-
-		// Certificate
-		if config.Cert != "" {
-			keySigner, err := sshlib.CreateSignerPublicKeyPrompt(config.CertKey, config.CertKeyPass)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-
-			err = r.registerAuthMapCertificate(server, config.Cert, keySigner)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-		}
-
-		// PKCS11
-		if config.PKCS11Use {
-			err := r.registerAuthMapPKCS11(server, config.PKCS11Provider, config.PKCS11PIN)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		}
-	}
+	return common.GetUniqueSlice(srvs)
 }
 
 // SetupSSHAgent setup SSH agent.
@@ -126,6 +54,10 @@ func (r *Run) SetupSSHAgent() {
 
 // registerAuthMapPassword ...
 func (r *Run) registerAuthMapPassword(server, password string) {
+	if password == "" {
+		return
+	}
+
 	password = r.decodePassword(password)
 
 	authKey := AuthKey{AuthKeyPassword, password}
@@ -144,7 +76,7 @@ func (r *Run) decodePassword(password string) string {
 	if pwd, err := pbe.Ebp(password); err != nil {
 		panic(err)
 	} else {
-		r.registerAutoEncryptPwd(password, pwd)
+		r.registerAutoEncryptPwd(password)
 
 		return pwd
 	}
@@ -152,6 +84,10 @@ func (r *Run) decodePassword(password string) string {
 
 //
 func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error) {
+	if key == "" {
+		return nil
+	}
+
 	authKey := AuthKey{AuthKeyKey, key}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -175,7 +111,11 @@ func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error)
 }
 
 //
-func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) (err error) {
+func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) error {
+	if command == "" {
+		return nil
+	}
+
 	authKey := AuthKey{AuthKeyKey, command}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -203,7 +143,7 @@ func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) 
 	// Register AuthMethod to serverAuthMethodMap from authMethodMap
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 
-	return
+	return nil
 }
 
 //

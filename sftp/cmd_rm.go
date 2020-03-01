@@ -50,61 +50,7 @@ func (r *RunSftp) rmAction(c *cli.Context) error {
 	exit := make(chan bool)
 
 	for s, cl := range r.Client {
-		server, client := s, cl
-		path := c.Args()[0]
-
-		go func() {
-			defer func() { exit <- true }()
-
-			// get writer
-			client.Output.Create(server)
-			w := client.Output.NewWriter()
-
-			// set arg path
-			if !filepath.IsAbs(path) {
-				path = filepath.Join(client.Pwd, path)
-			}
-
-			// get current directory
-			if c.Bool("r") {
-				// create walker
-				walker := client.Connect.Walk(path)
-
-				var data []string
-
-				for walker.Step() {
-					err := walker.Err()
-					if err != nil {
-						fmt.Fprintf(w, "Error: %s\n", err)
-						return
-					}
-
-					p := walker.Path()
-					data = append(data, p)
-				}
-
-				// reverse slice
-				for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 { // nolint gomnd
-					data[i], data[j] = data[j], data[i]
-				}
-
-				for _, p := range data {
-					err := client.Connect.Remove(p)
-					if err != nil {
-						fmt.Fprintf(w, "%s\n", err)
-						return
-					}
-				}
-			} else {
-				err := client.Connect.Remove(path)
-				if err != nil {
-					fmt.Fprintf(w, "%s\n", err)
-					return
-				}
-			}
-
-			fmt.Fprintf(w, "remove: %s\n", path)
-		}()
+		go r.doRM(exit, s, cl, c.Args()[0], c)
 	}
 
 	for range r.Client {
@@ -112,4 +58,57 @@ func (r *RunSftp) rmAction(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func (r *RunSftp) doRM(exit chan bool, server string, client *Connect, path string, c *cli.Context) {
+	defer func() { exit <- true }()
+
+	// get writer
+	client.Output.Create(server)
+	w := client.Output.NewWriter()
+
+	// set arg path
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(client.Pwd, path)
+	}
+
+	// get current directory
+	if c.Bool("r") {
+		// create walker
+		walker := client.Connect.Walk(path)
+
+		var data []string
+
+		for walker.Step() {
+			err := walker.Err()
+			if err != nil {
+				fmt.Fprintf(w, "Error: %s\n", err)
+				return
+			}
+
+			p := walker.Path()
+			data = append(data, p)
+		}
+
+		// reverse slice
+		for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 { // nolint gomnd
+			data[i], data[j] = data[j], data[i]
+		}
+
+		for _, p := range data {
+			err := client.Connect.Remove(p)
+			if err != nil {
+				fmt.Fprintf(w, "%s\n", err)
+				return
+			}
+		}
+	} else {
+		err := client.Connect.Remove(path)
+		if err != nil {
+			fmt.Fprintf(w, "%s\n", err)
+			return
+		}
+	}
+
+	fmt.Fprintf(w, "remove: %s\n", path)
 }

@@ -9,10 +9,9 @@ package sftp
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"regexp"
 	"strconv"
 	"sync"
 	"text/tabwriter"
@@ -127,56 +126,7 @@ func (r *RunSftp) lsAction(c *cli.Context) error {
 	for s, cl := range r.Client {
 		server, client := s, cl
 
-		go func() {
-			defer func() { exit <- true }()
-
-			// get output
-			client.Output.Create(server)
-			w := client.Output.NewWriter()
-
-			// set path
-			path := client.Pwd
-
-			if len(argpath) > 0 {
-				if !filepath.IsAbs(argpath) {
-					path = filepath.Join(path, argpath)
-				} else {
-					path = argpath
-				}
-			}
-
-			// get ls data
-			data, err := r.getRemoteLsData(client, path)
-			if err != nil {
-				fmt.Fprintf(w, "Error: %s\n", err)
-				return
-			}
-
-			// if `a` flag disable, delete Hidden files...
-			if !c.Bool("a") {
-				// hidden delete data slice
-				hddata := []os.FileInfo{}
-
-				// regex
-				rgx := regexp.MustCompile(`^\.`)
-
-				for _, f := range data.Files {
-					if !rgx.MatchString(f.Name()) {
-						hddata = append(hddata, f)
-					}
-				}
-
-				data.Files = hddata
-			}
-
-			// sort
-			r.SortLsData(c, data.Files)
-
-			// write lsdata
-			m.Lock()
-			lsdata[server] = data
-			m.Unlock()
-		}()
+		go r.doLs(lsdata, c, exit, m, client, server, argpath)
 	}
 
 	// wait get directory data
@@ -186,97 +136,7 @@ func (r *RunSftp) lsAction(c *cli.Context) error {
 
 	switch {
 	case c.Bool("l"): // long list format
-		// set tabwriter
-		tabw := new(tabwriter.Writer)
-		tabw.Init(os.Stdout, 0, 1, 1, ' ', 0)
-
-		// get maxSizeWidth
-		var maxSizeWidth int
-
-		var sizestr string
-
-		for _, data := range lsdata {
-			for _, f := range data.Files {
-				if c.Bool("h") {
-					sizestr = humanize.Bytes(uint64(f.Size()))
-				} else {
-					sizestr = strconv.FormatUint(uint64(f.Size()), 10)
-				}
-
-				// set sizestr max length
-				if maxSizeWidth < len(sizestr) {
-					maxSizeWidth = len(sizestr)
-				}
-			}
-		}
-
-		// print list ls
-		for server, data := range lsdata {
-			// get prompt
-			data.Client.Output.Create(server)
-			prompt := data.Client.Output.GetPrompt()
-
-			// for get data
-			for _, f := range lsdata[server].Files {
-				sys := f.Sys()
-
-				// TDXX(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
-				var uid, gid uint32
-
-				var size uint64
-
-				var user, group, timestr, sizestr string
-
-				if stat, ok := sys.(*sftp.FileStat); ok {
-					uid = stat.UID
-					gid = stat.GID
-					size = stat.Size
-					timestamp := time.Unix(int64(stat.Mtime), 0)
-					timestr = timestamp.Format("2006 01-02 15:04:05")
-				}
-
-				// Switch with or without -n option.
-				if c.Bool("n") {
-					user = strconv.FormatUint(uint64(uid), 10)
-					group = strconv.FormatUint(uint64(gid), 10)
-				} else {
-					user, _ = common.GetNameFromID(lsdata[server].Passwd, uid)
-					group, _ = common.GetNameFromID(lsdata[server].Groups, gid)
-				}
-
-				// Switch with or without -h option.
-				if c.Bool("h") {
-					sizestr = humanize.Bytes(size)
-				} else {
-					sizestr = strconv.FormatUint(size, 10)
-				}
-
-				// set data
-				data := new(sftpLsData)
-				data.Mode = f.Mode().String()
-				data.User = user
-				data.Group = group
-				data.Size = sizestr
-				data.Time = timestr
-				data.Path = f.Name()
-
-				if len(lsdata) == 1 { // nolint gomnd
-					// set print format
-					format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
-
-					// write data
-					fmt.Fprintf(tabw, format, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
-				} else {
-					// set print format
-					format := "%s\t%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
-
-					// write data
-					fmt.Fprintf(tabw, format, prompt, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
-				}
-			}
-		}
-
-		tabw.Flush()
+		r.longList(lsdata, c)
 
 	case c.Bool("1"): // list 1 file per line
 		// for list
@@ -309,4 +169,103 @@ func (r *RunSftp) lsAction(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func (r *RunSftp) longList(lsdata map[string]sftpLs, c *cli.Context) {
+	// set tabwriter
+	tabw := new(tabwriter.Writer)
+	tabw.Init(os.Stdout, 0, 1, 1, ' ', 0)
+
+	// get maxSizeWidth
+	var maxSizeWidth int
+
+	var sizestr string
+
+	for _, data := range lsdata {
+		for _, f := range data.Files {
+			if c.Bool("h") {
+				sizestr = humanize.Bytes(uint64(f.Size()))
+			} else {
+				sizestr = strconv.FormatUint(uint64(f.Size()), 10)
+			}
+
+			// set sizestr max length
+			if maxSizeWidth < len(sizestr) {
+				maxSizeWidth = len(sizestr)
+			}
+		}
+	}
+
+	// print list ls
+	for server, data := range lsdata {
+		// get prompt
+		data.Client.Output.Create(server)
+		prompt := data.Client.Output.GetPrompt()
+
+		// for get data
+		for _, f := range lsdata[server].Files {
+			r.listFile(f, c, lsdata, server, maxSizeWidth, tabw, prompt)
+		}
+	}
+
+	tabw.Flush()
+}
+
+func (r *RunSftp) listFile(f os.FileInfo, c *cli.Context, lsdata map[string]sftpLs,
+	server string, maxSizeWidth int, tabw io.Writer, prompt string) {
+	sys := f.Sys()
+
+	// TDXX(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。
+	var uid, gid uint32
+
+	var size uint64
+
+	var user, group, timestr, sizestr string
+
+	if stat, ok := sys.(*sftp.FileStat); ok {
+		uid = stat.UID
+		gid = stat.GID
+		size = stat.Size
+		timestamp := time.Unix(int64(stat.Mtime), 0)
+		timestr = timestamp.Format("2006 01-02 15:04:05")
+	}
+
+	// Switch with or without -n option.
+	if c.Bool("n") {
+		user = strconv.FormatUint(uint64(uid), 10)
+		group = strconv.FormatUint(uint64(gid), 10)
+	} else {
+		user, _ = common.GetNameFromID(lsdata[server].Passwd, uid)
+		group, _ = common.GetNameFromID(lsdata[server].Groups, gid)
+	}
+
+	// Switch with or without -h option.
+	if c.Bool("h") {
+		sizestr = humanize.Bytes(size)
+	} else {
+		sizestr = strconv.FormatUint(size, 10)
+	}
+
+	// set data
+	data := new(sftpLsData)
+	data.Mode = f.Mode().String()
+	data.User = user
+	data.Group = group
+	data.Size = sizestr
+	data.Time = timestr
+	data.Path = f.Name()
+
+	if len(lsdata) == 1 { // nolint gomnd
+		// set print format
+		format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
+
+		// write data
+		fmt.Fprintf(tabw, format, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
+	} else {
+		// set print format
+		format := "%s\t%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
+
+		// write data
+		fmt.Fprintf(tabw, format, prompt, data.Mode, data.User, data.Group, data.Size, data.Time, data.Path)
+	}
 }
