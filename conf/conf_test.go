@@ -131,7 +131,7 @@ func TestServerConfigReduct(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := serverConfigReduct(v.perConfig, v.childConfig)
+		got := serverConfigDeduct(v.perConfig, v.childConfig)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }

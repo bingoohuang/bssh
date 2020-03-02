@@ -211,7 +211,7 @@ func ReadConf(confPath string) (config Config) {
 		}
 	} else {
 		for _, sshConfig := range config.SSHConfig {
-			setCommon := serverConfigReduct(config.Common, sshConfig.ServerConfig)
+			setCommon := serverConfigDeduct(config.Common, sshConfig.ServerConfig)
 
 			if v, err := getOpenSSHConfig(sshConfig.Path, sshConfig.Command); err == nil {
 				config.parseConfigServers(v, setCommon)
@@ -273,7 +273,7 @@ func (cf *Config) readIncludeFiles() {
 		}
 
 		// reduce common setting
-		setCommon := serverConfigReduct(cf.Common, includeConf.Common)
+		setCommon := serverConfigDeduct(cf.Common, includeConf.Common)
 
 		// map init
 		if len(cf.Server) == 0 {
@@ -289,7 +289,7 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 	tmplConfigs := make([]tmplConfig, 0)
 
 	for key, value := range configServers {
-		setValue := serverConfigReduct(setCommon, value)
+		setValue := serverConfigDeduct(setCommon, value)
 		cf.Server[key] = setValue
 
 		if value.Tmpl != "" {
@@ -365,9 +365,9 @@ func checkFormatServerConfAuth(c ServerConfig) (isFormat bool) {
 	return
 }
 
-// serverConfigReduct returns a new server config that set perConfig field to
+// serverConfigDeduct returns a new server config that set perConfig field to
 // childConfig empty filed.
-func serverConfigReduct(perConfig, childConfig ServerConfig) ServerConfig {
+func serverConfigDeduct(perConfig, childConfig ServerConfig) ServerConfig {
 	result := ServerConfig{}
 
 	// struct to map
