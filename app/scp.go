@@ -154,7 +154,13 @@ func parseFromToServer(hosts, names []string, isFromInRemote, isToRemote bool, d
 			os.Exit(1) // nolint gomnd
 		}
 
-		toServer = hosts
+		if isFromInRemote {
+			fromServer = hosts
+		}
+
+		if isToRemote {
+			toServer = hosts
+		}
 	// remote to remote scp
 	case isFromInRemote && isToRemote:
 		fromServer = list.ShowServersView(&data, "bssh scp(from)>>", names, false)

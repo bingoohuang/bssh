@@ -326,7 +326,7 @@ func (cp *Scp) pull() {
 	// create connection parallel
 	clients := cp.createScpConnects(targets)
 	if len(clients) == 0 {
-		fmt.Fprintf(os.Stderr, "There is no host to connect to\n")
+		fmt.Fprintf(os.Stderr, "There is no host to connect to```\n")
 		return
 	}
 
@@ -363,7 +363,7 @@ func (cp *Scp) pullPath(client *Connect) {
 	ow := client.Output.NewWriter()
 
 	// basedir
-	baseDir := cp.To.Path[0]
+	baseDir := common.ExpandHomeDir(cp.To.Path[0])
 
 	// if multi pull, servername add baseDir
 	if len(cp.From.Server) > 1 { // nolint gomnd
