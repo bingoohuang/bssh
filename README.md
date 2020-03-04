@@ -7,7 +7,8 @@ TUI list select ssh/scp/sftp client tools.
 
 ## Install
 
-`go get -v github.com/bingoohuang/bssh/cmd/bssh@ded39df`
+1. `go get -v github.com/bingoohuang/bssh/cmd/bssh`
+1. or `git clone https://github.com/bingoohuang/bssh.git` and `cd bssh && go install  -ldflags="-s -w" ./...`
 
 ## Description
 
