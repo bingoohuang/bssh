@@ -234,6 +234,10 @@ func WalkDir(dir string) (files []string, err error) {
 	}
 
 	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if IsHidden(dir, path) {
+			return nil // ignore hidden filesß
+		}
+
 		if info.IsDir() {
 			path += "/"
 		}
@@ -244,6 +248,24 @@ func WalkDir(dir string) (files []string, err error) {
 	})
 
 	return
+}
+
+// IsHidden tells a path is hidden after basedir
+func IsHidden(basedir, path string) bool {
+	p, err := filepath.Rel(basedir, path)
+	if err != nil {
+		p = path
+	}
+
+	parts := filepath.SplitList(p)
+
+	for _, part := range parts {
+		if len(part) > 1 && part[0:1] == "." {
+			return true
+		}
+	}
+
+	return false
 }
 
 // GetIDFromName return user name from /etc/passwd and uid.

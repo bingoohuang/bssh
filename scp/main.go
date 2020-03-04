@@ -277,6 +277,10 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 		}
 
 		p := walker.Path()
+		if common.IsHidden(path, p) {
+			continue // ignore hidden files.
+		}
+
 		stat := walker.Stat()
 
 		if stat.IsDir() { // is directory
@@ -355,7 +359,6 @@ func (cp *Scp) pull() {
 
 // walk return file path list ([]string).
 func (cp *Scp) pullPath(client *Connect) {
-	// set ftp client
 	ftp := client.Connect
 
 	// get output writer
@@ -375,25 +378,32 @@ func (cp *Scp) pullPath(client *Connect) {
 
 	// walk remote path
 	for _, path := range cp.From.Path {
+		if _, err := ftp.Stat(path); err != nil {
+			fmt.Fprintf(ow, "path %s Error: %s\n", path, err)
+			continue
+		}
+
 		globpath, err := ftp.Glob(path)
 		if err != nil {
-			fmt.Fprintf(ow, "Error: %s\n", err)
+			fmt.Fprintf(ow, "path %s Error: %s\n", path, err)
 			continue
 		}
 
 		for _, gp := range globpath {
+			remoteBase := filepath.Dir(gp) // basedir
 			walker := ftp.Walk(gp)
-			for walker.Step() {
-				// basedir
-				remoteBase := filepath.Dir(gp)
 
-				err := walker.Err()
-				if err != nil {
+			for walker.Step() {
+				if err := walker.Err(); err != nil {
 					fmt.Fprintf(ow, "Error: %s\n", err)
 					continue
 				}
 
 				p := walker.Path()
+				if common.IsHidden(path, p) {
+					continue // ignore hidden files.
+				}
+
 				rp, _ := filepath.Rel(remoteBase, p)
 				lpath := filepath.Join(baseDir, rp)
 
