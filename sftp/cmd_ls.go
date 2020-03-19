@@ -59,7 +59,7 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 
 	lstat, err := client.Connect.Lstat(path)
 	if err != nil {
-		return
+		return lsdata, err
 	}
 
 	// get path data
@@ -68,7 +68,7 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 		// get directory list data
 		data, err = client.Connect.ReadDir(path)
 		if err != nil {
-			return
+			return lsdata, err
 		}
 	} else {
 		data = []os.FileInfo{lstat}
@@ -76,12 +76,12 @@ func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, 
 
 	passwd, err := ClientReadFile(client, "/etc/passwd")
 	if err != nil {
-		return
+		return lsdata, err
 	}
 
 	groups, err := ClientReadFile(client, "/etc/group")
 	if err != nil {
-		return
+		return lsdata, err
 	}
 
 	return sftpLs{Client: client, Files: data, Passwd: passwd, Groups: groups}, err

@@ -126,6 +126,7 @@ func (cp *Scp) push() {
 	for i, p := range cp.From.Path {
 		data, err := common.WalkDir(p)
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "common.WalkDir error %v\n", err)
 			continue
 		}
 
@@ -136,24 +137,7 @@ func (cp *Scp) push() {
 
 	// parallel push data
 	for _, c := range clients {
-		client := c
-
-		go func() {
-			defer func() { exit <- true }()
-
-			client.Output.Create(client.Server)
-			ow := client.Output.NewWriter()
-			ftp := client.Connect
-
-			// push path
-			for _, p := range pathset {
-				base := p.Base
-
-				for _, path := range p.PathSlice {
-					_ = cp.pushPath(ftp, ow, client.Output, base, path)
-				}
-			}
-		}()
+		go pushByClient(exit, c, pathset, cp)
 	}
 
 	// wait send data
@@ -168,6 +152,23 @@ func (cp *Scp) push() {
 	fmt.Println("all push exit.")
 }
 
+func pushByClient(exit chan bool, client *Connect, pathset []PathSet, cp *Scp) {
+	defer func() { exit <- true }()
+
+	client.Output.Create(client.Server)
+	ow := client.Output.NewWriter()
+	ftp := client.Connect
+
+	// push path
+	for _, p := range pathset {
+		for _, path := range p.PathSlice {
+			if err := cp.pushPath(ftp, ow, client.Output, p.Base, path); err != nil {
+				fmt.Fprintf(os.Stderr, "cp.pushPath error %v\n", err)
+			}
+		}
+	}
+}
+
 //
 func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, base, path string) (err error) {
 	// get rel path
@@ -177,15 +178,14 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 	// get local file info
 	fInfo, _ := os.Lstat(path)
 	if fInfo.IsDir() {
-		err = ftp.Mkdir(rpath)
-		if err != nil {
-			fmt.Fprintf(ow, "%s\n", err)
+		if err := ftp.MkdirAll(rpath); err != nil {
+			fmt.Fprintf(ow, "ftp.MkdirAll rpath %s error %v\n", rpath, err)
 			return err
 		}
 	} else {
 		lf, err := os.Open(path)
 		if err != nil {
-			fmt.Fprintf(ow, "%s\n", err)
+			fmt.Fprintf(ow, "os.Open path %s error %v\n", path, err)
 			return err
 		}
 
@@ -195,9 +195,8 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 		lstat, _ := os.Lstat(path)
 		size := lstat.Size()
 
-		err = cp.pushFile(lf, ftp, output, rpath, size)
-		if err != nil {
-			fmt.Fprintf(ow, "%s\n", err)
+		if err := cp.pushFile(lf, ftp, output, rpath, size); err != nil {
+			fmt.Fprintf(ow, "cp.pushFile %s->%s error %v\n", path, rpath, err)
 			return err
 		}
 	}
@@ -210,17 +209,17 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 	ow := output.NewWriter()
 
 	dir := filepath.Dir(path)
-	err = ftp.MkdirAll(dir)
+	if err = ftp.MkdirAll(dir); err != nil {
+		fmt.Fprintf(ow, "ftp.MkdirAll error %v\n", err)
 
-	if err != nil {
-		fmt.Fprintf(ow, "%s\n", err)
-		return
+		return err
 	}
 
 	rf, err := ftp.OpenFile(path, os.O_RDWR|os.O_CREATE)
 	if err != nil {
-		fmt.Fprintf(ow, "%s\n", err)
-		return
+		fmt.Fprintf(ow, "ftp.OpenFile error %v\n", err)
+
+		return err
 	}
 
 	defer rf.Close()
@@ -231,7 +230,7 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 	cp.ProgressWG.Add(1) // nolint gomnd
 	output.ProgressPrinter(size, rd, path)
 
-	return
+	return err
 }
 
 func (cp *Scp) viaPush() {
@@ -272,7 +271,7 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 	for walker.Step() {
 		err := walker.Err()
 		if err != nil {
-			fmt.Fprintf(fow, "Error: %s\n", err)
+			fmt.Fprintf(fow, "Error: %v\n", err)
 			continue
 		}
 
@@ -292,7 +291,7 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 				// open from server file
 				file, err := ftp.Open(p)
 				if err != nil {
-					fmt.Fprintf(fow, "Error: %s\n", err)
+					fmt.Fprintf(fow, "ftp.Open Error: %v\n", err)
 					return
 				}
 				defer file.Close()
@@ -330,7 +329,7 @@ func (cp *Scp) pull() {
 	// create connection parallel
 	clients := cp.createScpConnects(targets)
 	if len(clients) == 0 {
-		fmt.Fprintf(os.Stderr, "There is no host to connect to```\n")
+		fmt.Fprintf(os.Stderr, "There is no host to connect to\n")
 		return
 	}
 
@@ -379,13 +378,13 @@ func (cp *Scp) pullPath(client *Connect) {
 	// walk remote path
 	for _, path := range cp.From.Path {
 		if _, err := ftp.Stat(path); err != nil {
-			fmt.Fprintf(ow, "path %s Error: %s\n", path, err)
+			fmt.Fprintf(ow, "ftp.Stat path %s Error: %v\n", path, err)
 			continue
 		}
 
 		globpath, err := ftp.Glob(path)
 		if err != nil {
-			fmt.Fprintf(ow, "path %s Error: %s\n", path, err)
+			fmt.Fprintf(ow, "ftp.Glob path %s Error: %v\n", path, err)
 			continue
 		}
 
@@ -395,7 +394,7 @@ func (cp *Scp) pullPath(client *Connect) {
 
 			for walker.Step() {
 				if err := walker.Err(); err != nil {
-					fmt.Fprintf(ow, "Error: %s\n", err)
+					fmt.Fprintf(ow, "walker.Err Error: %v\n", err)
 					continue
 				}
 
@@ -427,7 +426,7 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 	// open remote file
 	rf, err := ftp.Open(p)
 	if err != nil {
-		fmt.Fprintf(ow, "Error: %s\n", err)
+		fmt.Fprintf(ow, "ftp.Open Error: %v\n", err)
 		return
 	}
 
@@ -436,7 +435,7 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 	// open local file
 	lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		fmt.Fprintf(ow, "Error: %s\n", err)
+		fmt.Fprintf(ow, "os.OpenFile Error: %v\n", err)
 		return
 	}
 
@@ -462,14 +461,14 @@ func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 			// ssh connect
 			conn, err := cp.Run.CreateSSHConnect(server)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s connect error: %s\n", server, err)
+				fmt.Fprintf(os.Stderr, "cp.Run.CreateSSHConnect %s connect error: %v\n", server, err)
 				return
 			}
 
 			// create sftp client
 			ftp, err := sftp.NewClient(conn.Client)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s create client error: %s\n", server, err)
+				fmt.Fprintf(os.Stderr, "sftp.NewClient %s create client error: %v\n", server, err)
 				return
 			}
 

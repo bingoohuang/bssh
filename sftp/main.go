@@ -166,7 +166,7 @@ func (r *RunSftp) doLs(lsdata map[string]sftpLs, c *cli.Context, exit chan bool,
 	// get ls data
 	data, err := r.getRemoteLsData(client, path)
 	if err != nil {
-		fmt.Fprintf(w, "Error: %s\n", err)
+		fmt.Fprintf(w, "getRemoteLsData Error: %v\n", err)
 		return
 	}
 
