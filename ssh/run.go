@@ -271,7 +271,7 @@ func (r *Run) printProxy(server string) {
 }
 
 func (r *Run) registerAutoEncryptPwd(oldPwd string) {
-	if r.Conf.Extra.DisableAutoEncryptPwd || strings.HasPrefix(oldPwd, `{PBE}`) {
+	if oldPwd == "na" || r.Conf.Extra.DisableAutoEncryptPwd || strings.HasPrefix(oldPwd, `{PBE}`) {
 		return
 	}
 
@@ -320,8 +320,7 @@ func (r *Run) autoEncryptPwd() {
 			return
 		}
 
-		r := regexp.QuoteMeta(pwd)
-		reg := regexp.MustCompile(r)
+		reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
 		newContent = reg.ReplaceAllString(newContent, newPwd)
 	}
 

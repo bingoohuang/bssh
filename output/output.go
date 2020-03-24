@@ -174,8 +174,7 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 
 		sum += s
 
-		d := time.Since(startTime)
-		bar.IncrBy(s, d)
+		bar.IncrBy(s, time.Since(startTime))
 
 		// check exit
 		if err == io.EOF {
