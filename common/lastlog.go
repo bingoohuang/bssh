@@ -49,7 +49,7 @@ func saveLastLogFile() {
 // ReadLastLog reads last Log
 func ReadLastLog() (*LastLogBean, bool) {
 	lastFile := ExpandHomeDir("~/.bssh.last")
-	stat, _ := file.Stat(lastFile)
+	stat := file.Stat(lastFile)
 
 	if stat == file.NotExists {
 		return nil, false

@@ -1,4 +1,4 @@
 package bssh
 
 // AppVersion ...
-const AppVersion = "0.6.14"
+const AppVersion = "1.0.0"
