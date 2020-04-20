@@ -28,12 +28,10 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 
 			key := tc.k
 
-			if len(tc.t) > 1 { // nolint gomnd
-				if t.ID != "" {
-					key += t.ID
-				} else {
-					key += fmt.Sprintf("%d", i+1) // nolint gomnd
-				}
+			if t.ID != "" {
+				key += t.ID
+			} else if len(tc.t) > 1 { // nolint gomnd
+				key += fmt.Sprintf("%d", i+1) // nolint gomnd
 			}
 
 			if proxy := t.Props["proxy"]; proxy != "" && c.Proxy == "" {
