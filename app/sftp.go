@@ -49,7 +49,7 @@ func Lsftp() (app *cli.App) {
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
+		cli.StringFlag{Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
@@ -65,7 +65,7 @@ func Lsftp() (app *cli.App) {
 func lsftpAction(c *cli.Context) error {
 	common.CheckHelpFlag(c)
 
-	confpath := c.String("file")
+	confpath := c.String("cnf")
 
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()

@@ -71,7 +71,7 @@ option(bssh)
 	
 	OPTIONS:
 	    --host servername, -H servername            connect servername.
-	    --file filepath, -F filepath                config filepath. (default: "/Users/blacknon/.bssh.toml")
+	    --cnf filepath, -c filepath                config filepath. (default: "/Users/blacknon/.bssh.toml")
 	    -L [bind_address:]port:remote_address:port  Local port forward mode.Specify a [bind_address:]port:remote_address:port.
 	    -R [bind_address:]port:remote_address:port  Remote port forward mode.Specify a [bind_address:]port:remote_address:port.
 	    -D port                                     Dynamic port forward mode(Socks5). Specify a port.
@@ -80,7 +80,7 @@ option(bssh)
 	    --not-execute, -N                           not execute remote command and shell.
 	    --x11, -X                                   x11 forwarding(forward to ${DISPLAY}).
 	    --term, -t                                  run specified command at terminal.
-	    --parallel, -p                              run command parallel node(tail -F etc...).
+	    --parallel, -p                              run command parallel node(tail -c etc...).
 	    --localrc                                   use local bashrc shell.
 	    --not-localrc                               not use local bashrc shell.
 	    --pshell, -s                                use parallel-shell(pshell) (alpha).
@@ -121,7 +121,7 @@ option(lscp)
 	OPTIONS:
 	    --host value, -H value  connect servernames
 	    --list, -l              print server list from config
-	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.toml")
+	    --cnf value, -c value  config file path (default: "/Users/blacknon/.bssh.toml")
 	    --permission, -p        copy file permission
 	    --help, -h              print this help
 	    --version, -v           print the version
@@ -157,7 +157,7 @@ option(bssh ftp)
 	    bssh ftp [options]
 	
 	OPTIONS:
-	    --file value, -F value  config file path (default: "/Users/blacknon/.bssh.toml")
+	    --cnf value, -c value  config file path (default: "/Users/blacknon/.bssh.toml")
 	    --help, -h              print this help
 	    --version, -v           print the version
 	

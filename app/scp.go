@@ -61,7 +61,7 @@ func Lscp() (app *cli.App) {
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
+		cli.StringFlag{Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config file path"},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
@@ -89,7 +89,7 @@ func lscpAction(c *cli.Context) error {
 	isFromInRemote, isFromInLocal := parseFromLocation(fromArgs)
 
 	isToRemote, _ := check.ParseScpPath(toArg)
-	confpath := c.String("file")
+	confpath := c.String("cnf")
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()
 	hosts := data.ExpandHosts(c)

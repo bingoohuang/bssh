@@ -77,7 +77,7 @@ func Lssh() (app *cli.App) {
 	app.Flags = []cli.Flag{
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
-		cli.StringFlag{Name: "file,F", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
+		cli.StringFlag{Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config `filepath`."},
 
 		// port forward option
@@ -95,7 +95,7 @@ func Lssh() (app *cli.App) {
 		cli.BoolFlag{Name: "not-execute,N", Usage: "not execute remote command and shell."},
 		cli.BoolFlag{Name: "x11,X", Usage: "x11 forwarding(forward to ${DISPLAY})."},
 		cli.BoolFlag{Name: "term,t", Usage: "run specified command at terminal."},
-		cli.BoolFlag{Name: "parallel,p", Usage: "run command parallel node(tail -F etc...)."},
+		cli.BoolFlag{Name: "parallel,p", Usage: "run command parallel node(tail -c etc...)."},
 		cli.BoolFlag{Name: "localrc", Usage: "use local bashrc shell."},
 		cli.BoolFlag{Name: "not-localrc", Usage: "not use local bashrc shell."},
 		cli.BoolFlag{Name: "pshell,s", Usage: "use parallel-shell(pshell) (alpha)."},
@@ -113,7 +113,7 @@ func Lssh() (app *cli.App) {
 func lsshAction(c *cli.Context) error {
 	common.CheckHelpFlag(c)
 
-	confpath := c.String("file")
+	confpath := c.String("cnf")
 
 	data := conf.ReadConf(confpath)
 	isMulti := parseMultiFlag(c)
