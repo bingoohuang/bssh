@@ -271,7 +271,7 @@ func (r *Run) printProxy(server string) {
 }
 
 func (r *Run) registerAutoEncryptPwd(oldPwd string) {
-	if oldPwd == "na" || r.Conf.Extra.DisableAutoEncryptPwd || strings.HasPrefix(oldPwd, `{PBE}`) {
+	if oldPwd == "na" || r.Conf.IsDisableAutoEncryptPwd() || strings.HasPrefix(oldPwd, `{PBE}`) {
 		return
 	}
 
@@ -301,7 +301,7 @@ func writeConfContent(confPath, content string) error {
 }
 
 func (r *Run) autoEncryptPwd() {
-	if r.Conf.Extra.DisableAutoEncryptPwd || len(r.decodedPasswordMap) == 0 {
+	if r.Conf.IsDisableAutoEncryptPwd() || len(r.decodedPasswordMap) == 0 {
 		return
 	}
 

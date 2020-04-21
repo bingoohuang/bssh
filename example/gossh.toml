@@ -1,0 +1,22 @@
+#printConfig = false
+# passphrase="xxx"
+disableAutoEncryptPwd = true
+
+hosts = [
+"1.2.1.1:1163 root/111222",
+"1.2.1.1:1166 root/111222",
+"1.2.1.1:1169 root/111333",
+# "1.2.1.1:1094  root/111333",
+# "1.2.1.1:1093  root/111333",
+# "1.2.1.1:1092  root/111333",
+]
+
+cmds = [
+#    "%host date",
+#    "%host %ul ~/Code/Go/src/github.com/bjca/telegraf/build/telegraf-1.7.2-agent_tencent_dev.x86_64.rpm /tmp",
+#    "%host rm -rf /var/lib/rpm/.rpm.lock",
+#    "%host rpm -qa | grep 'telegraf' | xargs rpm -ev",
+#    "%host rpm -ivh /tmp/telegraf-1.7.2-agent_tencent_dev.x86_64.rpm",
+   "%host service telegraf restart",
+   "%host telegraf version",
+]

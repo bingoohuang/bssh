@@ -18,36 +18,43 @@ type tmplConfig struct {
 func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 	for _, tc := range tmplConfigs {
 		for i, t := range tc.t {
-			c := tc.c
-			c.Addr = t.Host
-			c.Port = t.Port
-			c.User = t.User
-			c.Pass = t.Password
+			t.createServerConfig(&tc.c)
 
-			fixNote(&c)
-
-			key := tc.k
-
-			if t.ID != "" {
-				key += t.ID
-			} else if len(tc.t) > 1 { // nolint gomnd
-				key += fmt.Sprintf("%d", i+1) // nolint gomnd
-			}
-
-			if proxy := t.Props["proxy"]; proxy != "" && c.Proxy == "" {
-				c.Proxy = proxy
-			}
-
-			if group := t.Props["group"]; group != "" && len(c.Group) == 0 {
-				c.Group = str.SplitTrim(group, ",")
-			}
-
-			cf.Server[key] = c
+			cf.Server[tc.createKey(t.ID, i)] = tc.c
 		}
 	}
 }
 
-func fixNote(c *ServerConfig) {
+func (tc tmplConfig) createKey(tid string, i int) string {
+	if tid != "" {
+		return tc.k + tid
+	}
+
+	if len(tc.t) > 1 { // nolint gomnd
+		return tc.k + fmt.Sprintf("%d", i+1) // nolint gomnd
+	}
+
+	return tc.k
+}
+
+func (t Tmpl) createServerConfig(c *ServerConfig) {
+	c.Addr = t.Host
+	c.Port = t.Port
+	c.User = t.User
+	c.Pass = t.Password
+
+	c.fixNote()
+
+	if proxy := t.Props["proxy"]; proxy != "" && c.Proxy == "" {
+		c.Proxy = proxy
+	}
+
+	if group := t.Props["group"]; group != "" && len(c.Group) == 0 {
+		c.Group = str.SplitTrim(group, ",")
+	}
+}
+
+func (c *ServerConfig) fixNote() {
 	if strings.Contains(c.Note, c.Addr) {
 		return
 	}

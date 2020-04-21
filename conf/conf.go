@@ -11,8 +11,11 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/gou/str"
 
 	"github.com/bingoohuang/gou/pbe"
 	"github.com/spf13/viper"
@@ -35,6 +38,11 @@ type Config struct {
 	SSHConfig map[string]OpenSSHConfig
 
 	grouping map[string]map[string]ServerConfig
+
+	// DisableAutoEncryptPwd disable auto PBE passwords in config file.
+	DisableAutoEncryptPwd bool
+	Passphrase            string
+	Hosts                 []string
 }
 
 // ExtraConfig store extra configs
@@ -199,10 +207,20 @@ func ReadConf(confPath string) (config Config) {
 		os.Exit(1) // nolint gomnd
 	}
 
-	viper.Set(pbe.PbePwd, config.Extra.Passphrase)
+	viper.Set(pbe.PbePwd, str.EmptyThen(config.Extra.Passphrase, config.Passphrase))
 
 	// reduce common setting (in .bssh.toml servers)
 	config.parseConfigServers(config.Server, config.Common)
+
+	for i, server := range config.Hosts {
+		tmpls := ParseTmpl(server)
+		for j, tmpl := range tmpls {
+			sc := ServerConfig{}
+			tmpl.createServerConfig(&sc)
+
+			config.Server[generateKey(len(tmpls), len(config.Hosts), i, j)] = sc
+		}
+	}
 
 	// Read Openssh configs
 	if len(config.SSHConfig) == 0 {
@@ -230,6 +248,18 @@ func ReadConf(confPath string) (config Config) {
 	config.parseGroups()
 
 	return config
+}
+
+func generateKey(tmplsNum, hostsNum, i int, j int) string {
+	if tmplsNum > 1 {
+		return fmt.Sprintf("host-%s-%s", pad(i+1, hostsNum), pad(j+1, tmplsNum))
+	}
+
+	return fmt.Sprintf("host-%s", pad(i+1, hostsNum))
+}
+
+func pad(i int, size int) string {
+	return fmt.Sprintf(fmt.Sprintf("%%0%dd", len(strconv.Itoa(size))), i)
 }
 
 func (cf *Config) appendIncludePaths() {
@@ -395,4 +425,8 @@ func (cf *Config) GetNameSortedList() (nameList []string) {
 	sort.Strings(nameList)
 
 	return nameList
+}
+
+func (cf *Config) IsDisableAutoEncryptPwd() bool {
+	return cf.Extra.DisableAutoEncryptPwd || cf.DisableAutoEncryptPwd
 }

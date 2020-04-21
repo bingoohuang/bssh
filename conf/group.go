@@ -6,10 +6,10 @@ import (
 )
 
 // BelongsToGroup belongs to group or not
-func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
+func (c ServerConfig) BelongsToGroup(cf *Config, name string) bool {
 	othersGroupName := cf.pickOthersGroupName()
 
-	if len(sf.Group) == 0 { //others
+	if len(c.Group) == 0 { //others
 		return name == "" || name == othersGroupName
 	}
 
@@ -17,7 +17,7 @@ func (sf ServerConfig) BelongsToGroup(cf *Config, name string) bool {
 		return false
 	}
 
-	for _, g := range sf.Group {
+	for _, g := range c.Group {
 		if strings.HasPrefix(g, name) {
 			return true
 		}
