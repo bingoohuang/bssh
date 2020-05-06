@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -416,7 +417,117 @@ func (cf *Config) GetNameList() (nameList []string) {
 		nameList = append(nameList, k)
 	}
 
+	sort.Strings(nameList)
+
 	return nameList
+}
+
+// EnsureSearchHost searches the host name by glob pattern.
+func (cf *Config) EnsureSearchHost(host string) string {
+	matches1 := cf.globMatch(host)
+	if len(matches1) == 1 {
+		return matches1[0]
+	}
+
+	matches2 := cf.containsMatch(host)
+	if len(matches2) == 1 {
+		return matches2[0]
+	}
+
+	matches := make([]string, 0, len(matches1)+len(matches2))
+
+	matches = append(matches, matches1...)
+	matches = append(matches, matches2...)
+
+	if len(matches) == 0 {
+		_, _ = fmt.Fprintf(os.Stderr, "host %s not found from list.\n", host)
+	} else {
+		_, _ = fmt.Fprintf(os.Stderr, "host %s found multiple hosts(%v) from list.\n", host, matches)
+	}
+
+	os.Exit(1) // nolint gomnd
+
+	return ""
+}
+
+func (cf *Config) containsMatch(host string) []string {
+	result1 := cf.matchesFn(host, func(host, serverName string, _ ServerConfig) bool {
+		return strings.Contains(serverName, host)
+	})
+	if len(result1) == 1 {
+		return result1
+	}
+
+	result2 := cf.matchesFn(host, func(host, _ string, v ServerConfig) bool {
+		return strings.Contains(v.User+"@"+v.Addr+":"+v.Port, host)
+	})
+	if len(result2) == 1 {
+		return result2
+	}
+
+	result3 := cf.matchesFn(host, func(host, _ string, v ServerConfig) bool {
+		return strings.Contains(v.Note, host)
+	})
+	if len(result3) == 1 {
+		return result3
+	}
+
+	matches := make([]string, 0, len(result1)+len(result2)+len(result3))
+
+	matches = append(matches, result1...)
+	matches = append(matches, result2...)
+	matches = append(matches, result3...)
+
+	return matches
+}
+
+func (cf *Config) globMatch(host string) []string {
+	result1 := cf.matchesFn(host, func(host, serverName string, _ ServerConfig) bool {
+		ok, _ := filepath.Match(host, serverName)
+
+		return ok
+	})
+	if len(result1) == 1 {
+		return result1
+	}
+
+	result2 := cf.matchesFn(host, func(host, _ string, v ServerConfig) bool {
+		ok, _ := filepath.Match(host, v.User+"@"+v.Addr+":"+v.Port)
+
+		return ok
+	})
+	if len(result2) == 1 {
+		return result2
+	}
+
+	result3 := cf.matchesFn(host, func(host, _ string, v ServerConfig) bool {
+		ok, _ := filepath.Match(host, v.Note)
+
+		return ok
+	})
+	if len(result3) == 1 {
+		return result3
+	}
+
+	matches := make([]string, 0)
+
+	matches = append(matches, result1...)
+	matches = append(matches, result2...)
+	matches = append(matches, result3...)
+
+	return matches
+}
+
+func (cf *Config) matchesFn(host string, f func(host, serverName string, _ ServerConfig) bool) []string {
+	matches := make([]string, 0)
+
+	for k, v := range cf.Server {
+		if f(host, k, v) {
+			matches = append(matches, k)
+		}
+	}
+
+	return matches
 }
 
 // GetNameSortedList return a list of server names from the Config structure.

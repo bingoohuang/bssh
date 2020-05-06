@@ -43,8 +43,6 @@ func (t Tmpl) createServerConfig(c *ServerConfig) {
 	c.User = t.User
 	c.Pass = t.Password
 
-	c.fixNote()
-
 	if proxy := t.Props["proxy"]; proxy != "" && c.Proxy == "" {
 		c.Proxy = proxy
 	}
@@ -52,18 +50,6 @@ func (t Tmpl) createServerConfig(c *ServerConfig) {
 	if group := t.Props["group"]; group != "" && len(c.Group) == 0 {
 		c.Group = str.SplitTrim(group, ",")
 	}
-}
-
-func (c *ServerConfig) fixNote() {
-	if strings.Contains(c.Note, c.Addr) {
-		return
-	}
-
-	if c.Note != "" {
-		c.Note += " "
-	}
-
-	c.Note += c.User + "@" + c.Addr + ":" + c.Port
 }
 
 // Tmpl represents the structure of remote host information for ssh.

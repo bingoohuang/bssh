@@ -37,8 +37,7 @@ func TestExistServer(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := ExistServer(v.inputServer, v.nameList)
-		assert.Equal(t, v.expect, got, v.desc)
+		assert.Equal(t, v.expect, ExistServer(v.inputServer, v.nameList), v.desc)
 	}
 }
 

@@ -1,11 +1,6 @@
 package conf
 
 import (
-	"path/filepath"
-	"strings"
-
-	"github.com/sirupsen/logrus"
-
 	"github.com/bingoohuang/gou/str"
 	"github.com/urfave/cli"
 )
@@ -23,20 +18,7 @@ func (cf *Config) ExpandHosts(c *cli.Context) []string {
 				continue
 			}
 
-			count := 0
-
-			if strings.Contains(sh, "*") {
-				for k := range cf.Server {
-					if ok, _ := filepath.Match(sh, k); ok {
-						expanded = append(expanded, k)
-						count++
-					}
-				}
-			}
-
-			if count == 0 {
-				logrus.Warnf("no servers match  %s", sh)
-			}
+			expanded = append(expanded, cf.EnsureSearchHost(sh))
 		}
 	}
 

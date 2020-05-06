@@ -99,29 +99,29 @@ func lscpAction(c *cli.Context) error {
 
 	toServer, fromServer := parseFromToServer(hosts, names, isFromInRemote, isToRemote, data)
 
-	// scp struct
-	scp := new(scp.Scp)
+	// scpService struct
+	scpService := new(scp.Scp)
 
-	setFrom(fromArgs, scp)
+	setFrom(fromArgs, scpService)
 
-	scp.From.Server = fromServer
+	scpService.From.Server = fromServer
 
 	// set to info
 	isToRemote, toPath := check.ParseScpPath(toArg)
-	scp.To.IsRemote = isToRemote
+	scpService.To.IsRemote = isToRemote
 
 	if isToRemote {
 		toPath = check.EscapePath(toPath)
 	}
 
-	scp.To.Path = []string{toPath}
-	scp.To.Server = toServer
+	scpService.To.Path = []string{toPath}
+	scpService.To.Server = toServer
 
-	scp.Config = data
+	scpService.Config = data
 
-	printFromTo(isFromInRemote, scp, isToRemote)
+	printFromTo(isFromInRemote, scpService, isToRemote)
 
-	scp.Start(confpath)
+	scpService.Start(confpath)
 
 	return nil
 }
@@ -149,11 +149,6 @@ func parseFromToServer(hosts, names []string, isFromInRemote, isToRemote bool, d
 	switch {
 	// connectHost is set
 	case len(hosts) != 0:
-		if !check.ExistServer(hosts, names) {
-			fmt.Fprintln(os.Stderr, "Input Server not found from list.")
-			os.Exit(1) // nolint gomnd
-		}
-
 		if isFromInRemote {
 			fromServer = hosts
 		}

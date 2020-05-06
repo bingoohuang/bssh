@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jedib0t/go-pretty/table"
+
+	"github.com/bingoohuang/bssh/list"
+
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
 
-	"github.com/bingoohuang/bssh/list"
 	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/bssh"
-	"github.com/bingoohuang/bssh/check"
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
 	sshcmd "github.com/bingoohuang/bssh/ssh"
@@ -120,7 +122,7 @@ func lsshAction(c *cli.Context) error {
 	names := data.GetNameSortedList()
 	hosts := data.ExpandHosts(c)
 
-	processListFlag(c, names)
+	processListFlag(c, names, data.Server)
 
 	r := sshcmd.NewRun(confpath)
 	r.ServerList = parseSelected("bssh>>", hosts, names, data, isMulti)
@@ -191,17 +193,23 @@ func parseMultiFlag(c *cli.Context) bool {
 	return (len(c.Args()) > 0 || c.Bool("pshell")) && !c.Bool("not-execute")
 }
 
-func processListFlag(c *cli.Context, names []string) {
+func processListFlag(c *cli.Context, names []string, servers map[string]conf.ServerConfig) {
 	// Check list flag
 	if !c.Bool("list") {
 		return
 	}
 
 	_, _ = fmt.Fprintf(os.Stdout, "bssh Server List:\n")
-	for v := range names {
-		_, _ = fmt.Fprintf(os.Stdout, "  %s\n", names[v])
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"#", "Server Name", "Connect Info", "Note"})
+
+	for i, name := range names {
+		v := servers[name]
+		t.AppendRow(table.Row{i + 1, name, v.User + "@" + v.Addr + ":" + v.Port, v.Note})
 	}
 
+	t.Render()
 	os.Exit(0)
 }
 
@@ -217,19 +225,10 @@ func parseMode(c *cli.Context) string {
 	}
 }
 
-func parseSelected(prompt string, hosts []string, names []string, data conf.Config, isMulti bool) []string {
-	var selected []string
-
-	if len(hosts) > 0 {
-		if !check.ExistServer(hosts, names) {
-			_, _ = fmt.Fprintln(os.Stderr, "Input Server not found from list.")
-			os.Exit(1) // nolint gomnd
-		} else {
-			selected = hosts
-		}
-	} else {
-		selected = list.ShowServersView(&data, prompt, names, isMulti)
+func parseSelected(prompt string, hosts, names []string, data conf.Config, isMulti bool) []string {
+	if len(hosts) == 0 {
+		return list.ShowServersView(&data, prompt, names, isMulti)
 	}
 
-	return selected
+	return hosts
 }
