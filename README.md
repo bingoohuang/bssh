@@ -1,14 +1,14 @@
+# bssh
+
 [![TravisCI](https://travis-ci.org/bingoohuang/bssh.svg?branch=master)](https://travis-ci.org/bingoohuang/bssh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bingoohuang/bssh)](https://goreportcard.com/report/github.com/bingoohuang/bssh)
-
-# bssh
 
 TUI list select ssh/scp/sftp client tools.
 
 ## Install
 
 1. `go get -v github.com/bingoohuang/bssh/cmd/bssh`
-1. or `git clone https://github.com/bingoohuang/bssh.git` and `cd bssh && go install  -ldflags="-s -w" ./...`
+1. or `git clone https://github.com/bingoohuang/bssh.git` and `make install`
 
 ## Description
 
@@ -26,11 +26,7 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 * Can use bashrc of local machine at ssh connection destination.
 * Auto encrypt clear password in the config file. (can be disabled by DisableAutoEncryptPwd=true, see [example](example/democonf.toml))
 
-## Demo
-
-## Install
-
-### compile
+## compile
 
 compile go file(tested go1.12.4).
 
@@ -55,12 +51,26 @@ For details see [Config](doc/Config.md).
 
 ## Usage
 
-### bssh
+### bssh server list
+
+```bash
+$ bssh -c ~/Downloads/tencent-test.toml -l                                    [三  5/ 6 12:06:50 2020]
+bssh Server List:
++---+-------------------------------+-------------------------------------------+--------------------+
+| # | SERVER NAME                   | CONNECT INFO                              | NOTE               |
++---+-------------------------------+-------------------------------------------+--------------------+
+| 1 | host-1                        | root@123.206.185.162:61063                |                    |
+| 2 | host-2                        | root@123.206.185.162:61066                |                    |
+| 3 | host-3                        | root@123.206.185.162:61069                |                    |
+| 4 | host-4                        | root@123.206.185.162:61065                |                    |
++---+-------------------------------+-------------------------------------------+--------------------+
+```
+
+### bssh ssh
 
 run command.
 
     bssh
-
 
 option(bssh)
 
@@ -68,7 +78,7 @@ option(bssh)
 	    bssh - TUI list select and parallel ssh client command.
 	USAGE:
 	    bssh [options] [commands...]
-	
+
 	OPTIONS:
 	    --host servername, -H servername            connect servername.
 	    --cnf filepath, -c filepath                config filepath. (default: "/Users/blacknon/.bssh.toml")
@@ -87,20 +97,20 @@ option(bssh)
 	    --list, -l                                  print server list from config.
 	    --help, -h                                  print this help
 	    --version, -v                               print the version
-	
+
 	COPYRIGHT:
 	    blacknon(blacknon@orebibou.com)
-	
+
 	VERSION:
 	    0.6.0
-	
+
 	USAGE:
 	    # connect ssh
 	    bssh
-	
+
 	    # parallel run command in select server over ssh
 	    bssh -p command...
-	
+
 	    # parallel run command in select server over ssh, do it interactively.
 	    bssh -s
 
@@ -112,12 +122,12 @@ run command.
     bssh scp from... to
 
 option(lscp)
-	
+
 	NAME:
 	    lscp scp - TUI list select and parallel scp client command.
 	USAGE:
 	    lscp scp [options] (local|remote):from_path... (local|remote):to_path
-	
+
 	OPTIONS:
 	    --host value, -H value  connect servernames
 	    --list, -l              print server list from config
@@ -125,23 +135,22 @@ option(lscp)
 	    --permission, -p        copy file permission
 	    --help, -h              print this help
 	    --version, -v           print the version
-	
+
 	COPYRIGHT:
 	    blacknon(blacknon@orebibou.com)
-	
+
 	VERSION:
 	    0.6.0
-	
+
 	USAGE:
 	    # local to remote scp
 	    bssh scp /path/to/local... remote:/path/to/remote
-	
+
 	    # remote to local scp
 	    bssh scp remote:/path/to/remote... /path/to/local
-	
+
 	    # remote to remote scp
 	    bssh scp remote:/path/to/remote... remote:/path/to/local
-
 
 ### bssh ftp
 
@@ -155,25 +164,23 @@ option(bssh ftp)
 	    bssh ftp - TUI list select and parallel sftp client command.
 	USAGE:
 	    bssh ftp [options]
-	
+
 	OPTIONS:
 	    --cnf value, -c value  config file path (default: "/Users/blacknon/.bssh.toml")
 	    --help, -h              print this help
 	    --version, -v           print the version
-	
+
 	COPYRIGHT:
 	    blacknon(blacknon@orebibou.com)
-	
+
 	VERSION:
 	    0.6.0
-	
+
 	USAGE:
 	  # start bssh ftp shell
 	  bssh ftp
 
-
 If you specify a command as an argument, you can select multiple hosts. Select host <kbd>Tab</kbd>, select all displayed hosts <kbd>Ctrl</kbd> + <kbd>a</kbd>.
-
 
 ### 1. [bssh] connect terminal
 <details>
@@ -379,12 +386,12 @@ You can include server settings in another file.\
 	user = "user"
 	key = "~/.ssh/id_rsa"
 	pkcs11provider = "/usr/local/lib/opensc-pkcs11.so"
-	
+
 	[server.Server1]
 	addr = "172.16.200.1"
 	note = "TEST Server1"
 	local_rc = "yes"
-	
+
 	[server.Server2]
 	addr = "172.16.200.2"
 	note = "TEST Server2"
@@ -442,13 +449,13 @@ Besides this, you can also specify ProxyCommand like OpenSSH.
 	addr = "192.168.100.200"
 	key  = "/path/to/private_key"
 	note = "proxy server"
-	
+
 	[server.overProxyServer]
 	addr = "192.168.10.10"
 	key  = "/path/to/private_key"
 	note = "connect use ssh proxy"
 	proxy = "sshProxyServer"
-	
+
 	[server.overProxyServer2]
 	addr = "192.168.10.100"
 	key  = "/path/to/private_key"
