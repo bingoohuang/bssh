@@ -51,6 +51,10 @@ For details see [Config](doc/Config.md).
 
 ## Usage
 
+### Direct connect
+
+`bssh -H user:pass@192.168.1.30:8022`
+
 ### bssh server list
 
 ```bash
