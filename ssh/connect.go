@@ -63,8 +63,12 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 		return nil, err
 	}
 
-	s := r.Conf.Server[server] // server conf
-	x11 := s.X11 || r.X11      // set x11
+	s, ok := r.Conf.Server[server] // server conf
+	if !ok {
+		s = r.parseDirectServer(server)
+	}
+
+	x11 := s.X11 || r.X11 // set x11
 
 	// connect target server
 	connect = &sshlib.Connect{
