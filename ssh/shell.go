@@ -27,7 +27,10 @@ import (
 // nolint funlen
 func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
-	config := r.Conf.Server[server]
+	config, ok := r.Conf.Server[server]
+	if !ok {
+		config = r.parseDirectServer(server)
+	}
 
 	// check count AuthMethod
 	if len(r.serverAuthMethodMap[server]) == 0 {
@@ -107,6 +110,37 @@ func (r *Run) shell() (err error) {
 	}
 
 	return err
+}
+
+func (r *Run) parseDirectServer(server string) conf.ServerConfig {
+	atPos := strings.Index(server, "@")
+	left := server[:atPos]
+	right := server[atPos+1:]
+
+	sc := conf.ServerConfig{}
+
+	commaPos := strings.Index(left, ":")
+	if commaPos == -1 {
+		sc.User = left
+	} else {
+		sc.User = left[:commaPos]
+		sc.Pass = left[commaPos+1:]
+	}
+
+	commaPos = strings.Index(right, ":")
+
+	if commaPos == -1 {
+		sc.Addr = right
+		sc.Port = "22"
+	} else {
+		sc.Addr = right[:commaPos]
+		sc.Port = right[commaPos+1:]
+	}
+
+	r.Conf.Server[server] = sc
+	r.registerAuthMapPassword(server, sc.Pass)
+
+	return sc
 }
 
 func (r *Run) sshAgent(config *conf.ServerConfig, connect *sshlib.Connect, session *ssh.Session) {

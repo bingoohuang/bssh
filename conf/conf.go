@@ -422,8 +422,17 @@ func (cf *Config) GetNameList() (nameList []string) {
 	return nameList
 }
 
+// IsDirectServer tells that the server is a direct server address like user:pass@host:port
+func IsDirectServer(server string) bool {
+	return strings.Index(server, "@") > 0
+}
+
 // EnsureSearchHost searches the host name by glob pattern.
 func (cf *Config) EnsureSearchHost(host string) string {
+	if IsDirectServer(host) {
+		return host
+	}
+
 	matches1 := cf.globMatch(host)
 	if len(matches1) == 1 {
 		return matches1[0]
