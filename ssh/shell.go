@@ -29,6 +29,7 @@ func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
 	config, ok := r.Conf.Server[server]
 	if !ok {
+		r.Conf.WriteTempHosts(server)
 		config = r.parseDirectServer(server)
 	}
 
@@ -113,29 +114,7 @@ func (r *Run) shell() (err error) {
 }
 
 func (r *Run) parseDirectServer(server string) conf.ServerConfig {
-	atPos := strings.Index(server, "@")
-	left := server[:atPos]
-	right := server[atPos+1:]
-
-	sc := conf.ServerConfig{}
-
-	commaPos := strings.Index(left, ":")
-	if commaPos == -1 {
-		sc.User = left
-	} else {
-		sc.User = left[:commaPos]
-		sc.Pass = left[commaPos+1:]
-	}
-
-	commaPos = strings.Index(right, ":")
-
-	if commaPos == -1 {
-		sc.Addr = right
-		sc.Port = "22"
-	} else {
-		sc.Addr = right[:commaPos]
-		sc.Port = right[commaPos+1:]
-	}
+	sc := conf.ParseDirectServer(server)
 
 	r.Conf.Server[server] = sc
 	r.registerAuthMapPassword(server, sc.Pass)

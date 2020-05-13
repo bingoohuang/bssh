@@ -9,6 +9,7 @@ import (
 	"crypto/md5" // nolint
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -44,6 +45,8 @@ type Config struct {
 	DisableAutoEncryptPwd bool
 	Passphrase            string
 	Hosts                 []string
+	tempHostsFile         string
+	tempHosts             map[string]bool
 }
 
 // ExtraConfig store extra configs
@@ -189,7 +192,6 @@ type OpenSSHConfig struct {
 }
 
 // ReadConf load configuration file and return Config structure
-// TDXX(blacknon): リファクタリング！(v0.6.1) 外出しや処理のまとめなど
 func ReadConf(confPath string) (config Config) {
 	confPath = common.ExpandHomeDir(confPath)
 
@@ -198,6 +200,8 @@ func ReadConf(confPath string) (config Config) {
 		fmt.Printf("sample: %s\n", "https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml")
 		os.Exit(1) // nolint gomnd
 	}
+
+	config.loadTempHosts(confPath)
 
 	config.Server = map[string]ServerConfig{}
 	config.SSHConfig = map[string]OpenSSHConfig{}
@@ -427,6 +431,35 @@ func IsDirectServer(server string) bool {
 	return strings.Index(server, "@") > 0
 }
 
+// ParseDirectServer parses a direct server address.
+func ParseDirectServer(server string) ServerConfig {
+	atPos := strings.Index(server, "@")
+	left := server[:atPos]
+	right := server[atPos+1:]
+
+	sc := ServerConfig{}
+
+	commaPos := strings.Index(left, ":")
+	if commaPos == -1 {
+		sc.User = left
+	} else {
+		sc.User = left[:commaPos]
+		sc.Pass = left[commaPos+1:]
+	}
+
+	commaPos = strings.Index(right, ":")
+
+	if commaPos == -1 {
+		sc.Addr = right
+		sc.Port = "22"
+	} else {
+		sc.Addr = right[:commaPos]
+		sc.Port = right[commaPos+1:]
+	}
+
+	return sc
+}
+
 // EnsureSearchHost searches the host name by glob pattern.
 func (cf *Config) EnsureSearchHost(host string) string {
 	if IsDirectServer(host) {
@@ -549,4 +582,56 @@ func (cf *Config) GetNameSortedList() (nameList []string) {
 
 func (cf *Config) IsDisableAutoEncryptPwd() bool {
 	return cf.Extra.DisableAutoEncryptPwd || cf.DisableAutoEncryptPwd
+}
+
+func (cf *Config) loadTempHosts(confPath string) {
+	tempHostsFile := confPath + ".temphosts"
+	cf.tempHostsFile = tempHostsFile
+	cf.tempHosts = make(map[string]bool)
+
+	if !common.IsExist(tempHostsFile) {
+		return
+	}
+
+	file, _ := ioutil.ReadFile(tempHostsFile)
+	for _, line := range strings.Split(string(file), "\n") {
+		hostLine := strings.TrimSpace(line)
+		if hostLine != "" && !strings.HasPrefix(hostLine, "#") {
+			cf.tempHosts[hostLine] = true
+		}
+	}
+
+	for k := range cf.tempHosts {
+		cf.Hosts = append(cf.Hosts, k)
+	}
+}
+
+// WriteTempHosts writes a new host to temporary file.
+func (cf *Config) WriteTempHosts(tempHost string) {
+	if _, ok := cf.tempHosts[tempHost]; ok {
+		return
+	}
+
+	cf.tempHosts[tempHost] = true
+
+	file := cf.tempHostsFile
+
+	if err := AppendFile(file, tempHost); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func AppendFile(file, line string) error {
+	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	if _, err := f.WriteString(line + "\n"); err != nil {
+		return err
+	}
+
+	return nil
 }

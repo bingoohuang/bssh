@@ -69,7 +69,21 @@ func ParseTmpl(tmpl string) []Tmpl {
 
 	fields := str.FieldsX(tmpl, "(", ")", -1)
 	if len(fields) < 2 { // nolint gomnd
+		if IsDirectServer(tmpl) {
+			s := ParseDirectServer(tmpl)
+
+			return []Tmpl{{
+				ID:       tmpl,
+				Host:     s.Addr,
+				Port:     s.Port,
+				User:     s.User,
+				Password: s.Pass,
+				Props:    make(map[string]string)},
+			}
+		}
+
 		logrus.Warnf("bad format for host %s", tmpl)
+
 		return hosts
 	}
 

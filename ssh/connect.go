@@ -65,6 +65,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 
 	s, ok := r.Conf.Server[server] // server conf
 	if !ok {
+		r.Conf.WriteTempHosts(server)
 		s = r.parseDirectServer(server)
 	}
 
