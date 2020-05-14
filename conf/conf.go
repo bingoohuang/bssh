@@ -17,6 +17,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jedib0t/go-pretty/table"
+
 	"github.com/bingoohuang/gou/str"
 
 	"github.com/bingoohuang/gou/pbe"
@@ -484,7 +486,8 @@ func (cf *Config) EnsureSearchHost(host string) string {
 	if len(matches) == 0 {
 		_, _ = fmt.Fprintf(os.Stderr, "host %s not found from list.\n", host)
 	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "host %s found multiple hosts(%v) from list.\n", host, matches)
+		_, _ = fmt.Fprintf(os.Stderr, "host %s found multiple hosts.\n", host)
+		cf.PrintServerList(matches, false)
 	}
 
 	os.Exit(1) // nolint gomnd
@@ -614,11 +617,27 @@ func (cf *Config) WriteTempHosts(tempHost string) {
 
 	cf.tempHosts[tempHost] = true
 
-	file := cf.tempHostsFile
-
-	if err := AppendFile(file, tempHost); err != nil {
+	if err := AppendFile(cf.tempHostsFile, tempHost); err != nil {
 		fmt.Println(err)
 	}
+}
+
+// PrintServerList prints server list which has names.
+func (cf *Config) PrintServerList(names []string, printTitle bool) {
+	if printTitle {
+		_, _ = fmt.Fprintf(os.Stdout, "bssh Server List:\n")
+	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"#", "Server Name", "Connect Info", "Note"})
+
+	for i, name := range names {
+		v := cf.Server[name]
+		t.AppendRow(table.Row{i + 1, name, v.User + "@" + v.Addr + ":" + v.Port, v.Note})
+	}
+
+	t.Render()
 }
 
 func AppendFile(file, line string) error {

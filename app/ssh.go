@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jedib0t/go-pretty/table"
-
 	"github.com/bingoohuang/bssh/list"
 
 	"github.com/bingoohuang/gou/str"
@@ -122,7 +120,7 @@ func lsshAction(c *cli.Context) error {
 	names := data.GetNameSortedList()
 	hosts := data.ExpandHosts(c)
 
-	processListFlag(c, names, data.Server)
+	processListFlag(c, names, data)
 
 	r := sshcmd.NewRun(confpath)
 	r.ServerList = parseSelected("bssh>>", hosts, names, data, isMulti)
@@ -193,23 +191,13 @@ func parseMultiFlag(c *cli.Context) bool {
 	return (len(c.Args()) > 0 || c.Bool("pshell")) && !c.Bool("not-execute")
 }
 
-func processListFlag(c *cli.Context, names []string, servers map[string]conf.ServerConfig) {
+func processListFlag(c *cli.Context, names []string, cnf conf.Config) {
 	// Check list flag
 	if !c.Bool("list") {
 		return
 	}
 
-	_, _ = fmt.Fprintf(os.Stdout, "bssh Server List:\n")
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"#", "Server Name", "Connect Info", "Note"})
-
-	for i, name := range names {
-		v := servers[name]
-		t.AppendRow(table.Row{i + 1, name, v.User + "@" + v.Addr + ":" + v.Port, v.Note})
-	}
-
-	t.Render()
+	cnf.PrintServerList(names, true)
 	os.Exit(0)
 }
 
