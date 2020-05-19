@@ -18,7 +18,7 @@ require (
 	github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsf/termbox-go v0.0.0-20190325093121-288510b9734e
-	github.com/pkg/sftp v1.10.1
+	github.com/pkg/sftp v1.11.1-0.20200310224833-18dc4db7a456
 	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/pflag v1.0.3
@@ -28,7 +28,7 @@ require (
 	github.com/urfave/cli v1.21.0
 	github.com/vbauerster/mpb v3.4.0+incompatible
 	github.com/youtube/vitess v2.1.1+incompatible // indirect
-	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586
+	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	mvdan.cc/sh v2.6.3+incompatible
 )
