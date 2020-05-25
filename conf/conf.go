@@ -486,7 +486,8 @@ func IsDirectServer(server string) bool {
 
 // ParseDirectServer parses a direct server address.
 func ParseDirectServer(server string) ServerConfig {
-	atPos := strings.Index(server, "@")
+	// LastIndex of "@" will allow that password contains "@"
+	atPos := strings.LastIndex(server, "@")
 	left := server[:atPos]
 	right := server[atPos+1:]
 
