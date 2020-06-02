@@ -253,6 +253,11 @@ func ReadConf(confPath string) (config Config) {
 }
 
 const initBsshToml = `
+
+hosts = [
+"user:pass@192.168.1.1:8022 note=host8022",
+]
+
 [log]
 enable = true
 timestamp = true
@@ -283,7 +288,7 @@ tmpl = "192.168.1.2:8022 root/123456"
 note = "demo1"
 
 [server.demo2]
-tmpl="192.168.1.4 root/xxxx"
+tmpl="192.168.1.4 root/xxxx note=demo2"
 
 [server.demo3]
 tmpl = "192.168.1.(21-23 30 33):8022 app/xxx id=(21-23 30 33) group=demo3"
