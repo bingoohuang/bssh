@@ -197,7 +197,6 @@ type OpenSSHConfig struct {
 func ReadConf(confPath string) (config Config) {
 	confPath = common.ExpandHomeDir(confPath)
 	checkConfPath(confPath)
-	config.loadTempHosts(confPath)
 
 	config.Server = map[string]ServerConfig{}
 	config.SSHConfig = map[string]OpenSSHConfig{}
@@ -207,6 +206,8 @@ func ReadConf(confPath string) (config Config) {
 		fmt.Println(err)
 		os.Exit(1) // nolint gomnd
 	}
+
+	config.loadTempHosts(confPath)
 
 	viper.Set(pbe.PbePwd, str.EmptyThen(config.Extra.Passphrase, config.Passphrase))
 

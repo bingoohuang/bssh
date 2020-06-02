@@ -43,12 +43,16 @@ func (t Tmpl) createServerConfig(c *ServerConfig) {
 	c.User = t.User
 	c.Pass = t.Password
 
-	if proxy := t.Props["proxy"]; proxy != "" && c.Proxy == "" {
-		c.Proxy = proxy
+	if v := t.Props["proxy"]; v != "" && c.Proxy == "" {
+		c.Proxy = v
 	}
 
-	if group := t.Props["group"]; group != "" && len(c.Group) == 0 {
-		c.Group = str.SplitTrim(group, ",")
+	if v := t.Props["group"]; v != "" && len(c.Group) == 0 {
+		c.Group = str.SplitTrim(v, ",")
+	}
+
+	if v := t.Props["note"]; v != "" && c.Note == "" {
+		c.Note = v
 	}
 }
 
@@ -73,7 +77,7 @@ func ParseTmpl(tmpl string) []Tmpl {
 			s := ParseDirectServer(tmpl)
 
 			return []Tmpl{{
-				ID:       tmpl,
+				ID:       "",
 				Host:     s.Addr,
 				Port:     s.Port,
 				User:     s.User,
@@ -87,10 +91,20 @@ func ParseTmpl(tmpl string) []Tmpl {
 		return hosts
 	}
 
-	host, port := parseHostPort(fields[0])
-	user, pass := parseUserPass(fields[1])
+	host, port, user, pass := "", "", "", ""
 
-	props := parseProps(fields[2:])
+	var props map[string]string
+
+	if atPos := strings.LastIndex(fields[0], "@"); atPos > 0 {
+		user, pass = splitBySep(fields[0][0:atPos], ":")
+		host, port = splitHostPort(fields[0][atPos+1:])
+		props = parseProps(fields[1:])
+	} else {
+		host, port = splitHostPort(fields[0])
+		user, pass = splitBySep(fields[1], "/")
+		props = parseProps(fields[2:])
+	}
+
 	t := Tmpl{ID: props["id"], Host: host, Port: port, User: user, Password: pass, Props: props}
 	hosts = append(hosts, expandTmpl(t)...)
 
@@ -132,11 +146,11 @@ func parseProps(fields []string) map[string]string {
 	return props
 }
 
-func parseUserPass(userPass string) (string, string) {
-	return str.Split2(userPass, "/", false, false)
+func splitBySep(userPass, sep string) (string, string) {
+	return str.Split2(userPass, sep, false, false)
 }
 
-func parseHostPort(addr string) (string, string) {
+func splitHostPort(addr string) (string, string) {
 	if !strings.Contains(addr, ":") {
 		return addr, "22"
 	}
