@@ -69,7 +69,7 @@ const (
 	oprompt = "${SERVER} :: "
 )
 
-// Start starts the sftp app
+// Start starts the sftp app.
 func (r *RunSftp) Start(confpath string) {
 	// Create AuthMap
 	r.Run = sshl.NewRun(confpath)

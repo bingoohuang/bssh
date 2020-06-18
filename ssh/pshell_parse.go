@@ -16,14 +16,14 @@ type pipeLine struct {
 	Operator string
 }
 
-// pipeLine return string of join
+// String return string of join.
 func (p *pipeLine) String() string {
 	result := strings.Join(p.Args, " ")
 
 	return result + " " + p.Operator
 }
 
-// joinPipeLineSlice
+// joinPipeLineSlice ...
 func joinPipeLineSlice(pslice []pipeLine) string {
 	result := ""
 
@@ -153,7 +153,7 @@ func parseCallExpr(cmd *syntax.CallExpr) (pLine []string) {
 	return
 }
 
-// parseRedirect return pipeline redirect element ([]string)
+// parseRedirect return pipeline redirect element ([]string).
 func parseRedirect(redir []*syntax.Redirect) (rs []string) {
 	printer := syntax.NewPrinter()
 

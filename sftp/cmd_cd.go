@@ -13,12 +13,12 @@ import (
 	"path/filepath"
 )
 
-// NOTE: カレントディレクトリの移動の仕組みを別途作成すること(保持する仕組みがないので)
-// cd change remote machine current directory
+// NOTE: カレントディレクトリの移動の仕組みを別途作成すること(保持する仕組みがないので).
+// cd change remote machine current directory.
 func (r *RunSftp) cd(args []string) {
 	path := "./"
 	// cd command only
-	if len(args) == 1 { // nolint gomnd
+	if len(args) == 1 {
 		// set pwd
 		for _, c := range r.Client {
 			c.Pwd = path
@@ -76,13 +76,13 @@ func (r *RunSftp) cd(args []string) {
 	}
 }
 
-// lcd
+// lcd ...
 func (r *RunSftp) lcd(args []string) {
 	// get user home directory path
 	usr, _ := user.Current()
 
 	path := usr.HomeDir
-	if len(args) > 1 { // nolint gomnd
+	if len(args) > 1 {
 		path = args[1]
 	}
 

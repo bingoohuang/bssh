@@ -12,10 +12,10 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-// Draw a string based on the specified coordinate information
+// Draw a string based on the specified coordinate information.
 func drawLine(x, y int, str string, colorNum int, backColorNum int) {
-	color := termbox.Attribute(colorNum + 1)         // nolint gomnd
-	backColor := termbox.Attribute(backColorNum + 1) // nolint gomnd
+	color := termbox.Attribute(colorNum + 1)
+	backColor := termbox.Attribute(backColorNum + 1)
 	// View Multi-Byte
 	for _, char := range str {
 		termbox.SetCell(x, y, char, color, backColor)
@@ -23,7 +23,7 @@ func drawLine(x, y int, str string, colorNum int, backColorNum int) {
 	}
 }
 
-// Highlight lines and draw text based on filtering results
+// Highlight lines and draw text based on filtering results.
 func drawFilterLine(x, y int, str string, backColorNum, keywordColorNum int, searchText string) {
 	// SearchText Bounds Space
 	searchWords := strings.Fields(searchText)
@@ -70,21 +70,21 @@ func drawFilterLine(x, y int, str string, backColorNum, keywordColorNum int, sea
 	}
 }
 
-// draw list
+// draw list.
 func (l *Info) draw() {
 	l.Term.Headline = 2
 	l.Term.LeftMargin = 2
 	l.Term.Color = 255
 	l.Term.BackgroundColor = 255
 
-	_ = termbox.Clear(termbox.Attribute(l.Term.Color+1), termbox.Attribute(l.Term.BackgroundColor+1)) // nolint gomnd
+	_ = termbox.Clear(termbox.Attribute(l.Term.Color+1), termbox.Attribute(l.Term.BackgroundColor+1))
 
 	// Get Terminal Size
 	_, height := termbox.Size()
 	height -= l.Term.Headline
 
 	// Set View List Range
-	firstLine := (l.CursorLine/height)*height + 1 // nolint gomnd
+	firstLine := (l.CursorLine/height)*height + 1
 	lastLine := firstLine + height
 
 	var viewList []string
@@ -94,7 +94,7 @@ func (l *Info) draw() {
 		viewList = l.ViewText[firstLine:lastLine]
 	}
 
-	cursor := l.CursorLine - firstLine + 1 // nolint gomnd
+	cursor := l.CursorLine - firstLine + 1
 
 	l.drawViewHead()
 	l.drawViewList(viewList, cursor)

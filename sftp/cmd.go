@@ -16,7 +16,7 @@ import (
 // FileInfos is []os.FileInfo.
 type FileInfos []os.FileInfo
 
-// ByName is sort by name
+// ByName is sort by name.
 type ByName struct{ FileInfos }
 
 func (fi ByName) Len() int {
@@ -29,7 +29,7 @@ func (fi ByName) Less(i, j int) bool {
 	return fi.FileInfos[j].Name() > fi.FileInfos[i].Name()
 }
 
-// BySize is sort by size
+// BySize is sort by size.
 type BySize struct{ FileInfos }
 
 func (fi BySize) Len() int {
@@ -42,7 +42,7 @@ func (fi BySize) Less(i, j int) bool {
 	return fi.FileInfos[j].Size() > fi.FileInfos[i].Size()
 }
 
-// ByTime is sort by time
+// ByTime is sort by time.
 type ByTime struct{ FileInfos }
 
 func (fi ByTime) Len() int {

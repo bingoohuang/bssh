@@ -89,7 +89,7 @@ func (l *Info) toggle(newLine string) {
 	l.SelectName = tmpList
 }
 
-// allToggle the selected state of the currently displayed list
+// allToggle the selected state of the currently displayed list.
 func (l *Info) allToggle(allFlag bool) {
 	// allFlag is False
 	if !allFlag {
@@ -112,7 +112,7 @@ func (l *Info) allToggle(allFlag bool) {
 	}
 }
 
-// SetTitle sets the view's title columns
+// SetTitle sets the view's title columns.
 func (l *Info) SetTitle(titleColumns []string) {
 	s := ""
 	for _, col := range titleColumns {
@@ -122,7 +122,7 @@ func (l *Info) SetTitle(titleColumns []string) {
 	l.Title = s
 }
 
-// Create view text (use text/tabwriter)
+// Create view text (use text/tabwriter).
 func (l *Info) getText() {
 	buffer := &bytes.Buffer{}
 	tabWriterBuffer := new(tabwriter.Writer)
@@ -183,7 +183,7 @@ func (l *Info) getFilterText() {
 	l.ViewText = append(l.ViewText, tmpText...)
 }
 
-// View displays the list in TUI
+// View displays the list in TUI.
 func (l *Info) View() {
 	if err := termbox.Init(); err != nil {
 		panic(err)

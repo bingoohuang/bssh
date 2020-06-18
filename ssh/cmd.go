@@ -31,7 +31,7 @@ func (r *Run) cmd() {
 	r.PrintSelectServer()
 	r.printRunCommand()
 
-	if len(r.ServerList) == 1 { // nolint gomnd
+	if len(r.ServerList) == 1 {
 		r.printProxy(r.ServerList[0])
 	}
 
@@ -68,7 +68,7 @@ func (r *Run) cmd() {
 
 	close(exitInput)
 
-	time.Sleep(300 * time.Millisecond) // nolint gomnd
+	time.Sleep(300 * time.Millisecond) // nolint:gomnd
 }
 
 func (r *Run) createWriter(connMap map[string]*sshlib.Connect) []io.WriteCloser {
@@ -90,7 +90,7 @@ func (r *Run) createWriter(connMap map[string]*sshlib.Connect) []io.WriteCloser 
 		c.Stdout, c.Stderr = o.NewWriter(), o.NewWriter()
 
 		// if single server, setup port forwarding.
-		if len(r.ServerList) == 1 { // nolint gomnd
+		if len(r.ServerList) == 1 {
 			r.setupPortForwarding(&config, c)
 		} else if r.IsParallel {
 			w, _ := c.Session.StdinPipe()

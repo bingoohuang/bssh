@@ -61,7 +61,7 @@ func checkLocalCommand(cmd string) (isLocalCmd bool) {
 	return regex.MatchString(cmd)
 }
 
-// check local or build-in command
+// checkLocalBuildInCommand check local or build-in command.
 func checkLocalBuildInCommand(cmd string) (result bool) {
 	result = checkBuildInCommand(cmd)
 	if result {
@@ -102,9 +102,9 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 
 	// %out [num]
 	case misc.PercentOut:
-		num := ps.Count - 1 // nolint gomnd
+		num := ps.Count - 1
 
-		if len(pl.Args) > 1 { // nolint gomnd
+		if len(pl.Args) > 1 {
 			var err error
 
 			num, err = strconv.Atoi(pl.Args[1])
@@ -126,18 +126,7 @@ func (ps *pShell) run(pl pipeLine, in io.Reader, out *io.PipeWriter, ch chan<- b
 	}
 }
 
-// localCmd_set is set pshll option.
-// TDXX(blacknon): Optionsの値などについて、あとから変更できるようにする。
-// func (ps *pShell) buildin_set(args []string, out *io.PipeWriter, ch chan<- bool) {
-// }
-
-// localCmd_save is save HistoryResult results as a file local.
-//     %save num PATH(独自の環境変数を利用して個別のファイルに保存できるようにする)
-// TDXX(blacknon): Optionsの値などについて、あとから変更できるようにする。
-// func (ps *pShell) buildin_save(args []string, out *io.PipeWriter, ch chan<- bool) {
-// }
-
-// buildinHistory is printout history (shell history)
+// buildinHistory is printout history (shell history).
 func (ps *pShell) buildinHistory(out *io.PipeWriter, ch chan<- bool) {
 	stdout := setOutput(out)
 
@@ -229,7 +218,7 @@ func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 
 // executePipeLineRemote is exec command in remote machine.
 // Didn't know how to send data from Writer to Channel, so switch the function if * io.PipeWriter is Nil.
-// nolint funlen
+// nolint:funlen
 func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
 	ch chan<- bool, kill chan bool) {
 	// join command
@@ -321,7 +310,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	wait(len(sessions), exit)
 
 	// wait time (0.500 sec)
-	time.Sleep(5000 * time.Millisecond) // nolint gomnd
+	time.Sleep(5000 * time.Millisecond) // nolint:gomnd
 
 	// Print message `Please input enter` (Only when input is os.Stdin and output is os.Stdout).
 	// Note: This necessary for using Blocking.IO.
@@ -340,7 +329,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 }
 
 // executePipeLineLocal is exec command in local machine.
-// TDXX(blacknon): 利用中のShellでの実行+functionや環境変数、aliasの引き継ぎを行えるように実装
+// TDXX(blacknon): 利用中のShellでの実行+functionや環境変数、aliasの引き継ぎを行えるように実装.
 func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
 	ch chan<- bool, kill chan bool) {
 	// set stdin/stdout
@@ -365,7 +354,7 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 	// delete command prefix(`!`)
 	pline.Args[0] = regexp.MustCompile(`^!`).ReplaceAllString(pline.Args[0], "")
 
-	cmd := exec.Command("sh", "-c", strings.Join(pline.Args, " ")) // nolint gosec
+	cmd := exec.Command("sh", "-c", strings.Join(pline.Args, " ")) // nolint:gosec
 
 	// set stdin, stdout, stderr
 	cmd.Stdin = stdin
@@ -401,14 +390,14 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 	ch <- true
 }
 
-// ps.wait
+// wait ps.wait.
 func wait(num int, ch <-chan bool) {
 	for i := 0; i < num; i++ {
 		<-ch
 	}
 }
 
-// setInput
+// setInput ..
 func setInput(in io.Reader) (stdin io.Reader) {
 	if reflect.ValueOf(in).IsNil() {
 		stdin = os.Stdin
@@ -419,7 +408,7 @@ func setInput(in io.Reader) (stdin io.Reader) {
 	return
 }
 
-// setOutput
+// setOutput ...
 func setOutput(out io.Writer) (stdout io.Writer) {
 	if reflect.ValueOf(out).IsNil() {
 		stdout = os.Stdout

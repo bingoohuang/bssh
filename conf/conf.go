@@ -28,7 +28,7 @@ import (
 	"github.com/bingoohuang/bssh/common"
 )
 
-// Config is Struct that stores the entire configuration file
+// Config is Struct that stores the entire configuration file.
 type Config struct {
 	Extra    ExtraConfig
 	Log      LogConfig
@@ -51,7 +51,7 @@ type Config struct {
 	tempHosts             map[string]bool
 }
 
-// ExtraConfig store extra configs
+// ExtraConfig store extra configs.
 type ExtraConfig struct {
 	// Passphrase used to decrypt {PBE}xxx
 	Passphrase string
@@ -107,7 +107,7 @@ type IncludesConfig struct {
 	Path []string
 }
 
-// ServerConfig structure for holding SSH connection information
+// ServerConfig structure for holding SSH connection information.
 type ServerConfig struct {
 	// templates, host:port user/pass
 	Tmpl  string
@@ -193,7 +193,7 @@ type OpenSSHConfig struct {
 	ServerConfig
 }
 
-// ReadConf load configuration file and return Config structure
+// ReadConf load configuration file and return Config structure.
 func ReadConf(confPath string) (config Config) {
 	confPath = common.ExpandHomeDir(confPath)
 	checkConfPath(confPath)
@@ -204,7 +204,7 @@ func ReadConf(confPath string) (config Config) {
 	// Read config file
 	if _, err := toml.DecodeFile(confPath, &config); err != nil {
 		fmt.Println(err)
-		os.Exit(1) // nolint gomnd
+		os.Exit(1)
 	}
 
 	config.loadTempHosts(confPath)
@@ -231,7 +231,7 @@ func ReadConf(confPath string) (config Config) {
 		}
 	} else {
 		for _, sshConfig := range config.SSHConfig {
-			setCommon := serverConfigDeduct(config.Common, sshConfig.ServerConfig)
+			setCommon := ServerConfigDeduct(config.Common, sshConfig.ServerConfig)
 
 			if v, err := getOpenSSHConfig(sshConfig.Path, sshConfig.Command); err == nil {
 				config.parseConfigServers(v, setCommon)
@@ -243,8 +243,8 @@ func ReadConf(confPath string) (config Config) {
 	config.readIncludeFiles()
 
 	// Check Config Parameter
-	if !checkFormatServerConf(config) {
-		os.Exit(1) // nolint gomnd
+	if !CheckFormatServerConf(config) {
+		os.Exit(1)
 	}
 
 	config.parseGroups()
@@ -309,7 +309,7 @@ func checkConfPath(confPath string) {
 	fmt.Println("or directly run `bssh -H user:pass@192.168.1.30:8022`")
 
 	_ = os.MkdirAll(filepath.Dir(confPath), 0755)
-	_ = ioutil.WriteFile(confPath, []byte(initBsshToml), 0644)
+	_ = ioutil.WriteFile(confPath, []byte(initBsshToml), 0600)
 
 	os.Exit(0)
 }
@@ -367,7 +367,7 @@ func (cf *Config) readIncludeFiles() {
 		}
 
 		// reduce common setting
-		setCommon := serverConfigDeduct(cf.Common, includeConf.Common)
+		setCommon := ServerConfigDeduct(cf.Common, includeConf.Common)
 
 		// map init
 		if len(cf.Server) == 0 {
@@ -383,7 +383,7 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 	tmplConfigs := make([]tmplConfig, 0)
 
 	for key, value := range configServers {
-		setValue := serverConfigDeduct(setCommon, value)
+		setValue := ServerConfigDeduct(setCommon, value)
 		cf.Server[key] = setValue
 
 		if value.Tmpl != "" {
@@ -397,13 +397,13 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 	cf.tmplServers(tmplConfigs)
 }
 
-// checkFormatServerConf checkes format of server config.
+// CheckFormatServerConf checkes format of server config.
 //
 // Note: Checking Addr, User and authentications
 // having a value. No checking a validity of each fields.
 //
 // See also: checkFormatServerConfAuth function.
-func checkFormatServerConf(c Config) (isFormat bool) {
+func CheckFormatServerConf(c Config) (isFormat bool) {
 	isFormat = true
 
 	for k, v := range c.Server {
@@ -421,7 +421,7 @@ func checkFormatServerConf(c Config) (isFormat bool) {
 			isFormat = false
 		}
 
-		if !checkFormatServerConfAuth(v) {
+		if !CheckFormatServerConfAuth(v) {
 			fmt.Printf("%s: Authentication information is not set.\n", k)
 
 			isFormat = false
@@ -431,11 +431,11 @@ func checkFormatServerConf(c Config) (isFormat bool) {
 	return
 }
 
-// checkFormatServerConfAuth checkes format of server config authentication.
+// CheckFormatServerConfAuth checkes format of server config authentication.
 //
 // Note: Checking Pass, Key, Cert, AgentAuth, PKCS11Use, PKCS11Provider, Keys or
 // Passes having a value. No checking a validity of each fields.
-func checkFormatServerConfAuth(c ServerConfig) (isFormat bool) {
+func CheckFormatServerConfAuth(c ServerConfig) (isFormat bool) {
 	isFormat = false
 	if c.Pass != "" || c.Key != "" || c.Cert != "" {
 		isFormat = true
@@ -459,9 +459,9 @@ func checkFormatServerConfAuth(c ServerConfig) (isFormat bool) {
 	return
 }
 
-// serverConfigDeduct returns a new server config that set perConfig field to
+// ServerConfigDeduct returns a new server config that set perConfig field to
 // childConfig empty filed.
-func serverConfigDeduct(perConfig, childConfig ServerConfig) ServerConfig {
+func ServerConfigDeduct(perConfig, childConfig ServerConfig) ServerConfig {
 	result := ServerConfig{}
 
 	// struct to map
@@ -485,7 +485,7 @@ func (cf *Config) GetNameList() (nameList []string) {
 	return nameList
 }
 
-// IsDirectServer tells that the server is a direct server address like user:pass@host:port
+// IsDirectServer tells that the server is a direct server address like user:pass@host:port.
 func IsDirectServer(server string) bool {
 	return strings.Index(server, "@") > 0
 }
@@ -548,7 +548,7 @@ func (cf *Config) EnsureSearchHost(host string) string {
 		cf.PrintServerList(matches, false)
 	}
 
-	os.Exit(1) // nolint gomnd
+	os.Exit(1)
 
 	return ""
 }

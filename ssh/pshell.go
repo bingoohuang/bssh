@@ -26,7 +26,7 @@ import (
 // TDXX(blacknon): グループ化(`()`で囲んだりする)や三項演算子への対応(v0.6.1)
 // TDXX(blacknon): `サーバ名:command...` で、指定したサーバでのみコマンドを実行させる機能の追加(v0.6.1)
 
-// Pshell is Parallel-Shell struct
+// Pshell is Parallel-Shell struct.
 type pShell struct {
 	Signal        chan os.Signal
 	Count         int
@@ -42,7 +42,6 @@ type pShell struct {
 }
 
 // pShellOption is optitons pshell.
-// TDXX(blacknon): つくる。
 type pShellOption struct {
 	// local command実行時の結果をHistoryResultに記録しない(os.Stdoutに直接出す)
 	LocalCommandNotRecordResult bool
@@ -67,19 +66,18 @@ type psConnect struct {
 	*sshlib.Connect
 }
 
-// variable
 const (
-	// Default PROMPT
+	// Default PROMPT.
 	defaultPrompt = "[${COUNT}] <<< "
 
-	// Default OPROMPT
+	// Default OPROMPT.
 	defaultOPrompt = "[${SERVER}][${COUNT}] > "
 
-	// Default Parallel shell history file
+	// Default Parallel shell history file.
 	defaultHistoryFile = "~/.lssh_history"
 )
 
-// nolint funlen
+// nolint:funlen
 func (r *Run) pshell() (err error) {
 	// print header
 	fmt.Println("Start parallel-shell...")
@@ -189,7 +187,7 @@ func (r *Run) createPsConnects(config conf.ShellConfig) []*psConnect {
 }
 
 // CreatePrompt is create shell prompt.
-// default value is `[${COUNT}] <<< `
+// default value is `[${COUNT}] <<< `.
 func (ps *pShell) CreatePrompt() (p string, result bool) {
 	// set prompt template (from conf)
 	p = ps.PROMPT

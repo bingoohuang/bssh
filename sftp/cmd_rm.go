@@ -40,7 +40,7 @@ func (r *RunSftp) rm(args []string) {
 }
 
 func (r *RunSftp) rmAction(c *cli.Context) error {
-	if len(c.Args()) != 1 { // nolint gomnd
+	if len(c.Args()) != 1 {
 		fmt.Println("Requires one arguments")
 		fmt.Println("rm [path]")
 
@@ -91,7 +91,7 @@ func (r *RunSftp) doRM(exit chan bool, server string, client *Connect, path stri
 		}
 
 		// reverse slice
-		for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 { // nolint gomnd
+		for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
 			data[i], data[j] = data[j], data[i]
 		}
 

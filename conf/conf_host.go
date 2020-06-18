@@ -5,7 +5,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ExpandHosts expand hosts to comma-separated or wild match (file name pattern)
+// ExpandHosts expand hosts to comma-separated or wild match (file name pattern).
 func (cf *Config) ExpandHosts(c *cli.Context) []string {
 	hosts := c.StringSlice("host")
 	expanded := make([]string, 0)

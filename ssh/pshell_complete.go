@@ -24,7 +24,7 @@ import (
 // TDXX(blacknon): `!command`だとまとめてパイプ経由でデータを渡すことになっているが、`!!command`で個別のローカルコマンドにデータを渡すように実装する
 
 // Completer parallel-shell complete function
-// nolint funlen
+// nolint:funlen
 func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	// if current line data is none.
 	if len(t.CurrentLine()) == 0 {
@@ -45,7 +45,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	ll := 0
 	num := 0
 
-	if sl >= 1 { // nolint gomnd
+	if sl >= 1 {
 		ll = len(pslice[sl-1])             // pline count
 		num = len(pslice[sl-1][ll-1].Args) // pline args count
 	}
@@ -131,8 +131,8 @@ func getCursorChar(left string) string {
 }
 
 // GetCommandComplete get command list remote machine.
-// mode ... command/path
-// data ... Value being entered
+// mode ... command/path.
+// data ... Value being entered.
 func (ps *pShell) GetCommandComplete() {
 	// bash complete command. use `compgen`.
 	compCmd := []string{"compgen", "-c"}
@@ -191,7 +191,7 @@ func (ps *pShell) GetCommandComplete() {
 }
 
 // GetPathComplete return complete path from local or remote machine.
-// TDXX(blacknon): 複数のノードにあるPATHだけ補完リストに出てる状態なので、単一ノードにしか無いファイルも出力されるよう修正する
+// TDXX(blacknon): 複数のノードにあるPATHだけ補完リストに出てる状態なので、単一ノードにしか無いファイルも出力されるよう修正する.
 func (ps *pShell) GetPathComplete(remote bool, word string) []prompt.Suggest {
 	command := strings.Join([]string{"compgen", "-f", word}, " ")
 

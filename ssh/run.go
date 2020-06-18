@@ -110,7 +110,7 @@ func NewRun(confFile string) *Run {
 	return r
 }
 
-// AuthKey define auth key\
+// AuthKey define auth key.
 type AuthKey struct {
 	// auth type:
 	//   - password
@@ -147,7 +147,7 @@ const (
 	AuthKeyPkcs11 = "pkcs11"
 )
 
-// Start ssh connect
+// Start ssh connect.
 func (r *Run) Start() {
 	var err error
 
@@ -359,7 +359,7 @@ func (r *Run) createAuthMethodMapForServer(server string) {
 		keyName := pair[0]
 		keyPass := ""
 
-		if len(pair) > 1 { // nolint gomnd
+		if len(pair) > 1 {
 			keyPass = pair[1]
 		}
 

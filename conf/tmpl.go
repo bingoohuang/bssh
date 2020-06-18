@@ -30,8 +30,8 @@ func (tc tmplConfig) createKey(tid string, i int) string {
 		return tc.k + tid
 	}
 
-	if len(tc.t) > 1 { // nolint gomnd
-		return tc.k + fmt.Sprintf("%d", i+1) // nolint gomnd
+	if len(tc.t) > 1 {
+		return tc.k + fmt.Sprintf("%d", i+1)
 	}
 
 	return tc.k
@@ -72,7 +72,7 @@ func ParseTmpl(tmpl string) []Tmpl {
 	hosts := make([]Tmpl, 0)
 
 	fields := str.FieldsX(tmpl, "(", ")", -1)
-	if len(fields) < 2 { // nolint gomnd
+	if len(fields) < 2 { // nolint:gomnd
 		if IsDirectServer(tmpl) {
 			s := ParseDirectServer(tmpl)
 

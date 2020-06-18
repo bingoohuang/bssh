@@ -24,10 +24,11 @@ import (
 )
 
 // run shell
-// nolint funlen
+// nolint:funlen
 func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
 	config, ok := r.Conf.Server[server]
+
 	if !ok {
 		r.Conf.WriteTempHosts(server)
 		config = r.parseDirectServer(server)
@@ -37,7 +38,7 @@ func (r *Run) shell() (err error) {
 	if len(r.serverAuthMethodMap[server]) == 0 {
 		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", server)
 
-		return errors.New(msg)
+		return errors.New(msg) // nolint:goerr113
 	}
 
 	r.overwritePortForwardConfig(&config)
@@ -201,7 +202,7 @@ func (r *Run) getLogPath(server string) (logPath string) {
 	return logPath
 }
 
-// getLogDirPath return log directory path
+// getLogDirPath return log directory path.
 func (r *Run) getLogDirPath(server string) (dir string, err error) {
 	logConf := r.Conf.Log
 
@@ -216,7 +217,7 @@ func (r *Run) getLogDirPath(server string) (dir string, err error) {
 	return dir, err
 }
 
-// runLocalRcShell connect to remote shell using local bashrc
+// runLocalRcShell connect to remote shell using local bashrc.
 func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []string, decoder string) (err error) {
 	// set default bashrc
 	if len(localrcPath) == 0 {
@@ -243,7 +244,7 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 
 // noneExecute is not execute command and shell.
 func (r *Run) noneExecute() {
-	for range time.After(500 * time.Millisecond) { // nolint gomnd
+	for range time.After(500 * time.Millisecond) { // nolint:gomnd
 
 	}
 }

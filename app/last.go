@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// Last pbe passwords in the conf file
+// Last pbe passwords in the conf file.
 func Last() ([]string, bool) {
 	var (
 		lastLog *common.LastLogBean

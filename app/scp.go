@@ -77,11 +77,11 @@ func lscpAction(c *cli.Context) error {
 
 	// check count args
 	args := c.Args()
-	if len(args) < 2 { // nolint gomnd
+	if len(args) < 2 { // nolint:gomnd
 		_, _ = fmt.Fprintln(os.Stderr, "Too few arguments.")
 		_ = cli.ShowAppHelp(c)
 
-		os.Exit(1) // nolint gomnd
+		os.Exit(1)
 	}
 
 	// Set args path
@@ -198,7 +198,7 @@ func setFrom(fromArgs cli.Args, scp *scp.Scp) {
 			_, err := os.Stat(common.GetFullPath(fromPath))
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "not found path %s \n", fromPath)
-				os.Exit(1) // nolint gomnd
+				os.Exit(1)
 			}
 
 			fromPath = common.GetFullPath(fromPath)

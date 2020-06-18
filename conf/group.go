@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// BelongsToGroup belongs to group or not
+// BelongsToGroup belongs to group or not.
 func (c ServerConfig) BelongsToGroup(cf *Config, name string) bool {
 	othersGroupName := cf.pickOthersGroupName()
 

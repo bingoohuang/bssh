@@ -16,7 +16,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// chmod
+// chmod ...
 func (r *RunSftp) chmod(args []string) {
 	app := cli.NewApp()
 
@@ -36,7 +36,7 @@ func (r *RunSftp) chmod(args []string) {
 }
 
 func (r *RunSftp) chmodAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint gomnd
+	if len(c.Args()) != 2 { // nolint:gomnd
 		fmt.Println("Requires two arguments")
 		fmt.Println("chmod mode path")
 

@@ -49,7 +49,7 @@ func (r *RunSftp) mkdir(args []string) {
 
 func (r *RunSftp) mkdirAction(c *cli.Context) error {
 	// TDXX(blacknon): 複数のディレクトリ受付(v0.6.1以降)
-	if len(c.Args()) != 1 { // nolint gomnd
+	if len(c.Args()) != 1 {
 		fmt.Println("Requires one arguments")
 		fmt.Println("mkdir [path]")
 
@@ -121,7 +121,7 @@ func (r *RunSftp) lmkdir(args []string) {
 	// action
 	app.Action = func(c *cli.Context) error {
 		// TDXX(blacknon): 複数のディレクトリ受付(v0.6.1以降)
-		if len(c.Args()) != 1 { // nolint gomnd
+		if len(c.Args()) != 1 {
 			fmt.Println("Requires one arguments")
 			fmt.Println("lmkdir [path]")
 

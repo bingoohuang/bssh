@@ -11,19 +11,19 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-// Add Rune to search keywords(l.Keyword)
-func (l *Info) insertRune(inputRune rune) {
+// InsertRune adds rune to search keywords(l.Keyword).
+func (l *Info) InsertRune(inputRune rune) {
 	l.Keyword += string(inputRune)
 }
 
-// Delete Rune at search keywords(l.Keyword)
-func (l *Info) deleteRune() {
+// DeleteRune deletes rune at search keywords(l.Keyword).
+func (l *Info) DeleteRune() {
 	sc := []rune(l.Keyword)
 	l.Keyword = string(sc[:(len(sc) - 1)])
 }
 
-// nolint gocognit
-// keyEvent wait for keyboard events
+// keyEvent waits for keyboard events.
+// nolint:gocyclo,funlen,gocognit
 func (l *Info) keyEvent() {
 	l.CursorLine = 0
 	headLine := 2
@@ -117,7 +117,7 @@ func (l *Info) keyEvent() {
 			// BackSpace Key
 			case termbox.KeyBackspace, termbox.KeyBackspace2:
 				if len(l.Keyword) > 0 {
-					l.deleteRune()
+					l.DeleteRune()
 					l.getFilterText()
 
 					if l.CursorLine > len(l.ViewText) {
@@ -141,7 +141,7 @@ func (l *Info) keyEvent() {
 			// Other Key
 			default:
 				if ev.Ch != 0 {
-					l.insertRune(ev.Ch)
+					l.InsertRune(ev.Ch)
 					l.getFilterText()
 
 					if l.CursorLine > len(l.ViewText)-headLine {

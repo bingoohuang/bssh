@@ -43,7 +43,7 @@ func openOpenSSHConfig(path, command string) (cfg *ssh_config.Config, err error)
 	return ssh_config.Decode(rd)
 }
 
-// getOpenSSHConfig loads the specified OpenSsh configuration file and returns it in conf.ServerConfig format
+// getOpenSSHConfig loads the specified OpenSsh configuration file and returns it in conf.ServerConfig format.
 func getOpenSSHConfig(path, command string) (config map[string]ServerConfig, err error) {
 	config = map[string]ServerConfig{}
 
@@ -127,7 +127,7 @@ func parseRemotePortForwarding(host string, serverConfig *ServerConfig) {
 
 	array := strings.SplitN(remoteForward, " ", 2)
 
-	if len(array) <= 1 { // nolint gomnd
+	if len(array) <= 1 {
 		return
 	}
 
@@ -157,7 +157,7 @@ func parseLocalPortForwarding(host string, serverConfig *ServerConfig) {
 
 	array := strings.SplitN(localForward, " ", 2)
 
-	if len(array) <= 1 { // nolint gomnd
+	if len(array) <= 1 {
 		return
 	}
 

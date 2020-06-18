@@ -2,10 +2,12 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-package common
+package common_test
 
 import (
 	"testing"
+
+	"github.com/bingoohuang/bssh/common"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +26,7 @@ func TestIsExist(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := IsExist(v.filename)
+		got := common.IsExist(v.filename)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
@@ -55,7 +57,7 @@ func TestMapReduce(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := MapReduce(v.map1, v.map2)
+		got := common.MapReduce(v.map1, v.map2)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
@@ -75,17 +77,17 @@ func TestStructToMap(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "Converts struct to map", val: A{S: "a", I: 1}, // nolint gomnd
+		{desc: "Converts struct to map", val: A{S: "a", I: 1},
 			mapVal: map[string]interface{}{"S": "a", "I": 1}, ok: false},
 		{desc: "Sets zero value if val is a empty struct", val: A{},
 			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false},
-		{desc: "Private field doesn't set", val: A{f: 1.0}, // nolint gomnd
+		{desc: "Private field doesn't set", val: A{f: 1.0},
 			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false},
 	}
 
 	for _, v := range tds {
 		val2 := v.val
-		mapVal, ok := StructToMap(&val2)
+		mapVal, ok := common.StructToMap(&val2)
 		assert.Equal(t, v.mapVal, mapVal, v.desc)
 		assert.Equal(t, v.ok, ok, v.desc)
 	}
@@ -106,7 +108,7 @@ func TestMapToStruct(t *testing.T) {
 
 	tds := []TestData{
 		{desc: "Converts map to struct",
-			mapVal: map[string]interface{}{"S": "a", "I": 1}, val: A{S: "a", I: 1}, ok: false}, // nolint gomnd
+			mapVal: map[string]interface{}{"S": "a", "I": 1}, val: A{S: "a", I: 1}, ok: false},
 		{desc: "Empty map",
 			mapVal: map[string]interface{}{}, val: A{S: "", I: 0}, ok: false},
 		// mapVal: map[string]interface{}{"f":1.0} raises panic
@@ -115,7 +117,7 @@ func TestMapToStruct(t *testing.T) {
 
 	for _, v := range tds {
 		val := A{}
-		ok := MapToStruct(v.mapVal, &val)
+		ok := common.MapToStruct(v.mapVal, &val)
 		assert.Equal(t, v.val, val, v.desc)
 		assert.Equal(t, v.ok, ok, v.desc)
 	}
@@ -129,15 +131,15 @@ func TestGetMaxLength(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "list has 1 value", list: []string{"abc"}, expect: 3},          // nolint gomnd
-		{desc: "list has 2 value", list: []string{"abc", "abcde"}, expect: 5}, // nolint gomnd
-		{desc: "Multibyte", list: []string{"あいうえお"}, expect: 15},              // nolint gomnd
+		{desc: "list has 1 value", list: []string{"abc"}, expect: 3},
+		{desc: "list has 2 value", list: []string{"abc", "abcde"}, expect: 5},
+		{desc: "Multibyte", list: []string{"あいうえお"}, expect: 15},
 		{desc: "list is empty", list: []string{}, expect: 0},
 		{desc: "list is nil", list: nil, expect: 0},
 	}
 
 	for _, v := range tds {
-		got := GetMaxLength(v.list)
+		got := common.GetMaxLength(v.list)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }

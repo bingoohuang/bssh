@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// TDXX(blacknon): 転送時の進捗状況を表示するプログレスバーの表示はさせること
+// TDXX(blacknon): 転送時の進捗状況を表示するプログレスバーの表示はさせること.
 func (r *RunSftp) symlink(args []string) {
 	app := cli.NewApp()
 	// app.UseShortOptionHandling = true
@@ -35,7 +35,7 @@ func (r *RunSftp) symlink(args []string) {
 }
 
 func (r *RunSftp) symlinkAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint gomnd
+	if len(c.Args()) != 2 { // nolint:gomnd
 		fmt.Println("Requires two arguments")
 		fmt.Println("symlink source target")
 

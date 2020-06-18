@@ -105,7 +105,7 @@ func (cp *Scp) Start(confpath string) {
 	}
 }
 
-// push data from local to remote machine
+// push data from local to remote machine.
 func (cp *Scp) push() {
 	// set target hosts
 	targets := cp.To.Server
@@ -146,7 +146,7 @@ func (cp *Scp) push() {
 	}
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint gomnd
+	time.Sleep(300 * time.Millisecond) // nolint:gomnd
 
 	// exit messages
 	fmt.Println("all push exit.")
@@ -227,7 +227,7 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 	rd := io.TeeReader(lf, rf)
 
 	// copy to data
-	cp.ProgressWG.Add(1) // nolint gomnd
+	cp.ProgressWG.Add(1)
 	output.ProgressPrinter(size, rd, path)
 
 	return err
@@ -251,7 +251,7 @@ func (cp *Scp) viaPush() {
 	}
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint gomnd
+	time.Sleep(300 * time.Millisecond) // nolint:gomnd
 
 	// exit messages
 	fmt.Println("all push exit.")
@@ -350,13 +350,14 @@ func (cp *Scp) pull() {
 	}
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint gomnd
+	time.Sleep(300 * time.Millisecond) // nolint:gomnd
 
 	// exit messages
 	fmt.Println("all pull exit.")
 }
 
-// walk return file path list ([]string).
+// pullPath pulls the file or directory from the host to local.
+// nolint:funlen
 func (cp *Scp) pullPath(client *Connect) {
 	ftp := client.Connect
 
@@ -368,7 +369,7 @@ func (cp *Scp) pullPath(client *Connect) {
 	baseDir := common.ExpandHomeDir(cp.To.Path[0])
 
 	// if multi pull, servername add baseDir
-	if len(cp.From.Server) > 1 { // nolint gomnd
+	if len(cp.From.Server) > 1 {
 		baseDir = filepath.Join(baseDir, client.Server)
 		_ = os.MkdirAll(baseDir, 0755)
 	}
@@ -380,6 +381,11 @@ func (cp *Scp) pullPath(client *Connect) {
 		if _, err := ftp.Stat(path); err != nil {
 			fmt.Fprintf(ow, "ftp.Stat path %s Error: %v\n", path, err)
 			continue
+		}
+
+		if p, err := ftp.ReadLink(path); err == nil {
+			fmt.Fprintf(ow, "read link to %s\n", p)
+			path = filepath.Join(filepath.Dir(path), p)
 		}
 
 		globpath, err := ftp.Glob(path)
@@ -443,7 +449,7 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 
 	rd := io.TeeReader(rf, lf)
 
-	cp.ProgressWG.Add(1) // nolint gomnd
+	cp.ProgressWG.Add(1)
 	client.Output.ProgressPrinter(size, rd, p)
 }
 

@@ -39,7 +39,7 @@ func (ps *pShell) Executor(command string) {
 
 // parseExecutor assemble and execute the parsed command line.
 // TDXX(blacknon): 現状はパイプにしか対応していないので、`&&`や`||`にも対応できるよう変更する(v0.6.1)
-// nolint funlen
+// nolint:funlen
 func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 	// Create History
 	ps.History[ps.Count] = map[string]*pShellHistory{}
@@ -124,7 +124,7 @@ func (ps *pShell) parseExecutor(pslice [][]pipeLine) {
 	isBuildInOnly := true
 
 	for _, pline := range pslice {
-		if len(pline) > 1 { // nolint gomnd
+		if len(pline) > 1 {
 			isBuildInOnly = false
 			break
 		}

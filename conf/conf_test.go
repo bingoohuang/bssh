@@ -2,10 +2,12 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-package conf
+package conf_test
 
 import (
 	"testing"
+
+	"github.com/bingoohuang/bssh/conf"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -13,15 +15,15 @@ import (
 func TestCheckFormatServerConf(t *testing.T) {
 	type TestData struct {
 		desc   string
-		c      Config
+		c      conf.Config
 		expect bool
 	}
 
 	tds := []TestData{
 		{
 			desc: "Address, user and password",
-			c: Config{
-				Server: map[string]ServerConfig{
+			c: conf.Config{
+				Server: map[string]conf.ServerConfig{
 					"a": {Addr: "192.168.100.101", User: "test", Pass: "Password"},
 				},
 			},
@@ -29,8 +31,8 @@ func TestCheckFormatServerConf(t *testing.T) {
 		},
 		{
 			desc: "Empty address",
-			c: Config{
-				Server: map[string]ServerConfig{
+			c: conf.Config{
+				Server: map[string]conf.ServerConfig{
 					"b": {Addr: "", User: "test", Pass: "Password"},
 				},
 			},
@@ -38,8 +40,8 @@ func TestCheckFormatServerConf(t *testing.T) {
 		},
 		{
 			desc: "Empty user",
-			c: Config{
-				Server: map[string]ServerConfig{
+			c: conf.Config{
+				Server: map[string]conf.ServerConfig{
 					"c": {Addr: "192.168.100.101", User: "", Pass: "Password"},
 				},
 			},
@@ -47,8 +49,8 @@ func TestCheckFormatServerConf(t *testing.T) {
 		},
 		{
 			desc: "Empty password",
-			c: Config{
-				Server: map[string]ServerConfig{
+			c: conf.Config{
+				Server: map[string]conf.ServerConfig{
 					"d": {Addr: "192.168.100.101", User: "test", Pass: ""},
 				},
 			},
@@ -56,8 +58,8 @@ func TestCheckFormatServerConf(t *testing.T) {
 		},
 		{
 			desc: "1 server config is illegal",
-			c: Config{
-				Server: map[string]ServerConfig{
+			c: conf.Config{
+				Server: map[string]conf.ServerConfig{
 					"a": {Addr: "192.168.100.101", User: "test", Pass: "Password"},
 					"b": {Addr: "", User: "test", Pass: "Password"},
 					"e": {Addr: "192.168.100.101", User: "test", Pass: "Password"},
@@ -68,7 +70,7 @@ func TestCheckFormatServerConf(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := checkFormatServerConf(v.c)
+		got := conf.CheckFormatServerConf(v.c)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
@@ -76,22 +78,22 @@ func TestCheckFormatServerConf(t *testing.T) {
 func TestCheckFormatServerConfAuth(t *testing.T) {
 	type TestData struct {
 		desc   string
-		c      ServerConfig
+		c      conf.ServerConfig
 		expect bool
 	}
 
 	tds := []TestData{
-		{desc: "Password", c: ServerConfig{Pass: "Password"}, expect: true},
-		{desc: "Secret key file", c: ServerConfig{Key: "/tmp/key.pem"}, expect: true},
-		{desc: "Cert file", c: ServerConfig{Cert: "/tmp/key.crt"}, expect: true},
-		{desc: "Agent auth", c: ServerConfig{AgentAuth: true}, expect: true},
+		{desc: "Password", c: conf.ServerConfig{Pass: "Password"}, expect: true},
+		{desc: "Secret key file", c: conf.ServerConfig{Key: "/tmp/key.pem"}, expect: true},
+		{desc: "Cert file", c: conf.ServerConfig{Cert: "/tmp/key.crt"}, expect: true},
+		{desc: "Agent auth", c: conf.ServerConfig{AgentAuth: true}, expect: true},
 		// {desc: "File exists", c: ServerConfig{PKCS11Provider: "/path/to/providor"}, expect: true},
-		{desc: "Key files", c: ServerConfig{Keys: []string{"/tmp/key.pem", "/tmp/key2.pem"}}, expect: true},
-		{desc: "Passwords", c: ServerConfig{Passes: []string{"Pass1", "Pass2"}}, expect: true},
+		{desc: "Key files", c: conf.ServerConfig{Keys: []string{"/tmp/key.pem", "/tmp/key2.pem"}}, expect: true},
+		{desc: "Passwords", c: conf.ServerConfig{Passes: []string{"Pass1", "Pass2"}}, expect: true},
 	}
 
 	for _, v := range tds {
-		got := checkFormatServerConfAuth(v.c)
+		got := conf.CheckFormatServerConfAuth(v.c)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
@@ -99,39 +101,39 @@ func TestCheckFormatServerConfAuth(t *testing.T) {
 func TestServerConfigReduct(t *testing.T) {
 	type TestData struct {
 		desc                   string
-		perConfig, childConfig ServerConfig
-		expect                 ServerConfig
+		perConfig, childConfig conf.ServerConfig
+		expect                 conf.ServerConfig
 	}
 
 	tds := []TestData{
 		{
 			desc:        "Set perConfig addr to child config",
-			perConfig:   ServerConfig{Addr: "192.168.100.101", User: "pertest"},
-			childConfig: ServerConfig{User: "test"},
-			expect:      ServerConfig{Addr: "192.168.100.101", User: "test"},
+			perConfig:   conf.ServerConfig{Addr: "192.168.100.101", User: "pertest"},
+			childConfig: conf.ServerConfig{User: "test"},
+			expect:      conf.ServerConfig{Addr: "192.168.100.101", User: "test"},
 		},
 		{
 			desc:        "Child config is empty",
-			perConfig:   ServerConfig{Addr: "192.168.100.101"},
-			childConfig: ServerConfig{},
-			expect:      ServerConfig{Addr: "192.168.100.101"},
+			perConfig:   conf.ServerConfig{Addr: "192.168.100.101"},
+			childConfig: conf.ServerConfig{},
+			expect:      conf.ServerConfig{Addr: "192.168.100.101"},
 		},
 		{
 			desc:        "Per config is empty",
-			perConfig:   ServerConfig{},
-			childConfig: ServerConfig{User: "test"},
-			expect:      ServerConfig{User: "test"},
+			perConfig:   conf.ServerConfig{},
+			childConfig: conf.ServerConfig{User: "test"},
+			expect:      conf.ServerConfig{User: "test"},
 		},
 		{
 			desc:        "Both empty",
-			perConfig:   ServerConfig{},
-			childConfig: ServerConfig{},
-			expect:      ServerConfig{},
+			perConfig:   conf.ServerConfig{},
+			childConfig: conf.ServerConfig{},
+			expect:      conf.ServerConfig{},
 		},
 	}
 
 	for _, v := range tds {
-		got := serverConfigDeduct(v.perConfig, v.childConfig)
+		got := conf.ServerConfigDeduct(v.perConfig, v.childConfig)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
@@ -139,15 +141,15 @@ func TestServerConfigReduct(t *testing.T) {
 func TestGetNameList(t *testing.T) {
 	type TestData struct {
 		desc     string
-		listConf Config
+		listConf conf.Config
 		expect   []string
 	}
 
 	tds := []TestData{
 		{
 			desc: "",
-			listConf: Config{
-				Server: map[string]ServerConfig{
+			listConf: conf.Config{
+				Server: map[string]conf.ServerConfig{
 					"a": {},
 					"b": {},
 				},
@@ -156,8 +158,8 @@ func TestGetNameList(t *testing.T) {
 		},
 		{
 			desc: "",
-			listConf: Config{
-				Server: map[string]ServerConfig{},
+			listConf: conf.Config{
+				Server: map[string]conf.ServerConfig{},
 			},
 			expect: nil,
 		},

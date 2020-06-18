@@ -15,14 +15,14 @@ import (
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
 
-	prompt "github.com/c-bata/go-prompt"
+	"github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
-	shellwords "github.com/mattn/go-shellwords"
+	"github.com/mattn/go-shellwords"
 )
 
 // TDXX(blacknon): catコマンド相当の機能を追加する
 
-// shell Shell mode function
+// shell Shell mode function.
 func (r *RunSftp) shell() {
 	// start message
 	fmt.Println("Start lsftp...")
@@ -38,7 +38,7 @@ func (r *RunSftp) shell() {
 		prompt.OptionLivePrefix(r.CreatePrompt),
 		prompt.OptionInputTextColor(prompt.Green),
 		prompt.OptionPrefixTextColor(prompt.Blue),
-		prompt.OptionMaxSuggestion(16),                                              // nolint gomnd
+		prompt.OptionMaxSuggestion(16),                                              // nolint:gomnd
 		prompt.OptionCompletionWordSeparator(completer.FilePathCompletionSeparator), // test
 	)
 
@@ -46,8 +46,8 @@ func (r *RunSftp) shell() {
 	p.Run()
 }
 
-// Executor sftp Shell mode function
-func (r *RunSftp) Executor(command string) { // nolint funlen
+// Executor sftp Shell mode function.
+func (r *RunSftp) Executor(command string) { // nolint:funlen
 	p := shellwords.NewParser()
 	p.ParseEnv = true
 	cmdline, _ := p.Parse(command)
@@ -105,15 +105,14 @@ func (r *RunSftp) Executor(command string) { // nolint funlen
 	}
 }
 
-// Completer sftp Shell mode function
+// Completer sftp Shell mode function.
 func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 	left, char := r.getCursorLeft(t)
 
 	cmdline := strings.Split(left, " ")
-	if len(cmdline) == 1 { // nolint gomnd
+	if len(cmdline) == 1 {
 		suggest := r.createSuggest()
 
-		// return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), true)
 		return prompt.FilterHasPrefix(suggest, t.GetWordBeforeCursor(), false)
 	}
 
@@ -125,10 +124,10 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		return r.cmdDf(t)
 	case misc.Get:
 		switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
-		case 1: // nolint gomnd remote
-			return r.PathComplete(true, 1, t)
-		case 2: // nolint gomnd local
-			return r.PathComplete(false, 2, t)
+		case 1:
+			return r.PathComplete(true, 1, t) // remote
+		case 2: // nolint:gomnd
+			return r.PathComplete(false, 2, t) // local
 		}
 	case "lcd":
 		return r.PathComplete(false, 1, t)
@@ -145,10 +144,10 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		// TDXX(blacknon): オプションを追加したら引数の数から減らす処理が必要
 		// TDXX（blacknon）：添加选项后，有必要减少参数数量
 		switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
-		case 1: // nolint gomnd local
-			return r.PathComplete(false, 1, t)
-		case 2: // nolint gomnd remote
-			return r.PathComplete(true, 2, t)
+		case 1:
+			return r.PathComplete(false, 1, t) // local
+		case 2: // nolint:gomnd
+			return r.PathComplete(true, 2, t) // remote
 		}
 	case misc.Rename:
 		return r.PathComplete(true, 1, t)

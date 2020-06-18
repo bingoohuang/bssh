@@ -6,6 +6,7 @@ package ssh
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -57,11 +58,11 @@ func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r io.Rea
 			result = result + text + "\n"
 		}
 
-		if sc.Err() == io.ErrClosedPipe {
+		if errors.Is(sc.Err(), io.ErrClosedPipe) {
 			break
 		}
 
-		<-time.After(50 * time.Millisecond) // nolint gomnd
+		<-time.After(50 * time.Millisecond) // nolint:gomnd
 	}
 
 	// Add Result
@@ -73,7 +74,7 @@ func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r io.Rea
 	m.Unlock()
 }
 
-// GetHistoryFromFile return []History from historyfile
+// GetHistoryFromFile return []History from historyfile.
 func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 	histfile := common.ExpandHomeDir(ps.HistoryFile)
 
@@ -89,7 +90,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 		line := sc.Text()
 		text := strings.SplitN(line, " ", 2)
 
-		if len(text) < 2 { // nolint gomnd
+		if len(text) < 2 { // nolint:gomnd
 			continue
 		}
 

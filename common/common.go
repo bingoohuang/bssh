@@ -3,6 +3,7 @@
 // that can be found in the LICENSE file.
 
 // Package common is a package that summarizes the common processing of bssh package.
+// nolint:goerr113
 package common
 
 import (
@@ -109,7 +110,7 @@ func GetFullPath(path string) (fullPath string) {
 	return fullPath
 }
 
-// GetOrderNumber get order num in array
+// GetOrderNumber get order num in array.
 func GetOrderNumber(value string, array []string) int {
 	for i, v := range array {
 		if v == value {
@@ -178,7 +179,7 @@ func GetPassPhrase(msg string) (input string, err error) {
 	return
 }
 
-// nolint gochecknoinits
+// nolint:gochecknoinits
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -201,7 +202,7 @@ func NewSHA1Hash(n ...int) string {
 	return fmt.Sprintf("%02x", bs)
 }
 
-// RandomString generates a random string of n length
+// RandomString generates a random string of n length.
 func RandomString(n int) string {
 	b := make([]rune, n)
 	for i := range b {
@@ -250,7 +251,7 @@ func WalkDir(dir string) (files []string, err error) {
 	return
 }
 
-// IsHidden tells a path is hidden after basedir
+// IsHidden tells a path is hidden after basedir.
 func IsHidden(basedir, path string) bool {
 	p, err := filepath.Rel(basedir, path)
 	if err != nil {
@@ -326,10 +327,11 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 
 	// switch count
 	switch count {
-	case 3: // nolint gomnd `localhost:8000:localhost:18000`
+	case 3: // nolint:gomnd
+		// `localhost:8000:localhost:18000`
 		local = data[0] + ":" + data[1]
 		remote = data[2] + ":" + data[3]
-	case 2: // nolint gomnd
+	case 2: // nolint:gomnd
 		// check 1st column is int
 		_, e := strconv.Atoi(data[0])
 		if e == nil { // 1st column is port (int)
@@ -348,8 +350,8 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 }
 
 var (
-	optionReg = regexp.MustCompile("^-")         // nolint gochecknoglobals
-	parseReg  = regexp.MustCompile("^-[^-]{2,}") // nolint gochecknoglobals
+	optionReg = regexp.MustCompile("^-")         // nolint:gochecknoglobals
+	parseReg  = regexp.MustCompile("^-[^-]{2,}") // nolint:gochecknoglobals
 )
 
 // ParseArgs return os.Args parse short options (ex.) [-la] => [-l,-a] )
@@ -364,7 +366,7 @@ func ParseArgs(options []cli.Flag, args []string) []string {
 
 		for _, n := range names {
 			// add hyphen
-			if len(n) == 1 { // nolint gomnd
+			if len(n) == 1 {
 				optionMap["-"+n] = op
 			} else {
 				optionMap["--"+n] = op

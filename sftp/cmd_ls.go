@@ -26,7 +26,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// sftpLs
+// sftpLs ...
 type sftpLs struct {
 	Client *Connect
 	Files  []os.FileInfo
@@ -34,7 +34,7 @@ type sftpLs struct {
 	Groups string
 }
 
-// ClientReadFile read file from client
+// ClientReadFile read file from client.
 func ClientReadFile(client *Connect, file string) (string, error) {
 	f, err := client.Connect.Open(file)
 	if err != nil {
@@ -49,7 +49,7 @@ func ClientReadFile(client *Connect, file string) (string, error) {
 	return string(bytes), nil
 }
 
-// getRemoteLsData
+// getRemoteLsData ...
 func (r *RunSftp) getRemoteLsData(client *Connect, path string) (lsdata sftpLs, err error) {
 	// get symlink
 	p, err := client.Connect.ReadLink(path)
@@ -255,7 +255,7 @@ func (r *RunSftp) listFile(f os.FileInfo, c *cli.Context, lsdata map[string]sftp
 	data.Time = timestr
 	data.Path = f.Name()
 
-	if len(lsdata) == 1 { // nolint gomnd
+	if len(lsdata) == 1 {
 		// set print format
 		format := "%s\t%s\t%s\t%" + strconv.Itoa(maxSizeWidth) + "s\t%s\t%s\n"
 

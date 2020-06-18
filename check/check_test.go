@@ -1,7 +1,9 @@
-package check
+package check_test
 
 import (
 	"testing"
+
+	"github.com/bingoohuang/bssh/check"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +39,7 @@ func TestExistServer(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		assert.Equal(t, v.expect, ExistServer(v.inputServer, v.nameList), v.desc)
+		assert.Equal(t, v.expect, check.ExistServer(v.inputServer, v.nameList), v.desc)
 	}
 }
 
@@ -59,7 +61,7 @@ func TestParseScpPath(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		isRemote, path := ParseScpPath(v.arg)
+		isRemote, path := check.ParseScpPath(v.arg)
 		assert.Equal(t, v.isRemote, isRemote, v.desc)
 		assert.Equal(t, v.path, path, v.desc)
 	}
@@ -81,7 +83,7 @@ func TestEscapePath(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := EscapePath(v.str)
+		got := check.EscapePath(v.str)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
@@ -103,16 +105,16 @@ func TestCheckTypeError(t *testing.T) {
 		// exit 1 {r: true, l: true, toR: true, countHosts: 0},
 
 		// exit 1 {r: false, l: false, toR: false, countHosts: 1},
-		{r: false, l: false, toR: true, countHosts: 1}, // nolint gomnd
+		{r: false, l: false, toR: true, countHosts: 1},
 		// exit 1 {r: false, l: true, toR: false, countHosts: 1},
-		{r: false, l: true, toR: true, countHosts: 1},  // nolint gomnd
-		{r: true, l: false, toR: false, countHosts: 1}, // nolint gomnd
+		{r: false, l: true, toR: true, countHosts: 1},
+		{r: true, l: false, toR: false, countHosts: 1},
 		// exit 1 {r: true, l: false, toR: true, countHosts: 1},
 		// exit 1 {r: true, l: true, toR: false, countHosts: 1},
 		// exit 1 {r: true, l: true, toR: true, countHosts: 1},
 	}
 
 	for _, v := range tds {
-		TypeError(v.r, v.l, v.toR, v.countHosts)
+		check.TypeError(v.r, v.l, v.toR, v.countHosts)
 	}
 }

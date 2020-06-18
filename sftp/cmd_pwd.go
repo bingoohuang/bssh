@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 )
 
-// pwd
+// pwd ...
 func (r *RunSftp) pwd() {
 	exit := make(chan bool)
 
@@ -47,7 +47,7 @@ func (r *RunSftp) pwd() {
 	}
 }
 
-// lpwd
+// lpwd ...
 func (r *RunSftp) lpwd() {
 	pwd, err := os.Getwd()
 	if err != nil {
