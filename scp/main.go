@@ -378,19 +378,8 @@ func (cp *Scp) pullPath(client *Connect) {
 
 	// walk remote path
 	for _, path := range cp.From.Path {
-		if _, err := ftp.Stat(path); err != nil {
-			fmt.Fprintf(ow, "ftp.Stat path %s Error: %v\n", path, err)
-			continue
-		}
-
-		if p, err := ftp.ReadLink(path); err == nil {
-			fmt.Fprintf(ow, "read link to %s\n", p)
-			path = filepath.Join(filepath.Dir(path), p)
-		}
-
-		globpath, err := ftp.Glob(path)
+		globpath, err := tryEvalPath(ftp, path, ow)
 		if err != nil {
-			fmt.Fprintf(ow, "ftp.Glob path %s Error: %v\n", path, err)
 			continue
 		}
 
@@ -405,7 +394,7 @@ func (cp *Scp) pullPath(client *Connect) {
 				}
 
 				p := walker.Path()
-				if common.IsHidden(path, p) {
+				if common.IsHidden(remoteBase, p) {
 					continue // ignore hidden files.
 				}
 
@@ -422,6 +411,24 @@ func (cp *Scp) pullPath(client *Connect) {
 				_ = os.Chmod(lpath, stat.Mode())
 			}
 		}
+	}
+}
+
+func tryEvalPath(ftp *sftp.Client, path string, ow *io.PipeWriter) ([]string, error) {
+	if _, err := ftp.Stat(path); err == nil {
+		return []string{path}, nil
+	}
+
+	if p, err := ftp.ReadLink(path); err == nil {
+		fmt.Fprintf(ow, "read link %s to %s\n", path, p)
+		path = filepath.Join(filepath.Dir(path), p)
+		return []string{path}, nil
+	}
+
+	if globpath, err := ftp.Glob(path); err == nil {
+		return globpath, nil
+	} else {
+		return nil, err
 	}
 }
 
