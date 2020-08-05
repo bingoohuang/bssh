@@ -5,47 +5,52 @@
 package main
 
 import (
+	"github.com/bingoohuang/gou/str"
+	"github.com/mitchellh/go-homedir"
 	"os"
 
 	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/bssh/app"
 	"github.com/bingoohuang/bssh/common"
+	"github.com/spf13/pflag"
 	"github.com/urfave/cli"
 )
 
 func main() {
+	flagSet := pflag.NewFlagSet(os.Args[0], pflag.ContinueOnError)
+	flagSet.SetInterspersed(false)
+	flagSet.StringSliceP("host", "H", nil, "connect server names")
+	flagSet.StringP("cnf", "c", str.PickFirst(homedir.Expand("~/.bssh.toml")), " config file path")
+	_ = flagSet.Parse(os.Args[1:])
+
 	var ap *cli.App
 
 	args := os.Args
+	nargs := len(os.Args[1:])
 
-HERE:
-	if len(args) > 1 {
-		sub := args[1]
+	if len(flagSet.Args()) > 0 {
+		sub := flagSet.Args()[0]
+		i := nargs - flagSet.NArg() + 1
 		switch sub {
 		case "scp":
-			args = append(args[0:1], args[2:]...)
+			args = append(os.Args[0:1], os.Args[1:i]...)
+			args = append(args, flagSet.Args()[1:]...)
 			ap = app.Lscp()
 		case "ftp":
-			args = append(args[0:1], args[2:]...)
+			args = append(os.Args[0:1], os.Args[1:i]...)
+			args = append(args, flagSet.Args()[1:]...)
 			ap = app.Lsftp()
 		case misc.SSH:
-			args = append(args[0:1], args[2:]...)
+			args = append(os.Args[0:1], os.Args[1:i]...)
+			args = append(args, flagSet.Args()[1:]...)
 			ap = app.Lssh()
-		case "l", "last":
-			args = append(args[0:1], args[2:]...)
-			if lastArgs, ok := app.Last(); ok {
-				args = lastArgs
-				goto HERE
-			}
 		}
 	}
 
 	if ap == nil {
 		ap = app.Lssh()
 	}
-
-	common.SaveArgsLastLog()
 
 	_ = ap.Run(common.ParseArgs(ap.Flags, args))
 }

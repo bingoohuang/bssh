@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bingoohuang/bssh/common"
-
 	"github.com/bingoohuang/bssh/conf"
 )
 
@@ -32,8 +30,6 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 		fmt.Fprintln(os.Stderr, "Server not selected.")
 		os.Exit(1)
 	}
-
-	common.SaveServerNameLastLog(selected)
 
 	return selected
 }
