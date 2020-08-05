@@ -36,7 +36,6 @@ func (r *Run) cmd() {
 	}
 
 	connMap := r.createConnMap()
-
 	writers := r.createWriter(connMap)
 
 	// if parallel flag true, and select server is not single,
@@ -106,6 +105,8 @@ func (r *Run) createConnMap() map[string]*sshlib.Connect {
 
 	// Create sshlib.Connect to connMap
 	for _, server := range r.ServerList {
+		r.parseDirectServer(server)
+
 		// check count AuthMethod
 		if len(r.serverAuthMethodMap[server]) == 0 {
 			fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)

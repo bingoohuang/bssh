@@ -42,7 +42,6 @@ func (r *Run) shell() (err error) {
 	}
 
 	r.overwritePortForwardConfig(&config)
-
 	r.overwriteBashrcConfig(&config)
 
 	// header
