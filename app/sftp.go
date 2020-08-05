@@ -69,7 +69,10 @@ func lsftpAction(c *cli.Context) error {
 
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()
-	hosts := data.ExpandHosts(c)
+	hosts, searchNames := data.ExpandHosts(c)
+	if searchNames != nil {
+		names = searchNames
+	}
 
 	// scp struct
 	r := new(sftp.RunSftp)

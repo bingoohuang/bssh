@@ -494,10 +494,14 @@ func IsDirectServer(server string) bool {
 func ParseDirectServer(server string) ServerConfig {
 	// LastIndex of "@" will allow that password contains "@"
 	atPos := strings.LastIndex(server, "@")
+	sc := ServerConfig{}
+
+	if atPos < 0 {
+		return sc
+	}
+
 	left := server[:atPos]
 	right := server[atPos+1:]
-
-	sc := ServerConfig{}
 
 	commaPos := strings.Index(left, ":")
 	if commaPos == -1 {
@@ -521,19 +525,19 @@ func ParseDirectServer(server string) ServerConfig {
 }
 
 // EnsureSearchHost searches the host name by glob pattern.
-func (cf *Config) EnsureSearchHost(host string) string {
+func (cf *Config) EnsureSearchHost(host string) (string, []string) {
 	if IsDirectServer(host) {
-		return host
+		return host, nil
 	}
 
 	matches1 := cf.globMatch(host)
 	if len(matches1) == 1 {
-		return matches1[0]
+		return matches1[0], nil
 	}
 
 	matches2 := cf.containsMatch(host)
 	if len(matches2) == 1 {
-		return matches2[0]
+		return matches2[0], nil
 	}
 
 	matches := make([]string, 0, len(matches1)+len(matches2))
@@ -543,14 +547,11 @@ func (cf *Config) EnsureSearchHost(host string) string {
 
 	if len(matches) == 0 {
 		_, _ = fmt.Fprintf(os.Stderr, "host %s not found from list.\n", host)
-	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "host %s found multiple hosts.\n", host)
-		cf.PrintServerList(matches, false)
+		return "", cf.GetNameSortedList()
 	}
 
-	os.Exit(1)
-
-	return ""
+	_, _ = fmt.Fprintf(os.Stderr, "host %s found multiple hosts.\n", host)
+	return "", matches
 }
 
 func (cf *Config) containsMatch(host string) []string {

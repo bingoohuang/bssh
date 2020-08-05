@@ -2,9 +2,8 @@ package app
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/bingoohuang/bssh/list"
+	"os"
 
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
@@ -118,7 +117,10 @@ func lsshAction(c *cli.Context) error {
 	data := conf.ReadConf(confpath)
 	isMulti := parseMultiFlag(c)
 	names := data.GetNameSortedList()
-	hosts := data.ExpandHosts(c)
+	hosts, searchNames := data.ExpandHosts(c)
+	if searchNames != nil {
+		names = searchNames
+	}
 
 	processListFlag(c, names, data)
 

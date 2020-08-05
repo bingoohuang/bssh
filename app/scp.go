@@ -92,7 +92,10 @@ func lscpAction(c *cli.Context) error {
 	confpath := c.String("cnf")
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()
-	hosts := data.ExpandHosts(c)
+	hosts, searchNames := data.ExpandHosts(c)
+	if searchNames != nil {
+		names = searchNames
+	}
 
 	// Check from and to Type
 	check.TypeError(isFromInRemote, isFromInLocal, isToRemote, len(hosts))
