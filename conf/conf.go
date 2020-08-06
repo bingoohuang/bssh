@@ -243,10 +243,7 @@ func ReadConf(confPath string) (config Config) {
 	config.readIncludeFiles()
 
 	// Check Config Parameter
-	if !CheckFormatServerConf(config) {
-		os.Exit(1)
-	}
-
+	CheckFormatServerConf(config)
 	config.parseGroups()
 
 	return config
