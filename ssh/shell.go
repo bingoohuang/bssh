@@ -114,12 +114,13 @@ func (r *Run) shell() (err error) {
 }
 
 func (r *Run) parseDirectServer(server string) conf.ServerConfig {
-	sc := conf.ParseDirectServer(server)
+	sc, ok := conf.ParseDirectServer(server)
+	if ok {
+		r.Conf.Server[server] = sc
+		r.registerAuthMapPassword(server, sc.Pass)
+	}
 
-	r.Conf.Server[server] = sc
-	r.registerAuthMapPassword(server, sc.Pass)
-
-	return sc
+	return r.Conf.Server[server]
 }
 
 func (r *Run) sshAgent(config *conf.ServerConfig, connect *sshlib.Connect, session *ssh.Session) {

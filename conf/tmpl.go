@@ -74,7 +74,7 @@ func ParseTmpl(tmpl string) []Tmpl {
 	fields := str.FieldsX(tmpl, "(", ")", -1)
 	if len(fields) < 2 { // nolint:gomnd
 		if IsDirectServer(tmpl) {
-			s := ParseDirectServer(tmpl)
+			s, _ := ParseDirectServer(tmpl)
 
 			return []Tmpl{{
 				ID:       "",
