@@ -30,7 +30,7 @@ func (r *Run) shell() (err error) {
 	config, ok := r.Conf.Server[server]
 	isTempHost := !ok
 	if isTempHost {
-		config = r.parseDirectServer(server)
+		config, _ = r.parseDirectServer(server)
 	}
 
 	// check count AuthMethod
@@ -116,14 +116,14 @@ func (r *Run) shell() (err error) {
 	return err
 }
 
-func (r *Run) parseDirectServer(server string) conf.ServerConfig {
+func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig, isDirectServer bool) {
 	sc, ok := conf.ParseDirectServer(server)
 	if ok {
 		r.Conf.Server[server] = sc
 		r.registerAuthMapPassword(server, sc.Pass)
 	}
 
-	return r.Conf.Server[server]
+	return r.Conf.Server[server], ok
 }
 
 func (r *Run) sshAgent(config *conf.ServerConfig, connect *sshlib.Connect, session *ssh.Session) {

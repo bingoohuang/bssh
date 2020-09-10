@@ -66,7 +66,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 	s, ok := r.Conf.Server[server] // server conf
 	isTempHost := !ok
 	if isTempHost {
-		s = r.parseDirectServer(server)
+		s, _ = r.parseDirectServer(server)
 	}
 
 	x11 := s.X11 || r.X11 // set x11
