@@ -28,9 +28,8 @@ import (
 func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
 	config, ok := r.Conf.Server[server]
-
-	if !ok {
-		r.Conf.WriteTempHosts(server)
+	isTempHost := !ok
+	if isTempHost {
 		config = r.parseDirectServer(server)
 	}
 
@@ -64,6 +63,10 @@ func (r *Run) shell() (err error) {
 	session, err := connect.CreateSession()
 	if err != nil {
 		return err
+	}
+
+	if isTempHost {
+		r.Conf.WriteTempHosts(server)
 	}
 
 	r.sshAgent(&config, connect, session)
