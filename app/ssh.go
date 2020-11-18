@@ -2,8 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/bingoohuang/bssh/list"
 	"os"
+
+	"github.com/bingoohuang/bssh/list"
 
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"

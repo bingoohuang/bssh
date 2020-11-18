@@ -96,12 +96,12 @@ func ParseTmpl(tmpl string) []Tmpl {
 	var props map[string]string
 
 	if atPos := strings.LastIndex(fields[0], "@"); atPos > 0 {
-		user, pass = splitBySep(fields[0][0:atPos], ":")
+		user, pass = splitBySep(fields[0][0:atPos], []string{":", "/"})
 		host, port = splitHostPort(fields[0][atPos+1:])
 		props = parseProps(fields[1:])
 	} else {
 		host, port = splitHostPort(fields[0])
-		user, pass = splitBySep(fields[1], "/")
+		user, pass = splitBySep(fields[1], []string{":", "/"})
 		props = parseProps(fields[2:])
 	}
 
@@ -146,8 +146,14 @@ func parseProps(fields []string) map[string]string {
 	return props
 }
 
-func splitBySep(userPass, sep string) (string, string) {
-	return str.Split2(userPass, sep, false, false)
+func splitBySep(s string, seps []string) (string, string) {
+	for _, sep := range seps {
+		if strings.Contains(s, sep) {
+			return str.Split2(s, sep, false, false)
+		}
+	}
+
+	return s, ""
 }
 
 func splitHostPort(addr string) (string, string) {

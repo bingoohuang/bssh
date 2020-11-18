@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -185,21 +184,17 @@ func (r *Run) portForwarding(config *conf.ServerConfig, connect *sshlib.Connect)
 
 // getLogPath return log file path.
 func (r *Run) getLogPath(server string) (logPath string) {
-	// check regex
-	// if ~/.ssh/config, in ":"
-	reg := regexp.MustCompile(`:`)
-
-	if reg.MatchString(server) {
-		slice := strings.SplitN(server, ":", 2)
-		server = slice[1]
+	if idx := strings.Index(server, "@"); idx >= 0 {
+		server = server[idx+1:]
 	}
 
+	server = strings.ReplaceAll(server, ":", "_")
 	dir, err := r.getLogDirPath(server)
 	if err != nil {
 		log.Println(err)
 	}
 
-	file := time.Now().Format("20060102_150405") + "_" + server + ".log"
+	file := time.Now().Format("20060102") + "_" + server + ".log"
 	logPath = filepath.Join(dir, file)
 
 	return logPath

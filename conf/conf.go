@@ -500,15 +500,8 @@ func ParseDirectServer(server string) (ServerConfig, bool) {
 	left := server[:atPos]
 	right := server[atPos+1:]
 
-	commaPos := strings.Index(left, ":")
-	if commaPos == -1 {
-		sc.User = left
-	} else {
-		sc.User = left[:commaPos]
-		sc.Pass = left[commaPos+1:]
-	}
-
-	commaPos = strings.Index(right, ":")
+	sc.User, sc.Pass = splitBySep(left, []string{":", "/"})
+	commaPos := strings.Index(right, ":")
 
 	if commaPos == -1 {
 		sc.Addr = right

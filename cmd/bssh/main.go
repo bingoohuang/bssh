@@ -5,9 +5,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/bingoohuang/gou/str"
 	"github.com/mitchellh/go-homedir"
-	"os"
 
 	"github.com/bingoohuang/bssh/misc"
 

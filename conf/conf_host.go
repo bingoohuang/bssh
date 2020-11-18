@@ -1,9 +1,10 @@
 package conf
 
 import (
+	"sort"
+
 	"github.com/bingoohuang/gou/str"
 	"github.com/urfave/cli"
-	"sort"
 )
 
 // ExpandHosts expand hosts to comma-separated or wild match (file name pattern).
