@@ -224,7 +224,7 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 
 	defer rf.Close()
 
-	rd := io.TeeReader(lf, rf)
+	rd := io.TeeReader(common.CreateRateLimit(lf), rf)
 
 	// copy to data
 	cp.ProgressWG.Add(1)
@@ -454,7 +454,7 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 
 	defer lf.Close()
 
-	rd := io.TeeReader(rf, lf)
+	rd := io.TeeReader(common.CreateRateLimit(rf), lf)
 
 	cp.ProgressWG.Add(1)
 	client.Output.ProgressPrinter(size, rd, p)

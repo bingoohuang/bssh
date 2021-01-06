@@ -146,7 +146,7 @@ func (r *RunSftp) pushFile(c *Connect, localFile io.Reader, path string, size in
 
 	defer remoteFile.Close()
 
-	rd := io.TeeReader(localFile, remoteFile)
+	rd := io.TeeReader(common.CreateRateLimit(localFile), remoteFile)
 
 	r.ProgressWG.Add(1)
 	c.Output.ProgressPrinter(size, rd, path)

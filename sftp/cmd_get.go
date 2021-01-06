@@ -204,7 +204,7 @@ func pullFile(stat os.FileInfo, client *Connect, localpath, p string, r *RunSftp
 	defer localfile.Close()
 
 	// set tee reader
-	rd := io.TeeReader(remotefile, localfile)
+	rd := io.TeeReader(common.CreateRateLimit(remotefile), localfile)
 
 	r.ProgressWG.Add(1)
 	client.Output.ProgressPrinter(size, rd, p)
