@@ -1,39 +1,35 @@
 module github.com/bingoohuang/bssh
 
+go 1.16
+
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
-	github.com/bingoohuang/gonet v0.0.0-20200224141149-35b28c91a637
-	github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46
-	github.com/blacknon/go-sshlib v0.1.1
+	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
+	github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221
+	github.com/blacknon/go-sshlib v0.1.3
 	github.com/blacknon/textcol v0.0.1
-	github.com/c-bata/go-prompt v0.2.3
+	github.com/c-bata/go-prompt v0.2.5
 	github.com/dustin/go-humanize v1.0.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/juju/ratelimit v1.0.1
-	github.com/kevinburke/ssh_config v0.0.0-20190724205821-6cfae18c12b8
-	github.com/mattn/go-colorable v0.1.6 // indirect
-	github.com/mattn/go-runewidth v0.0.7
-	github.com/mattn/go-shellwords v1.0.6
-	github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859 // indirect
+	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351
+	github.com/mattn/go-runewidth v0.0.10
+	github.com/mattn/go-shellwords v1.0.11
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nsf/termbox-go v0.0.0-20190325093121-288510b9734e
-	github.com/pkg/sftp v1.11.1-0.20200310224833-18dc4db7a456
-	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942 // indirect
-	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/pflag v1.0.3
-	github.com/spf13/viper v1.6.1
-	github.com/stretchr/testify v1.4.0
-	github.com/thoas/go-funk v0.5.0
-	github.com/urfave/cli v1.21.0
+	github.com/nsf/termbox-go v0.0.0-20210114135735-d04385b850e8
+	github.com/pkg/sftp v1.12.0
+	github.com/sirupsen/logrus v1.8.0
+	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.7.1
+	github.com/stretchr/testify v1.7.0
+	github.com/thoas/go-funk v0.7.0
+	github.com/urfave/cli v1.22.5
 	github.com/vbauerster/mpb v3.4.0+incompatible
-	github.com/youtube/vitess v2.1.1+incompatible // indirect
-	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
-	mvdan.cc/sh v2.6.3+incompatible
+	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
+	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
+	mvdan.cc/sh v2.6.4+incompatible
 )
 
-replace github.com/urfave/cli v1.22.0 => ../../urfave/cli
-
-go 1.13
+replace github.com/miekg/pkcs11 => github.com/blacknon/pkcs11 v1.0.4-0.20201018135904-6038e308f617
