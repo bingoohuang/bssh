@@ -94,7 +94,7 @@ You can record the terminal log. The following variables can be specified in the
 [log]
 enable = true       # bool logging
 timestamp = true    # add timestamp line head
-dirpath = "/path/to/<Date>_<Hostname>/logdir"  
+dirpath = "/path/to/<Date>_<ServerName>/logdir"  
 ```
 
 ### [ssh,http,socks5] Proxy server settings

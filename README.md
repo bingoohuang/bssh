@@ -252,7 +252,7 @@ A terminal log can be recorded by writing a configuration file.
 	[log]
 	enable = true
 	timestamp = true
-	dirpath = "~/log/bssh/<Date>/<Hostname>"
+	dirpath = "~/log/bssh/<Date>/<ServerName>"
 
 
 There are other parameters corresponding to ClientAliveInterval and ClientAliveCountMax.

@@ -101,6 +101,7 @@ func (r *Run) shell() (err error) {
 		logConf := r.Conf.Log
 		if logConf.Enable {
 			logPath := r.getLogPath(server)
+			log.Printf("logging to %s", logPath)
 			connect.SetLog(logPath, logConf.Timestamp)
 		}
 
@@ -189,30 +190,48 @@ func (r *Run) getLogPath(server string) (logPath string) {
 	}
 
 	server = strings.ReplaceAll(server, ":", "_")
-	dir, err := r.getLogDirPath(server)
+	dir, dateFound, serverFound, err := r.getLogDirPath(server)
 	if err != nil {
 		log.Println(err)
 	}
 
-	file := time.Now().Format("20060102") + "_" + server + ".log"
+	var file string
+
+	if !dateFound {
+		file = time.Now().Format("20060102")
+	}
+
+	if !serverFound {
+		if file != "" {
+			file += "_"
+		}
+		file += server
+	}
+
+	file += ".log"
 	logPath = filepath.Join(dir, file)
 
 	return logPath
 }
 
 // getLogDirPath return log directory path.
-func (r *Run) getLogDirPath(server string) (dir string, err error) {
+func (r *Run) getLogDirPath(server string) (dir string, dateFound, hostnameFound bool, err error) {
 	logConf := r.Conf.Log
 
 	// expansion variable
 	dir = common.ExpandHomeDir(logConf.Dir)
-	dir = strings.Replace(dir, "<Date>", time.Now().Format("20060102"), 1)
-	dir = strings.Replace(dir, "<Hostname>", server, 1)
+	dir, dateFound = Replace(dir, "<Date>", time.Now().Format("20060102"), 1)
+	dir, hostnameFound = Replace(dir, "<ServerName>", server, 1)
 
 	// create directory
 	err = os.MkdirAll(dir, 0700)
 
-	return dir, err
+	return
+}
+
+func Replace(s, old, new string, n int) (r string, found bool) {
+	r = strings.Replace(s, old, new, n)
+	return r, r != s
 }
 
 // runLocalRcShell connect to remote shell using local bashrc.
