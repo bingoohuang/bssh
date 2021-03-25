@@ -1,7 +1,3 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
-
 // Package conf is a package used to read configuration file (~/.bssh.toml).
 package conf
 
@@ -171,6 +167,8 @@ type ServerConfig struct {
 	// Server Alive
 	ServerAliveCountMax      int `toml:"alive_max"`
 	ServerAliveCountInterval int `toml:"alive_interval"`
+
+	InitialCmd string `toml:"initial_cmd"`
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
@@ -295,6 +293,10 @@ tmpl = "192.168.2.3:22 aaa/11111"
 
 [server.demo4]
 tmpl = "192.168.2.(7 12) app/na proxy=demoJumper"
+
+[server.demo5]
+tmpl = "192.168.2.3:22 aaa/11111"
+initial_cmd = "{CtrlG}信云信书\n\n{CtrlR}10.66.55.44\n\n{CtrlA}oper\n\n\n"
 `
 
 func checkConfPath(confPath string) {

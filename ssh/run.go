@@ -1,7 +1,3 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
-
 package ssh
 
 import (
@@ -14,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/gou/pbe"
-	sshlib "github.com/blacknon/go-sshlib"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"

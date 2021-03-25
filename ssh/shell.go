@@ -1,7 +1,3 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
-
 package ssh
 
 import (
@@ -18,7 +14,7 @@ import (
 	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/bssh/common"
-	sshlib "github.com/blacknon/go-sshlib"
+	"github.com/bingoohuang/bssh/sshlib"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -109,7 +105,8 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			err = connect.Shell(session)
+			//data := ConvertKeys("{CtrlG}信步云信手书\n\n{CtrlR}10.64.65.4\n\n{CtrlA}msspoper\n\n\n")
+			err = connect.ShellInitial(session, []byte(config.InitialCmd))
 		}
 	}
 

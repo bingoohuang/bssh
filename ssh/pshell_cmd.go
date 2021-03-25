@@ -1,7 +1,3 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
-
 package ssh
 
 import (
@@ -20,7 +16,7 @@ import (
 	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/bssh/output"
-	sshlib "github.com/blacknon/go-sshlib"
+	"github.com/bingoohuang/bssh/sshlib"
 	"golang.org/x/crypto/ssh"
 )
 

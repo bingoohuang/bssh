@@ -4,8 +4,11 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/ScaleFT/sshkeys v0.0.0-20200327173127-6142f742bca5
+	github.com/ThalesIgnite/crypto11 v1.2.4
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
+	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
 	github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221
 	github.com/blacknon/go-sshlib v0.1.3
@@ -17,6 +20,7 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351
 	github.com/mattn/go-runewidth v0.0.10
 	github.com/mattn/go-shellwords v1.0.11
+	github.com/miekg/pkcs11 v1.0.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsf/termbox-go v0.0.0-20210114135735-d04385b850e8
 	github.com/pkg/sftp v1.12.0
