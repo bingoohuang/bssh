@@ -105,8 +105,7 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			//data := ConvertKeys("{CtrlG}信步云信手书\n\n{CtrlR}10.64.65.4\n\n{CtrlA}msspoper\n\n\n")
-			err = connect.ShellInitial(session, []byte(config.InitialCmd))
+			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd))
 		}
 	}
 
