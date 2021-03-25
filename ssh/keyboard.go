@@ -1,7 +1,6 @@
 package ssh
 
 import (
-	"bytes"
 	"strings"
 )
 
@@ -19,23 +18,25 @@ var KeyText = map[string]rune{
 	"F8": KeyF8, "F9": KeyF9, "F10": KeyF10, "F11": KeyF11, "F12": KeyF12,
 }
 
-func ConvertKeys(s string) []byte {
-	var buf bytes.Buffer
+func ConvertKeys(s string) [][]byte {
+	groups := make([][]byte, 0)
 
-	for {
+	for s != "" {
 		start := strings.Index(s, "{")
 		end := strings.Index(s, "}")
 		if start < 0 || end < 0 || start > end {
-			buf.Write([]byte(s))
+			groups = append(groups, []byte(s))
 			break
 		}
 
-		buf.Write([]byte(s[:start]))
+		if start > 0 {
+			groups = append(groups, []byte(s[:start]))
+		}
 
 		key := strings.TrimSpace(s[start+1 : end])
 		for k, v := range KeyText {
 			if strings.EqualFold(k, key) {
-				buf.Write([]byte(string([]rune{v})))
+				groups = append(groups, []byte(string([]rune{v})))
 				break
 			}
 		}
@@ -43,7 +44,7 @@ func ConvertKeys(s string) []byte {
 		s = s[end+1:]
 	}
 
-	return buf.Bytes()
+	return groups
 }
 
 // Giant list of key constants.  Everything above KeyUnknown matches an actual

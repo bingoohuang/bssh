@@ -17,7 +17,7 @@ import (
 )
 
 // Shell connect login shell over ssh.
-func (c *Connect) ShellInitial(session *ssh.Session, initialInput []byte) (err error) {
+func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
 	state, err := terminal.MakeRaw(fd)
@@ -50,7 +50,11 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput []byte) (err e
 	go c.SendKeepAlive(session)
 
 	if w != nil {
-		w.Write(initialInput)
+		for _, initialCmd := range initialInput {
+			time.Sleep(100 * time.Millisecond)
+			w.Write(initialCmd)
+		}
+
 	}
 
 	err = session.Wait()
