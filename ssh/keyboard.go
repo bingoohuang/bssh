@@ -93,7 +93,7 @@ const (
 	KeyEscape
 	KeyLeftBracket  = '['
 	KeyRightBracket = ']'
-	KeyEnter        = '\r'
+	KeyEnter        = '\n'
 	KeyBackspace    = 127
 	KeyUnknown      = 0xd800 /* UTF-16 surrogate area */ + iota
 	KeyUp
