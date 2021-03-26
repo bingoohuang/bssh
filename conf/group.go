@@ -58,7 +58,6 @@ func (cf *Config) FilterNamesByGroup(group string, names []string) []string {
 	}
 
 	x := make([]string, 0, len(names))
-
 	for _, name := range names {
 		if sc := cf.Server[name]; sc.BelongsToGroup(cf, group) {
 			x = append(x, name)

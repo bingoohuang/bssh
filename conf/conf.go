@@ -337,7 +337,7 @@ func (cf *Config) appendIncludePaths() {
 
 	for _, includePath := range cf.Includes.Path {
 		unixTime := time.Now().Unix()
-		keyString := strings.Join([]string{string(unixTime), includePath}, "_")
+		keyString := strings.Join([]string{strconv.FormatInt(unixTime, 10), includePath}, "_")
 
 		hasher := md5.New() // nolint
 		_, _ = hasher.Write([]byte(keyString))
@@ -574,7 +574,21 @@ func (cf *Config) containsMatch(host string) []string {
 	matches = append(matches, result2...)
 	matches = append(matches, result3...)
 
-	return matches
+	return Unique(matches)
+}
+
+// Unique returns unique items in a slice
+func Unique(slice []string) []string {
+	us := make([]string, 0, len(slice))
+	um := make(map[string]struct{})
+	for _, v := range slice {
+		if _, ok := um[v]; !ok {
+			um[v] = struct{}{}
+			us = append(us, v)
+		}
+	}
+
+	return us
 }
 
 func (cf *Config) globMatch(host string) []string {

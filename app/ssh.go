@@ -139,30 +139,23 @@ func lsshAction(c *cli.Context) error {
 	// set w/W flag
 	if c.Bool("w") {
 		fmt.Println("enable w")
-
 		r.EnableHeader = true
 	}
 
 	if c.Bool("W") {
 		fmt.Println("enable W")
-
 		r.DisableHeader = true
 	}
 
-	err := dealPortForward(c, r)
-
-	if err != nil {
+	if err := dealPortForward(c, r); err != nil {
 		fmt.Printf("Error: %s \n", err)
 	}
 
 	// is not execute
 	r.IsNone = c.Bool("not-execute")
-
 	// Dynamic port forwarding port
 	r.DynamicPortForward = c.String("D")
-
 	r.Start()
-
 	return nil
 }
 
@@ -195,7 +188,6 @@ func parseMultiFlag(c *cli.Context) bool {
 }
 
 func processListFlag(c *cli.Context, names []string, cnf conf.Config) {
-	// Check list flag
 	if !c.Bool("list") {
 		return
 	}
