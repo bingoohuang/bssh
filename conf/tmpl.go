@@ -18,9 +18,9 @@ type tmplConfig struct {
 func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 	for _, tc := range tmplConfigs {
 		for i, t := range tc.t {
-			t.createServerConfig(&tc.c)
-
-			cf.Server[tc.createKey(t.ID, i)] = tc.c
+			sc := tc.c
+			t.createServerConfig(&sc)
+			cf.Server[tc.createKey(t.ID, i)] = sc
 		}
 	}
 }
@@ -37,7 +37,7 @@ func (tc tmplConfig) createKey(tid string, i int) string {
 	return tc.k
 }
 
-func (t Tmpl) createServerConfig(c *ServerConfig) {
+func (t *Tmpl) createServerConfig(c *ServerConfig) {
 	c.Addr = t.Host
 	c.Port = t.Port
 	c.User = t.User
@@ -54,6 +54,21 @@ func (t Tmpl) createServerConfig(c *ServerConfig) {
 	if v := t.Props["note"]; v != "" && c.Note == "" {
 		c.Note = v
 	}
+
+	c.InitialCmd = substituteProps(c.InitialCmd, t.Props)
+	c.Note = substituteProps(c.Note, t.Props)
+}
+
+func substituteProps(s string, props map[string]string) string {
+	if s == "" {
+		return s
+	}
+
+	for k, v := range props {
+		s = strings.ReplaceAll(s, "{"+k+"}", v)
+	}
+
+	return s
 }
 
 // Tmpl represents the structure of remote host information for ssh.
@@ -65,6 +80,10 @@ type Tmpl struct {
 	Password string // empty when using public key
 
 	Props map[string]string
+}
+
+type wrapStr struct {
+	V string
 }
 
 // ParseTmpl parses the tmpl.
@@ -119,6 +138,23 @@ func expandTmpl(host Tmpl) []Tmpl {
 	ids := str.MakeExpand(host.ID).MakePart()
 	maxExpands := mat.MaxInt(hosts.Len(), ports.Len(), users.Len(), passes.Len(), ids.Len())
 
+	propsExpands := make(map[string]str.Part)
+	for k, v := range host.Props {
+		expandV := str.MakeExpand(v)
+		propsExpands[k] = expandV.MakePart()
+		if l := expandV.MaxLen(); maxExpands < l {
+			maxExpands = l
+		}
+	}
+
+	partPropsFn := func(i int) map[string]string {
+		m := make(map[string]string)
+		for k, v := range propsExpands {
+			m[k] = v.Part(i)
+		}
+		return m
+	}
+
 	tmpls := make([]Tmpl, maxExpands)
 
 	for i := 0; i < maxExpands; i++ {
@@ -128,7 +164,7 @@ func expandTmpl(host Tmpl) []Tmpl {
 			Port:     ports.Part(i),
 			User:     users.Part(i),
 			Password: passes.Part(i),
-			Props:    host.Props,
+			Props:    partPropsFn(i),
 		}
 	}
 
