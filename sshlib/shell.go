@@ -54,7 +54,6 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte) (err
 			time.Sleep(100 * time.Millisecond)
 			w.Write(initialCmd)
 		}
-
 	}
 
 	err = session.Wait()

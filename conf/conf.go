@@ -296,7 +296,7 @@ tmpl = "192.168.2.(7 12) app/na proxy=demoJumper"
 
 [server.demo5]
 tmpl = "192.168.2.3:22 aaa/11111"
-initial_cmd = "{CtrlG}信云信书\n\n{CtrlR}10.66.55.44\n\n{CtrlA}oper\n\n\n"
+initial_cmd = "{CtrlG}信云信书{2N}{CtrlR}10.66.55.44{2N}{CtrlA}oper{3N}"
 `
 
 func checkConfPath(confPath string) {

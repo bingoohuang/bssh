@@ -1,6 +1,8 @@
 package ssh
 
 import (
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -10,13 +12,15 @@ var KeyText = map[string]rune{
 	"CtrlM": KeyCtrlM, "CtrlN": KeyCtrlN, "CtrlO": KeyCtrlO, "CtrlP": KeyCtrlP, "CtrlQ": KeyCtrlQ, "CtrlR": KeyCtrlR,
 	"CtrlS": KeyCtrlS, "CtrlT": KeyCtrlT, "CtrlU": KeyCtrlU, "CtrlV": KeyCtrlV, "CtrlW": KeyCtrlW, "CtrlX": KeyCtrlX,
 	"CtrlY": KeyCtrlY, "CtrlZ": KeyCtrlZ, "Escape": KeyEscape, "LeftBracket": KeyLeftBracket,
-	"RightBracket": KeyRightBracket, "Enter": KeyEnter, "Backspace": KeyBackspace,
+	"RightBracket": KeyRightBracket, "Enter": KeyEnter, "N": KeyEnter, "Backspace": KeyBackspace,
 	"Unknown": KeyUnknown, "Up": KeyUp, "Down": KeyDown, "Left": KeyLeft, "Right": KeyRight,
 	"Home": KeyHome, "End": KeyEnd, "PasteStart": KeyPasteStart, "PasteEnd": KeyPasteEnd, "Insert": KeyInsert,
-	"Delete": KeyDelete, "PgUp": KeyPgUp, "PgDn": KeyPgDn, "Pause": KeyPause,
+	"Del": KeyDelete, "PgUp": KeyPgUp, "PgDn": KeyPgDn, "Pause": KeyPause,
 	"F1": KeyF1, "F2": KeyF2, "F3": KeyF3, "F4": KeyF4, "F5": KeyF5, "F6": KeyF6, "F7": KeyF7,
 	"F8": KeyF8, "F9": KeyF9, "F10": KeyF10, "F11": KeyF11, "F12": KeyF12,
 }
+
+var numReg = regexp.MustCompile(`^\d+`)
 
 func ConvertKeys(s string) [][]byte {
 	groups := make([][]byte, 0)
@@ -34,9 +38,17 @@ func ConvertKeys(s string) [][]byte {
 		}
 
 		key := strings.TrimSpace(s[start+1 : end])
+		num := 1
+		if numStr := numReg.FindString(key); numStr != "" {
+			num, _ = strconv.Atoi(numStr)
+			key = key[len(numStr):]
+		}
 		for k, v := range KeyText {
 			if strings.EqualFold(k, key) {
-				groups = append(groups, []byte(string([]rune{v})))
+				vbytes := []byte(string([]rune{v}))
+				for i := 0; i < num; i++ {
+					groups = append(groups, vbytes)
+				}
 				break
 			}
 		}
