@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	_ "embed"
+
 	"github.com/jedib0t/go-pretty/table"
 
 	"github.com/bingoohuang/gou/str"
@@ -247,57 +249,8 @@ func ReadConf(confPath string) (config Config) {
 	return config
 }
 
-const initBsshToml = `
-
-hosts = [
-"user:pass@192.168.1.1:8022 note=host8022",
-]
-
-[log]
-enable = true
-timestamp = true
-dirpath = "~/.bssh.log"
-
-[extra]
-Passphrase = "6425B5BD-4C88-4C5D-AF75-E22E357821BC"
-DisableGrouping = true
-DisableAutoEncryptPwd = true
-
-[server.example1]
-addr = "192.168.100.101"
-port = "22"
-user = "test"
-pass = "Password"
-note = "Password Auth Server"
-
-#
-[server.example2]
-addr = "192.168.100.102"
-port = "22"
-user = "test"
-key  = "/tmp/key.pem"
-note = "Key Auth Server"
-
-[server.demo1]
-tmpl = "192.168.1.2:8022 root/123456"
-note = "demo1"
-
-[server.demo2]
-tmpl="192.168.1.4 root/xxxx note=demo2"
-
-[server.demo3]
-tmpl = "192.168.1.(21-23 30 33):8022 app/xxx id=(21-23 30 33) group=demo3"
-
-[server.demoJumper]
-tmpl = "192.168.2.3:22 aaa/11111"
-
-[server.demo4]
-tmpl = "192.168.2.(7 12) app/na proxy=demoJumper"
-
-[server.demo5]
-tmpl = "192.168.2.3:22 aaa/11111"
-initial_cmd = "{CtrlG}信云信书{2N}{CtrlR}10.66.55.44{2N}{CtrlA}oper{3N}"
-`
+//go:embed conf.toml
+var initBsshToml []byte
 
 func checkConfPath(confPath string) {
 	if common.IsExist(confPath) {
@@ -308,7 +261,7 @@ func checkConfPath(confPath string) {
 	fmt.Println("or directly run `bssh -H user:pass@192.168.1.30:8022`")
 
 	_ = os.MkdirAll(filepath.Dir(confPath), 0755)
-	_ = ioutil.WriteFile(confPath, []byte(initBsshToml), 0600)
+	_ = ioutil.WriteFile(confPath, initBsshToml, 0600)
 
 	os.Exit(0)
 }
