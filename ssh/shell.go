@@ -3,6 +3,7 @@ package ssh
 import (
 	"errors"
 	"fmt"
+	"github.com/bingoohuang/gossh/gossh"
 	"log"
 	"os"
 	"path/filepath"
@@ -105,7 +106,7 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd))
+			err = connect.ShellInitial(session, gossh.ConvertKeys(config.InitialCmd))
 		}
 	}
 
