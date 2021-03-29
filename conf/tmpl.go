@@ -82,10 +82,6 @@ type Tmpl struct {
 	Props map[string]string
 }
 
-type wrapStr struct {
-	V string
-}
-
 // ParseTmpl parses the tmpl.
 func ParseTmpl(tmpl string) []Tmpl {
 	hosts := make([]Tmpl, 0)
