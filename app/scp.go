@@ -76,8 +76,9 @@ func lscpAction(c *cli.Context) error {
 	common.CheckHelpFlag(c)
 
 	// check count args
-	args := c.Args()
-	if len(args) < 2 { // nolint:gomnd
+	args, argOptions := conf.ParseMoreOptions(c.Args())
+	nargs := len(args)
+	if nargs < 2 { // nolint:gomnd
 		_, _ = fmt.Fprintln(os.Stderr, "Too few arguments.")
 		_ = cli.ShowAppHelp(c)
 
@@ -85,14 +86,14 @@ func lscpAction(c *cli.Context) error {
 	}
 
 	// Set args path
-	fromArgs, toArg := args[:c.NArg()-1], args[c.NArg()-1]
+	fromArgs, toArg := args[:nargs-1], args[nargs-1]
 	isFromInRemote, isFromInLocal := parseFromLocation(fromArgs)
 
 	isToRemote, _ := check.ParseScpPath(toArg)
 	confpath := c.String("cnf")
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()
-	hosts, searchNames := data.ExpandHosts(c)
+	hosts, searchNames := data.ExpandHosts(c, &argOptions)
 	if searchNames != nil {
 		names = searchNames
 	}

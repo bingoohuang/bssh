@@ -118,7 +118,7 @@ func lsshAction(c *cli.Context) error {
 	data := conf.ReadConf(confpath)
 	isMulti := parseMultiFlag(c)
 	names := data.GetNameSortedList()
-	hosts, searchNames := data.ExpandHosts(c)
+	hosts, searchNames := data.ExpandHosts(c, nil)
 	if searchNames != nil {
 		names = searchNames
 	}

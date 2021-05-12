@@ -69,7 +69,7 @@ func lsftpAction(c *cli.Context) error {
 
 	data := conf.ReadConf(confpath)
 	names := data.GetNameSortedList()
-	hosts, searchNames := data.ExpandHosts(c)
+	hosts, searchNames := data.ExpandHosts(c, nil)
 	if searchNames != nil {
 		names = searchNames
 	}
