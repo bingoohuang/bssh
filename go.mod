@@ -14,6 +14,9 @@ require (
 	github.com/blacknon/go-sshlib v0.1.3
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.5
+	github.com/chzyer/logex v1.1.10 // indirect
+	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
+	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/juju/ratelimit v1.0.1
