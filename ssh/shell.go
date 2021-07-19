@@ -3,7 +3,12 @@ package ssh
 import (
 	"errors"
 	"fmt"
+	"github.com/bingoohuang/filestash"
+	filestashcommon "github.com/bingoohuang/filestash/server/common"
+	"github.com/bingoohuang/filestash/server/middleware"
+	"github.com/bingoohuang/filestash/server/model/backend"
 	"github.com/bingoohuang/gossh/gossh"
+	"github.com/pkg/sftp"
 	"log"
 	"os"
 	"path/filepath"
@@ -53,6 +58,12 @@ func (r *Run) shell() (err error) {
 	connect, err := r.CreateSSHConnect(server)
 	if err != nil {
 		return err
+	}
+
+	if config.WebPort >= 0 {
+		if err := InitFileStash(config.WebPort, connect); err != nil {
+			return err
+		}
 	}
 
 	// Create session
@@ -111,6 +122,25 @@ func (r *Run) shell() (err error) {
 	}
 
 	return err
+}
+
+func InitFileStash(port int, connect *sshlib.Connect) error {
+	ftp, err := sftp.NewClient(connect.Client)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "sftp.NewClient create client error: %v\n", err)
+		return err
+	}
+
+	backend.SetSftpClient(&backend.Sftp{SSHClient: nil, SFTPClient: ftp})
+	middleware.SftpConfig{}.SetSession()
+
+	if port == 0 {
+		port = 8333
+	}
+
+	app := filestashcommon.App{}
+	filestash.AppConfig{Port: port}.Init(&app)
+	return nil
 }
 
 func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig, isDirectServer bool) {

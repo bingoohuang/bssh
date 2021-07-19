@@ -171,6 +171,7 @@ type ServerConfig struct {
 	ServerAliveCountInterval int `toml:"alive_interval"`
 
 	InitialCmd string `toml:"initial_cmd"`
+	WebPort    int    `toml:"web_port"`
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
