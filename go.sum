@@ -47,8 +47,8 @@ github.com/averagesecurityguy/random v0.0.0-20180326012618-37cce341d2af/go.mod h
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
-github.com/bingoohuang/filestash v0.2.2-0.20210719090141-1029ed7a4afc h1:YYevj6jht5nFEl5qvEAXR/tf0uS/1UYBlxISnyHthVA=
-github.com/bingoohuang/filestash v0.2.2-0.20210719090141-1029ed7a4afc/go.mod h1:J7CCpST7tUjNT6yxdL+mnXYcrLI76eLxitAWrIf+iAY=
+github.com/bingoohuang/filestash v0.2.2-0.20210719101939-d43dfdf3acff h1:ZPuh+ZgOfmwkpdnGDbk3pHAojtLSMoYZ7fAyBiq/Gec=
+github.com/bingoohuang/filestash v0.2.2-0.20210719101939-d43dfdf3acff/go.mod h1:GAaXHpg/zZWskj1JoRaMB99aepkFq0zymY4/T/tFRws=
 github.com/bingoohuang/gg v0.0.0-20210714022056-758998dde3b1 h1:CFtcxCT3KI/s0Z0uUKwcjSAcSEw0DITHoUpQT3kmRQc=
 github.com/bingoohuang/gg v0.0.0-20210714022056-758998dde3b1/go.mod h1:+gp+2GzJgRJy2kCLuryLM///MBlho+Fxg0j/ILrXrOc=
 github.com/bingoohuang/gonet v0.0.0-20190716021716-fd516efe8b31/go.mod h1:lSe5gMXAiQESg/xTshM6sByKvDkMGdDffZSXt0d64JI=
