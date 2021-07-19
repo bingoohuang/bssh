@@ -20,7 +20,7 @@ default: proxy
 
 install: proxy
 	packr2
-	go install -ldflags="-s -w" ./...
+	go install --tags "fts5" -trimpath -ldflags="-s -w" ./...
 	ls -lh ~/go/bin/$(APPNAME)
 	upx ~/go/bin/$(APPNAME)
 	ls -lh ~/go/bin/$(APPNAME)
