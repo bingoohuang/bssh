@@ -1,13 +1,19 @@
 package ssh
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"github.com/gorilla/mux"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/linuxdash"
 
 	"github.com/bingoohuang/filestash"
 	filestashcommon "github.com/bingoohuang/filestash/server/common"
@@ -62,7 +68,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	if config.WebPort >= 0 {
-		if err := InitFileStash(config.WebPort, connect); err != nil {
+		if err := InitFileStash(config.Silent, config.WebPort, connect); err != nil {
 			return err
 		}
 	}
@@ -125,10 +131,54 @@ func (r *Run) shell() (err error) {
 	return err
 }
 
-func InitFileStash(port int, connect *sshlib.Connect) error {
+func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
+	session, err := connect.CreateSession()
+	if err != nil {
+		return nil, err
+	}
+
+	defer session.Close()
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	session.Stdout, session.Stderr = &stdoutBuf, &stderrBuf
+	if err := session.Run(cmd); err != nil {
+		return nil, err
+	}
+
+	if stderr := stderrBuf.String(); stderr != "" {
+		//log.Printf("Exec cmd %s error: %s", cmd, stderr)
+	}
+
+	return stdoutBuf.Bytes(), nil
+}
+
+func SftpUpload(client *sftp.Client, remote string, data []byte) error {
+	// create destination file
+	dstFile, err := client.Create(remote)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	// copy source file to destination file
+	if _, err := io.Copy(dstFile, bytes.NewReader(data)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func InitFileStash(silent bool, port int, connect *sshlib.Connect) error {
 	ftp, err := sftp.NewClient(connect.Client)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "sftp.NewClient create client error: %v\n", err)
+		return err
+	}
+
+	if err := SftpUpload(ftp, "/tmp/ping_hosts", linuxdash.PingHosts); err != nil {
+		return err
+	}
+	if err := SftpUpload(ftp, "/tmp/linux_json_api.sh", []byte(linuxdash.LinuxJsonApiSh)); err != nil {
 		return err
 	}
 
@@ -140,7 +190,24 @@ func InitFileStash(port int, connect *sshlib.Connect) error {
 	}
 
 	app := filestashcommon.App{}
-	filestash.AppConfig{Port: port}.Init(&app)
+	r := mux.NewRouter()
+	config := filestash.AppConfig{Port: port, R: r}
+	dashStatic := http.FileServer(http.FS(linuxdash.DashStatic))
+	filestash.GET(r, "/linuxdash", http.StripPrefix("/linuxdash", dashStatic).ServeHTTP)
+	filestash.GET(r, "/fonts-googleapis-com.css", dashStatic.ServeHTTP)
+	filestash.GET(r, "/linuxDash.min.css", dashStatic.ServeHTTP)
+	filestash.GET(r, "/linuxDash.min.js", dashStatic.ServeHTTP)
+	filestash.GET(r, "/server/", linuxdash.MakeDashServe(func(module string) ([]byte, error) {
+		return execCmd(connect, "bash /tmp/linux_json_api.sh "+module)
+	}))
+	result := config.Init(&app)
+	if !silent {
+		addr := fmt.Sprintf("http://127.0.0.1:%d", result.Port)
+		go filestash.OpenBrowser(addr)
+		go filestash.OpenBrowser(addr + "/linuxdash")
+	}
+	config.Start()
+
 	return nil
 }
 
