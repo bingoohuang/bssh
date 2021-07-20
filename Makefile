@@ -19,7 +19,6 @@ default: proxy
 	go fmt ./...&&revive .&&goimports -w .&&golangci-lint run --enable-all
 
 install: proxy
-	packr2
 	go install --tags "fts5" -trimpath -ldflags="-s -w" ./...
 	ls -lh ~/go/bin/$(APPNAME)
 	upx ~/go/bin/$(APPNAME)

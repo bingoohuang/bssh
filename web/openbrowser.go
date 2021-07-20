@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"github.com/chzyer/readline"
 	gourl "net/url"
 	"os"
 	"os/exec"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/chzyer/readline"
 )
 
 // IsTerminal returns whether the UI is known to be tied to an

@@ -3,17 +3,18 @@ package ssh
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/bingoohuang/filestash"
 	filestashcommon "github.com/bingoohuang/filestash/server/common"
 	"github.com/bingoohuang/filestash/server/middleware"
 	"github.com/bingoohuang/filestash/server/model/backend"
 	"github.com/bingoohuang/gossh/gossh"
 	"github.com/pkg/sftp"
-	"log"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/bingoohuang/bssh/conf"
 
