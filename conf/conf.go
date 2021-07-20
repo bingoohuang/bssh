@@ -172,7 +172,6 @@ type ServerConfig struct {
 
 	InitialCmd string `toml:"initial_cmd"`
 	WebPort    int    `toml:"web_port"`
-	Silent     bool   `toml:"silent"`
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.

@@ -68,7 +68,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	if config.WebPort >= 0 {
-		if err := InitFileStash(config.Silent, config.WebPort, connect); err != nil {
+		if err := r.InitFileStash(config.WebPort, connect); err != nil {
 			return err
 		}
 	}
@@ -124,7 +124,7 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			err = connect.ShellInitial(session, gossh.ConvertKeys(config.InitialCmd))
+			err = connect.ShellInitial(session, gossh.ConvertKeys(config.InitialCmd), r.webPort)
 		}
 	}
 
@@ -168,7 +168,7 @@ func SftpUpload(client *sftp.Client, remote string, data []byte) error {
 	return nil
 }
 
-func InitFileStash(silent bool, port int, connect *sshlib.Connect) error {
+func (r *Run) InitFileStash(port int, connect *sshlib.Connect) error {
 	ftp, err := sftp.NewClient(connect.Client)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "sftp.NewClient create client error: %v\n", err)
@@ -190,23 +190,19 @@ func InitFileStash(silent bool, port int, connect *sshlib.Connect) error {
 	}
 
 	app := filestashcommon.App{}
-	r := mux.NewRouter()
-	config := filestash.AppConfig{Port: port, R: r}
+	rr := mux.NewRouter()
+	config := filestash.AppConfig{Port: port, R: rr}
 	dashStatic := http.FileServer(http.FS(linuxdash.DashStatic))
-	filestash.GET(r, "/linuxdash", http.StripPrefix("/linuxdash", dashStatic).ServeHTTP)
-	filestash.GET(r, "/fonts-googleapis-com.css", dashStatic.ServeHTTP)
-	filestash.GET(r, "/linuxDash.min.css", dashStatic.ServeHTTP)
-	filestash.GET(r, "/linuxDash.min.js", dashStatic.ServeHTTP)
-	filestash.GET(r, "/server/", linuxdash.MakeDashServe(func(module string) ([]byte, error) {
+	filestash.GET(rr, "/linuxdash", http.StripPrefix("/linuxdash", dashStatic).ServeHTTP)
+	filestash.GET(rr, "/fonts-googleapis-com.css", dashStatic.ServeHTTP)
+	filestash.GET(rr, "/linuxDash.min.css", dashStatic.ServeHTTP)
+	filestash.GET(rr, "/linuxDash.min.js", dashStatic.ServeHTTP)
+	filestash.GET(rr, "/server/", linuxdash.MakeDashServe(func(module string) ([]byte, error) {
 		return execCmd(connect, "bash /tmp/linux_json_api.sh "+module)
 	}))
 	result := config.Init(&app)
-	if !silent {
-		addr := fmt.Sprintf("http://127.0.0.1:%d", result.Port)
-		go filestash.OpenBrowser(addr)
-		go filestash.OpenBrowser(addr + "/linuxdash")
-	}
 	config.Start()
+	r.webPort = result.Port
 
 	return nil
 }

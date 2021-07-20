@@ -7,6 +7,7 @@ package sshlib
 import (
 	"bytes"
 	"fmt"
+	"github.com/bingoohuang/filestash"
 	"io"
 	"log"
 	"os"
@@ -17,7 +18,7 @@ import (
 )
 
 // Shell connect login shell over ssh.
-func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte) (err error) {
+func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
 	state, err := terminal.MakeRaw(fd)
@@ -35,7 +36,7 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte) (err
 	}
 
 	// setup
-	err = c.setupShell(session)
+	err = c.setupShell(session, webPort)
 	if err != nil {
 		return
 	}
@@ -75,7 +76,7 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 	defer terminal.Restore(fd, state)
 
 	// setup
-	err = c.setupShell(session)
+	err = c.setupShell(session, 0)
 	if err != nil {
 		return
 	}
@@ -109,7 +110,7 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	defer terminal.Restore(fd, state)
 
 	// setup
-	err = c.setupShell(session)
+	err = c.setupShell(session, 0)
 	if err != nil {
 		return
 	}
@@ -131,11 +132,15 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	return
 }
 
-func (c *Connect) setupShell(session *ssh.Session) (err error) {
+func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
 	// set FD
 	session.Stdin = os.Stdin
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
+
+	if webPort > 0 {
+		go c.listenBingoo(session, webPort)
+	}
 
 	// Logging
 	if c.logging {
@@ -167,6 +172,34 @@ func (c *Connect) setupShell(session *ssh.Session) (err error) {
 	}
 
 	return
+}
+
+func (c *Connect) listenBingoo(session *ssh.Session, webPort int) {
+	buf := new(bytes.Buffer)
+	session.Stdout = io.MultiWriter(session.Stdout, buf)
+	func() {
+		preLine := []byte{}
+		for {
+			if buf.Len() > 0 {
+				line, err := buf.ReadBytes('\n')
+
+				if err == io.EOF {
+					preLine = append(preLine, line...)
+					continue
+				}
+
+				preLine = append(preLine, line...)
+				if bytes.Contains(preLine, []byte(" bingoo\r\n")) {
+					addr := fmt.Sprintf("http://127.0.0.1:%d", webPort)
+					go filestash.OpenBrowser(addr)
+					go filestash.OpenBrowser(addr + "/linuxdash")
+				}
+				preLine = preLine[:0]
+			} else {
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
 }
 
 // SetLog set up terminal log logging.

@@ -94,6 +94,7 @@ type Run struct {
 
 	decodedPasswordMap map[string]bool
 	confFile           string
+	webPort            int
 }
 
 // NewRun news a Run struct.
