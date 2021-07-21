@@ -175,10 +175,10 @@ func (r *Run) InitFileStash(port int, connect *sshlib.Connect) error {
 		return err
 	}
 
-	if err := SftpUpload(ftp, "/tmp/ping_hosts", linuxdash.PingHosts); err != nil {
+	if err := SftpUpload(ftp, ".linuxdash_ping_hosts", linuxdash.PingHosts); err != nil {
 		return err
 	}
-	if err := SftpUpload(ftp, "/tmp/linux_json_api.sh", []byte(linuxdash.LinuxJsonApiSh)); err != nil {
+	if err := SftpUpload(ftp, ".linuxdash_json_api.sh", []byte(linuxdash.LinuxJsonApiSh)); err != nil {
 		return err
 	}
 
@@ -198,7 +198,7 @@ func (r *Run) InitFileStash(port int, connect *sshlib.Connect) error {
 	filestash.GET(rr, "/linuxDash.min.css", dashStatic.ServeHTTP)
 	filestash.GET(rr, "/linuxDash.min.js", dashStatic.ServeHTTP)
 	filestash.GET(rr, "/server/", linuxdash.MakeDashServe(func(module string) ([]byte, error) {
-		return execCmd(connect, "bash /tmp/linux_json_api.sh "+module)
+		return execCmd(connect, "bash .linuxdash_json_api.sh "+module)
 	}))
 	result := config.Init(&app)
 	config.Start()

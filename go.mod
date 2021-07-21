@@ -12,7 +12,7 @@ require (
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
 	github.com/bingoohuang/gossh v1.0.2-0.20210327012853-fda8e601e987
 	github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221
-	github.com/bingoohuang/linuxdash v0.0.0-20210720081020-5a35e261bd9c
+	github.com/bingoohuang/linuxdash v0.0.0-20210721020511-3b63f74c750c
 	github.com/blacknon/go-sshlib v0.1.3
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.5
