@@ -69,7 +69,7 @@ func (r *Run) shell() (err error) {
 
 	if config.WebPort >= 0 {
 		if err := r.InitFileStash(config.WebPort, connect); err != nil {
-			return err
+			fmt.Fprintf(os.Stderr, "InitFileStash error %s.\n", err.Error())
 		}
 	}
 
