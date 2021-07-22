@@ -16,6 +16,7 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 
 ## Features
 
+* 输入 bingoo 回车，自动打开 filestash 和 linuxdash 界面
 * Config Templating, grouping, passwords PEB encryption and direct last sub-command to reuse last chosen servers.
 * List selection type ssh client.
 * Pure Go.
