@@ -62,8 +62,8 @@ github.com/bingoohuang/gossh v1.0.2-0.20210327012853-fda8e601e987/go.mod h1:P2VP
 github.com/bingoohuang/gou v0.0.0-20200608105644-af3865a1364f/go.mod h1:aDOwtkuv68JHEEsHoWJhqyUODo79t5k/erZCZllNBhc=
 github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221 h1:Lx5ZtRWERyTyM85tmX4N1V85R+rKD3CR6mHs1CAO/8A=
 github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221/go.mod h1:aDOwtkuv68JHEEsHoWJhqyUODo79t5k/erZCZllNBhc=
-github.com/bingoohuang/linuxdash v0.0.0-20210721095417-9859edd3678d h1:xJzvlTeQ4LjmlzI2daFN0jwZAkHsN4DjYbdzyTpLBSo=
-github.com/bingoohuang/linuxdash v0.0.0-20210721095417-9859edd3678d/go.mod h1:+lU1hhUyqvMm5TpCUTlmgPI8+q64rsQ28i8O9aooDoQ=
+github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1 h1:kv3X0wNw1sIR1uB2cRvUaHJAulNB39mPRegl4ysuGrc=
+github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1/go.mod h1:+lU1hhUyqvMm5TpCUTlmgPI8+q64rsQ28i8O9aooDoQ=
 github.com/bingoohuang/strcase v0.0.0-20200312105414-ac2c85cfc85d h1:RkZ/6GrOw5MkrsMk/YKTkcmEF5z1CnjdaKaYCd9FJWQ=
 github.com/bingoohuang/strcase v0.0.0-20200312105414-ac2c85cfc85d/go.mod h1:WYrcjWhT2QgbWZcYzfYqWxaxut2hPFa6if/zYwEEEio=
 github.com/bingoohuang/toml v0.0.0-20200422103751-d93794558fab/go.mod h1:aixwsUzzh8XHIqLUnWUAGLUVYv8HOEhABIXQYx8U1/o=
