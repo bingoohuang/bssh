@@ -196,7 +196,7 @@ func pullFile(stat os.FileInfo, client *Connect, localpath, p string, r *RunSftp
 	defer remotefile.Close()
 
 	// open local file
-	localfile, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE, 0644)
+	localfile, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}

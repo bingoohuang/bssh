@@ -139,7 +139,7 @@ func (r *RunSftp) pushFile(c *Connect, localFile io.Reader, path string, size in
 		return err
 	}
 
-	remoteFile, err := c.Connect.OpenFile(path, os.O_RDWR|os.O_CREATE)
+	remoteFile, err := c.Connect.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC)
 	if err != nil {
 		return err
 	}

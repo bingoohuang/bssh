@@ -215,7 +215,7 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 		return err
 	}
 
-	rf, err := ftp.OpenFile(path, os.O_RDWR|os.O_CREATE)
+	rf, err := ftp.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC)
 	if err != nil {
 		fmt.Fprintf(ow, "ftp.OpenFile error %v\n", err)
 
@@ -446,7 +446,7 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 	defer rf.Close()
 
 	// open local file
-	lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE, 0644)
+	lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Fprintf(ow, "os.OpenFile Error: %v\n", err)
 		return
