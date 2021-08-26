@@ -8,7 +8,7 @@ require (
 	github.com/ThalesIgnite/crypto11 v1.2.4
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
-	github.com/bingoohuang/filestash v0.2.2-0.20210720070429-4806ed46ab4d
+	github.com/bingoohuang/filestash v0.2.2-0.20210826063619-eaa9271da225
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
 	github.com/bingoohuang/gossh v1.0.2-0.20210327012853-fda8e601e987
 	github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221
@@ -34,11 +34,11 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
-	github.com/thoas/go-funk v0.7.0
+	github.com/thoas/go-funk v0.9.0
 	github.com/urfave/cli v1.22.5
 	github.com/vbauerster/mpb v3.4.0+incompatible
-	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 	mvdan.cc/sh v2.6.4+incompatible
 )
 

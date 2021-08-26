@@ -17,7 +17,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-// Shell connect login shell over ssh.
+// ShellInitial connect login shell over ssh.
 func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
@@ -178,7 +178,7 @@ func (c *Connect) listenBingoo(session *ssh.Session, webPort int) {
 	buf := new(bytes.Buffer)
 	session.Stdout = io.MultiWriter(session.Stdout, buf)
 	func() {
-		preLine := []byte{}
+		var preLine []byte
 		for {
 			if buf.Len() > 0 {
 				line, err := buf.ReadBytes('\n')
