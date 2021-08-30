@@ -58,7 +58,7 @@ func Lssh() (app *cli.App) {
 	app.Name = "bssh"
 	app.Usage = "TUI list select and parallel ssh client command."
 	app.Copyright = misc.Copyright
-	app.Version = bssh.AppVersion
+	app.Version = bssh.AppVersion()
 
 	// TDXX(blacknon): オプションの追加
 	//     -f       ... バックグラウンドでの接続(X11接続やport forwardingをバックグラウンドで実行する場合など)。

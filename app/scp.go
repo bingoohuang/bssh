@@ -57,7 +57,7 @@ func Lscp() (app *cli.App) {
 	app.Name = "bssh scp"
 	app.Usage = "TUI list select and parallel scp client command."
 	app.Copyright = misc.Copyright
-	app.Version = bssh.AppVersion
+	app.Version = bssh.AppVersion()
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},

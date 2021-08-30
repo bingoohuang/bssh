@@ -45,7 +45,7 @@ func Lsftp() (app *cli.App) {
 	app.Name = "bssh ftp"
 	app.Usage = "TUI list select and parallel sftp client command."
 	app.Copyright = misc.Copyright
-	app.Version = bssh.AppVersion
+	app.Version = bssh.AppVersion()
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},

@@ -4,6 +4,20 @@ all: default install test
 APPNAME=bssh
 VERSION=v1.0.0
 
+app := $(notdir $(shell pwd))
+goVersion := $(shell go version)
+# echo ${goVersion#go version }
+# strip prefix "go version " from output "go version go1.16.7 darwin/amd64"
+goVersion2 := $(subst go version ,,$(goVersion))
+buildTime := $(shell date '+%Y-%m-%d %H:%M:%S')
+gitCommit := $(shell git rev-list -1 HEAD)
+// https://stackoverflow.com/a/47510909
+pkg := github.com/bingoohuang/bssh
+
+# https://ms2008.github.io/2018/10/08/golang-build-version/
+flags = "-extldflags=-s -w -X '$(pkg).buildTime=$(buildTime)' -X $(pkg).gitCommit=$(gitCommit) -X '$(pkg).goVersion=$(goVersion2)'"
+
+
 gosec:
 	go get github.com/securego/gosec/cmd/gosec
 
@@ -19,7 +33,7 @@ default: proxy
 	go fmt ./...&&revive .&&goimports -w .&&golangci-lint run --enable-all
 
 install: proxy
-	go install --tags "fts5" -trimpath -ldflags="-s -w" ./...
+	go install --tags "fts5" -trimpath -ldflags=${flags} ./...
 	ls -lh ~/go/bin/$(APPNAME)
 	upx ~/go/bin/$(APPNAME)
 	ls -lh ~/go/bin/$(APPNAME)
