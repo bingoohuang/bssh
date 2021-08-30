@@ -11,7 +11,7 @@ goVersion := $(shell go version)
 goVersion2 := $(subst go version ,,$(goVersion))
 buildTime := $(shell date '+%Y-%m-%d %H:%M:%S')
 gitCommit := $(shell git rev-list -1 HEAD)
-// https://stackoverflow.com/a/47510909
+# https://stackoverflow.com/a/47510909
 pkg := github.com/bingoohuang/bssh
 
 # https://ms2008.github.io/2018/10/08/golang-build-version/
