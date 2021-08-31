@@ -5,6 +5,7 @@ import (
 	"crypto/md5" // nolint
 	"encoding/hex"
 	"fmt"
+	"github.com/bingoohuang/gossh/pkg/hostparse"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -172,6 +173,7 @@ type ServerConfig struct {
 
 	InitialCmd string `toml:"initial_cmd"`
 	WebPort    int    `toml:"web_port"`
+	ID         string `toml:"id"`
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
@@ -216,12 +218,15 @@ func ReadConf(confPath string) (config Config) {
 	config.parseConfigServers(config.Server, config.Common)
 
 	for i, server := range config.Hosts {
-		tmpls := ParseTmpl(server)
+		tmpls := hostparse.Parse(server)
 		for j, tmpl := range tmpls {
 			sc := ServerConfig{}
-			tmpl.createServerConfig(&sc)
+			createServerConfigFromHost(tmpl, &sc)
 
-			config.Server[generateKey(len(tmpls), len(config.Hosts), i, j)] = sc
+			if sc.ID == "" {
+				sc.ID = generateKey(len(tmpls), len(config.Hosts), i, j)
+			}
+			config.Server[sc.ID] = sc
 		}
 	}
 
@@ -343,7 +348,7 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 			delete(cf.Server, key)
 
 			tmplConfigs = append(tmplConfigs, tmplConfig{
-				k: key, c: setValue, t: ParseTmpl(setValue.Tmpl)})
+				k: key, c: setValue, t: hostparse.Parse(setValue.Tmpl)})
 		}
 	}
 

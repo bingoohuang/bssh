@@ -10,7 +10,8 @@ goVersion := $(shell go version)
 # strip prefix "go version " from output "go version go1.16.7 darwin/amd64"
 goVersion2 := $(subst go version ,,$(goVersion))
 buildTime := $(shell date '+%Y-%m-%d %H:%M:%S')
-gitCommit := $(shell git rev-list -1 HEAD)
+# https://git-scm.com/docs/git-rev-list#Documentation/git-rev-list.txt-emaIem
+gitCommit := $(shell git rev-list --oneline --format=format:'%h@%aI' --max-count=1 `git rev-parse HEAD` | tail -1)
 # https://stackoverflow.com/a/47510909
 pkg := github.com/bingoohuang/bssh
 

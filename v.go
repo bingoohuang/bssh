@@ -8,7 +8,7 @@ var (
 	gitCommit  = ""
 	buildTime  = ""
 	goVersion  = ""
-	appVersion = "1.2.7"
+	appVersion = "1.2.8"
 )
 
 func AppVersion() string {

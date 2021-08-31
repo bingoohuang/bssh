@@ -19,7 +19,7 @@ import (
 	filestashcommon "github.com/bingoohuang/filestash/server/common"
 	"github.com/bingoohuang/filestash/server/middleware"
 	"github.com/bingoohuang/filestash/server/model/backend"
-	"github.com/bingoohuang/gossh/gossh"
+	"github.com/bingoohuang/gossh/pkg/gossh"
 	"github.com/pkg/sftp"
 
 	"github.com/bingoohuang/bssh/conf"
