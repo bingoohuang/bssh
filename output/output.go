@@ -137,7 +137,7 @@ func (o *Output) Printer(reader io.Reader) {
 }
 
 // ProgressPrinter ...
-func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
+func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) error {
 	// print header
 	oPrompt := ""
 	name := decor.Name(oPrompt)
@@ -181,8 +181,12 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) {
 		if err == io.EOF {
 			bar.SetTotal(size, true)
 			break
+		} else if err != nil {
+			return err
 		}
 	}
+
+	return nil
 }
 
 // OutColorStrings ...

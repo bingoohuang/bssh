@@ -83,7 +83,9 @@ func (r *RunSftp) putAction(c *cli.Context) error {
 			data := pathSet.PathSlice
 
 			for _, path := range data {
-				_ = r.pushPath(client, target, base, path)
+				if err := r.pushPath(client, target, base, path); err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				}
 			}
 		}()
 	}
@@ -121,8 +123,7 @@ func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err erro
 
 		defer localFile.Close()
 
-		err = r.pushFile(client, localFile, rpath, fInfo.Size())
-		if err != nil {
+		if err = r.pushFile(client, localFile, rpath, fInfo.Size()); err != nil {
 			return err
 		}
 	}
@@ -149,7 +150,6 @@ func (r *RunSftp) pushFile(c *Connect, localFile io.Reader, path string, size in
 	rd := io.TeeReader(common.CreateRateLimit(localFile), remoteFile)
 
 	r.ProgressWG.Add(1)
-	c.Output.ProgressPrinter(size, rd, path)
-
+	return c.Output.ProgressPrinter(size, rd, path)
 	return nil
 }

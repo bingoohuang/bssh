@@ -228,9 +228,7 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 
 	// copy to data
 	cp.ProgressWG.Add(1)
-	output.ProgressPrinter(size, rd, path)
-
-	return err
+	return output.ProgressPrinter(size, rd, path)
 }
 
 func (cp *Scp) viaPush() {
@@ -456,7 +454,9 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 	rd := io.TeeReader(common.CreateRateLimit(rf), lf)
 
 	cp.ProgressWG.Add(1)
-	client.Output.ProgressPrinter(size, rd, p)
+	if err := client.Output.ProgressPrinter(size, rd, p); err != nil {
+		fmt.Fprintf(ow, "Error: %v\n", err)
+	}
 }
 
 // createScpConnects return []*ScpConnect.
