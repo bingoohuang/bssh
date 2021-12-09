@@ -11,6 +11,7 @@ var (
 	appVersion = "1.2.8"
 )
 
+// AppVersion gives the app version string.
 func AppVersion() string {
 	return fmt.Sprintf("\nversion: %s\n", appVersion) +
 		fmt.Sprintf("built:\t%s\n", buildTime) +

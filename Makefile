@@ -31,7 +31,7 @@ proxy:
 
 
 default: proxy
-	go fmt ./...&&revive .&&goimports -w .&&golangci-lint run --enable-all
+	go fmt ./...&&revive .&&goimports -w .&&golangci-lint run
 
 install: proxy
 	go install --tags "fts5" -trimpath -ldflags=${flags} ./...

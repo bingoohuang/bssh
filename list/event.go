@@ -23,7 +23,6 @@ func (l *Info) DeleteRune() {
 }
 
 // keyEvent waits for keyboard events.
-// nolint:gocyclo,funlen,gocognit
 func (l *Info) keyEvent() {
 	l.CursorLine = 0
 	headLine := 2

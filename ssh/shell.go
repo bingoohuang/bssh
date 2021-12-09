@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/bingoohuang/linuxdash"
 

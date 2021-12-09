@@ -5,7 +5,6 @@ import (
 	"crypto/md5" // nolint
 	"encoding/hex"
 	"fmt"
-	"github.com/bingoohuang/gossh/pkg/hostparse"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/gossh/pkg/hostparse"
 
 	_ "embed"
 

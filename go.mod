@@ -10,10 +10,10 @@ require (
 	github.com/ThalesIgnite/crypto11 v1.2.4
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
-	github.com/bingoohuang/filestash v0.2.2-0.20210826063619-eaa9271da225
+	github.com/bingoohuang/filestash v0.0.0-20210826063619-eaa9271da225
 	github.com/bingoohuang/gg v0.0.0-20210826063140-db73de8c805d
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
-	github.com/bingoohuang/gossh v1.0.2-0.20210831023826-f63093c6f022
+	github.com/bingoohuang/gossh v0.0.0-20211130072514-44641d22a840
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/go-sshlib v0.1.3

@@ -357,7 +357,6 @@ func (cp *Scp) pull() {
 }
 
 // pullPath pulls the file or directory from the host to local.
-// nolint:funlen
 func (cp *Scp) pullPath(client *Connect) {
 	ftp := client.Connect
 

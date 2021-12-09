@@ -7,11 +7,13 @@ package sshlib
 import (
 	"bytes"
 	"fmt"
-	"github.com/bingoohuang/filestash"
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"time"
+
+	"github.com/bingoohuang/filestash"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -175,21 +177,25 @@ func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
 }
 
 func (c *Connect) listenBingoo(session *ssh.Session, webPort int) {
+	if webPort <= 0 {
+		return
+	}
+
 	buf := new(bytes.Buffer)
 	session.Stdout = io.MultiWriter(session.Stdout, buf)
+
+	bingoo := regexp.MustCompile(`[^\s\w] bingoo\r\n`)
 	func() {
 		var preLine []byte
 		for {
 			if buf.Len() > 0 {
 				line, err := buf.ReadBytes('\n')
-
+				preLine = append(preLine, line...)
 				if err == io.EOF {
-					preLine = append(preLine, line...)
 					continue
 				}
 
-				preLine = append(preLine, line...)
-				if webPort > 0 && bytes.Contains(preLine, []byte(" bingoo\r\n")) {
+				if bingoo.Match(preLine) {
 					addr := fmt.Sprintf("http://127.0.0.1:%d", webPort)
 					go filestash.OpenBrowser(addr)
 					go filestash.OpenBrowser(addr + "/linuxdash")

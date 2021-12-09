@@ -350,8 +350,8 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 }
 
 var (
-	optionReg = regexp.MustCompile("^-")         // nolint:gochecknoglobals
-	parseReg  = regexp.MustCompile("^-[^-]{2,}") // nolint:gochecknoglobals
+	optionReg = regexp.MustCompile("^-")
+	parseReg  = regexp.MustCompile("^-[^-]{2,}")
 )
 
 // ParseArgs return os.Args parse short options (ex.) [-la] => [-l,-a] )

@@ -2,8 +2,9 @@ package conf
 
 import (
 	"fmt"
-	"github.com/bingoohuang/gossh/pkg/hostparse"
 	"strings"
+
+	"github.com/bingoohuang/gossh/pkg/hostparse"
 
 	"github.com/bingoohuang/gou/str"
 )
