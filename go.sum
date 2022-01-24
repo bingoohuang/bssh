@@ -124,8 +124,8 @@ github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867/go.mod h1:6rpAU/
 github.com/bingoohuang/gor v0.0.0-20200321095356-94cf6290c6ea/go.mod h1:ahEOivpxL+rGjwq6hk2H8aQEMh/Uc6r1N3ohugldIww=
 github.com/bingoohuang/gor v0.0.0-20200628053500-ec6cb95c0e1b h1:V8FCwcSdI/IxeiS3cAH94x9080H1r58PP7ltUnohFPk=
 github.com/bingoohuang/gor v0.0.0-20200628053500-ec6cb95c0e1b/go.mod h1:6kZE8zuEyuhWpwUBjVbUw9lj8Ufuf1AIBqHB0/uUWL0=
-github.com/bingoohuang/gossh v0.0.0-20220124024046-40e25ed6f93a h1:Dr7qWmueFBhVqlP4BITkRqW2oeLY2ADgl+NPvY151mE=
-github.com/bingoohuang/gossh v0.0.0-20220124024046-40e25ed6f93a/go.mod h1:PfrrcMIpSWxMMasPJpV2DAVk/frLLT7mraVoBbrOYVE=
+github.com/bingoohuang/gossh v0.0.0-20220124033940-4121c6eeb316 h1:3sdUUAHcPr2JCNMIskkb8jmRa8x41beU9rbZzLdPkJU=
+github.com/bingoohuang/gossh v0.0.0-20220124033940-4121c6eeb316/go.mod h1:PfrrcMIpSWxMMasPJpV2DAVk/frLLT7mraVoBbrOYVE=
 github.com/bingoohuang/gou v0.0.0-20200427104110-9b847a792b6b/go.mod h1:aDOwtkuv68JHEEsHoWJhqyUODo79t5k/erZCZllNBhc=
 github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df h1:FKeJig2sfsHRBfKdOLJYQDMdV3wiM2YUxhya3u9H9Qg=
 github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df/go.mod h1:FBqLIBHSjvb+0sAy1uo9bZkSaqmRRXKSoAIdTWlDLoI=

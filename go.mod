@@ -13,7 +13,7 @@ require (
 	github.com/bingoohuang/filestash v0.0.0-20210826063619-eaa9271da225
 	github.com/bingoohuang/gg v0.0.0-20211227102539-8a437d3525d1
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
-	github.com/bingoohuang/gossh v0.0.0-20220124024046-40e25ed6f93a
+	github.com/bingoohuang/gossh v0.0.0-20220124033940-4121c6eeb316
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/go-sshlib v0.1.3
