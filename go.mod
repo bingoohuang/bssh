@@ -11,9 +11,9 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/bingoohuang/filestash v0.0.0-20210826063619-eaa9271da225
-	github.com/bingoohuang/gg v0.0.0-20210826063140-db73de8c805d
+	github.com/bingoohuang/gg v0.0.0-20211227102539-8a437d3525d1
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
-	github.com/bingoohuang/gossh v0.0.0-20211130072514-44641d22a840
+	github.com/bingoohuang/gossh v0.0.0-20220124024046-40e25ed6f93a
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/go-sshlib v0.1.3
@@ -30,14 +30,15 @@ require (
 	github.com/miekg/pkcs11 v1.0.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsf/termbox-go v1.1.1
-	github.com/pkg/sftp v1.13.2
+	github.com/pkg/sftp v1.13.4
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.8.1
+	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	github.com/thoas/go-funk v0.9.0
 	github.com/urfave/cli v1.22.5
 	github.com/vbauerster/mpb v3.4.0+incompatible
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
-	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
+	go.mongodb.org/mongo-driver v1.5.1 // indirect
+	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 	mvdan.cc/sh v2.6.4+incompatible
 )
