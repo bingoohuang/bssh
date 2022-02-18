@@ -48,13 +48,21 @@ func ParseScpPath(arg string) (isRemote bool, path string) {
 	case "local", "l": // local
 		return false, argArray[1]
 	case "remote", "r": // remote
-		return true, argArray[1]
+		return true, replaceUserHome(argArray[1])
 	default: // false
 		_, _ = fmt.Fprintln(os.Stderr, "The format of the specified argument is incorrect.")
 		os.Exit(1)
 	}
 
 	return false, ""
+}
+
+func replaceUserHome(s string) string {
+	if strings.HasPrefix(s, "~") {
+		return "." + s[1:]
+	}
+
+	return s
 }
 
 // EscapePath escapes characters (`\`, `;`, ` `).
