@@ -175,6 +175,8 @@ type ServerConfig struct {
 	InitialCmd string `toml:"initial_cmd"`
 	WebPort    int    `toml:"web_port"`
 	ID         string `toml:"id"`
+
+	Raw string // to register the raw template config, like `user:pass@host:port`
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
@@ -348,8 +350,8 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 		if value.Tmpl != "" {
 			delete(cf.Server, key)
 
-			tmplConfigs = append(tmplConfigs, tmplConfig{
-				k: key, c: setValue, t: hostparse.Parse(setValue.Tmpl)})
+			tmplHosts := hostparse.Parse(setValue.Tmpl)
+			tmplConfigs = append(tmplConfigs, tmplConfig{k: key, c: setValue, t: tmplHosts})
 		}
 	}
 
@@ -613,7 +615,7 @@ func (cf *Config) IsDisableAutoEncryptPwd() bool {
 }
 
 func (cf *Config) loadTempHosts(confPath string) {
-	tempHostsFile := confPath + ".temphosts"
+	tempHostsFile := strings.TrimSuffix(confPath, ".toml") + ".hosts"
 	cf.tempHostsFile = tempHostsFile
 	cf.tempHosts = make(map[string]bool)
 
@@ -625,7 +627,9 @@ func (cf *Config) loadTempHosts(confPath string) {
 	for _, line := range strings.Split(string(file), "\n") {
 		hostLine := strings.TrimSpace(line)
 		if hostLine != "" && !strings.HasPrefix(hostLine, "#") {
-			cf.tempHosts[hostLine] = true
+			if s, _ := pbe.Ebp(hostLine); s != "" {
+				cf.tempHosts[hostLine] = true
+			}
 		}
 	}
 
@@ -642,7 +646,8 @@ func (cf *Config) WriteTempHosts(tempHost string) {
 
 	cf.tempHosts[tempHost] = true
 
-	if err := AppendFile(cf.tempHostsFile, tempHost); err != nil {
+	s, _ := pbe.Pbe(tempHost)
+	if err := AppendFile(cf.tempHostsFile, s); err != nil {
 		fmt.Println(err)
 	}
 }

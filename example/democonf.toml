@@ -19,7 +19,7 @@ note = "机房MySQL"
 # 腾讯云环境 -- start ---
 [server.qqyun]
 group = ["qqyun"]
-tmpl = "123.206.185.162:(21061-21063) root/{PBE}H3y5VaKfj-vxSJ5JUHL0R-CBtZTkR2UR"
+tmpl = "12.26.18.62:(21061-21063) root/{PBE}xxx"
 # 腾讯云环境 -- end ---
 
 # openstack 环境 -- start ---

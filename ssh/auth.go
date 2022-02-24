@@ -2,12 +2,14 @@ package ssh
 
 import (
 	"os/exec"
+	"strings"
 
 	"github.com/bingoohuang/bssh/misc"
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/gou/pbe"
+	"github.com/manifoldco/promptui"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -49,12 +51,12 @@ func (r *Run) SetupSSHAgent() {
 }
 
 // registerAuthMapPassword ...
-func (r *Run) registerAuthMapPassword(server, password string) {
+func (r *Run) registerAuthMapPassword(server, password, rawTemplLine string) {
 	if password == "" {
 		return
 	}
 
-	password = r.decodePassword(password)
+	password = r.decodePassword(password, rawTemplLine)
 
 	authKey := AuthKey{AuthKeyPassword, password}
 	if _, ok := r.authMethodMap[authKey]; !ok {
@@ -68,7 +70,24 @@ func (r *Run) registerAuthMapPassword(server, password string) {
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 }
 
-func (r *Run) decodePassword(password string) string {
+func (r *Run) decodePassword(password string, rawTemplLine string) string {
+	if strings.EqualFold(password, "{Prompt}") {
+		prompt := promptui.Prompt{
+			Label:       "Password",
+			HideEntered: true,
+		}
+
+		result, err := prompt.Run()
+		if err != nil {
+			panic(err)
+		}
+
+		if rawTemplLine != "" {
+			r.updatePromptPwd(password, result)
+		}
+
+		return result
+	}
 	if pwd, err := pbe.Ebp(password); err != nil {
 		panic(err)
 	} else {

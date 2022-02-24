@@ -223,7 +223,7 @@ func (r *Run) printDynamicPortForward(port string) {
 // printProxy is printout proxy route.
 // use ssh command run header. only use shell().
 func (r *Run) printProxy(server string) {
-	array := []string{}
+	var array []string
 
 	proxyRoute, err := getProxyRoute(server, r.Conf)
 	if err != nil || len(proxyRoute) == 0 {
@@ -297,6 +297,24 @@ func writeConfContent(confPath, content string) error {
 	return ioutil.WriteFile(confPath, []byte(content), stat.Mode())
 }
 
+func (r *Run) updatePromptPwd(promptTag, password string) {
+	content, err := readConfContent(r.confFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
+		return
+	}
+
+	newContent := content
+	pp, _ := pbe.Pbe(password)
+	newContent = strings.ReplaceAll(newContent, promptTag, pp)
+
+	if newContent != content {
+		if err := writeConfContent(r.confFile, newContent); err != nil {
+			fmt.Fprintf(os.Stderr, "write conf file %s, error %v\n", r.confFile, err)
+			return
+		}
+	}
+}
 func (r *Run) autoEncryptPwd() {
 	if r.Conf.IsDisableAutoEncryptPwd() || len(r.decodedPasswordMap) == 0 {
 		return
@@ -338,11 +356,11 @@ func (r *Run) createAuthMethodMapForServer(server string) {
 	config := r.Conf.Server[server]
 
 	// Password
-	r.registerAuthMapPassword(server, config.Pass)
+	r.registerAuthMapPassword(server, config.Pass, config.Raw)
 
 	// Multiple Password
 	for _, pass := range config.Passes {
-		r.registerAuthMapPassword(server, pass)
+		r.registerAuthMapPassword(server, pass, config.Raw)
 	}
 
 	// PublicKey

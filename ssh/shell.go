@@ -212,7 +212,7 @@ func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig, isDirectSe
 	sc, ok := conf.ParseDirectServer(server)
 	if ok {
 		r.Conf.Server[server] = sc
-		r.registerAuthMapPassword(server, sc.Pass)
+		r.registerAuthMapPassword(server, sc.Pass, sc.Raw)
 	}
 
 	return r.Conf.Server[server], ok

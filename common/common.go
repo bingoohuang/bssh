@@ -355,8 +355,6 @@ var (
 )
 
 // ParseArgs return os.Args parse short options (ex.) [-la] => [-l,-a] )
-//
-// TDXX(blacknon): Migrate to github.com/urfave/cli version 1.22.
 func ParseArgs(options []cli.Flag, args []string) []string {
 	// create cli.Flag map
 	optionMap := map[string]cli.Flag{}

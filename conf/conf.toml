@@ -55,3 +55,8 @@ tmpl = "192.168.1.129:5107 huihui/xxxx IP=10.6.3.(1-6) id=(1-6)"
 # {N} mean enter, {2N} means two enters
 initial_cmd = "{CtrlG}api-gw{2N}{CtrlR}{IP}{2N}{CtrlA}msspoper{4N}"
 note = "demo6_{IP}"
+
+# use {Prompt} to prompt a password from terminal input and then saved back in {PBE}XXX format.
+[server.demo7]
+tmpl = "12.26.18.62:21063 root/{Prompt} group=qqyun"
+note = "192.1.1.14"

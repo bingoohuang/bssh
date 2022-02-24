@@ -11,9 +11,9 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/bingoohuang/filestash v0.0.0-20210826063619-eaa9271da225
-	github.com/bingoohuang/gg v0.0.0-20211227102539-8a437d3525d1
+	github.com/bingoohuang/gg v0.0.0-20220121011809-a7cafbfdce9b
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
-	github.com/bingoohuang/gossh v0.0.0-20220124033940-4121c6eeb316
+	github.com/bingoohuang/gossh v0.0.0-20220224064123-403a0c816f58
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/go-sshlib v0.1.3
@@ -25,6 +25,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/juju/ratelimit v1.0.1
 	github.com/kevinburke/ssh_config v1.1.0
+	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-runewidth v0.0.12
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/miekg/pkcs11 v1.0.3
@@ -37,8 +38,7 @@ require (
 	github.com/thoas/go-funk v0.9.0
 	github.com/urfave/cli v1.22.5
 	github.com/vbauerster/mpb v3.4.0+incompatible
-	go.mongodb.org/mongo-driver v1.5.1 // indirect
-	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
-	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
+	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
+	golang.org/x/net v0.0.0-20220121210141-e204ce36a2ba
 	mvdan.cc/sh v2.6.4+incompatible
 )
