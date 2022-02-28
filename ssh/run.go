@@ -297,16 +297,16 @@ func writeConfContent(confPath, content string) error {
 	return ioutil.WriteFile(confPath, []byte(content), stat.Mode())
 }
 
-func (r *Run) updatePromptPwd(promptTag, password string) {
+func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
 	content, err := readConfContent(r.confFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
 		return
 	}
 
-	newContent := content
 	pp, _ := pbe.Pbe(password)
-	newContent = strings.ReplaceAll(newContent, promptTag, pp)
+	newTemplLine := strings.ReplaceAll(rawTemplLine, promptTag, pp)
+	newContent := strings.ReplaceAll(content, rawTemplLine, newTemplLine)
 
 	if newContent != content {
 		if err := writeConfContent(r.confFile, newContent); err != nil {

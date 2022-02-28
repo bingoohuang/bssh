@@ -83,7 +83,7 @@ func (r *Run) decodePassword(password string, rawTemplLine string) string {
 		}
 
 		if rawTemplLine != "" {
-			r.updatePromptPwd(password, result)
+			r.updatePromptPwd(password, result, rawTemplLine)
 		}
 
 		return result
