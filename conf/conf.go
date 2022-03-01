@@ -639,15 +639,19 @@ func (cf *Config) loadTempHosts(confPath string) {
 }
 
 // WriteTempHosts writes a new host to temporary file.
-func (cf *Config) WriteTempHosts(tempHost string) {
+func (cf *Config) WriteTempHosts(tempHost, pass string) {
 	if _, ok := cf.tempHosts[tempHost]; ok {
 		return
 	}
 
 	cf.tempHosts[tempHost] = true
 
-	s, _ := pbe.Pbe(tempHost)
-	if err := AppendFile(cf.tempHostsFile, s); err != nil {
+	pbePass := ""
+	if pass != "" {
+		pbePass, _ = pbe.Pbe(pass)
+	}
+	tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
+	if err := AppendFile(cf.tempHostsFile, tempHost); err != nil {
 		fmt.Println(err)
 	}
 }

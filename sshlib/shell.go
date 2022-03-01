@@ -198,7 +198,7 @@ func (c *Connect) listenBingoo(session *ssh.Session, webPort int) {
 				if bingoo.Match(preLine) {
 					addr := fmt.Sprintf("http://127.0.0.1:%d", webPort)
 					go filestash.OpenBrowser(addr)
-					go filestash.OpenBrowser(addr + "/linuxdash")
+					go filestash.OpenBrowser(addr + "/dash")
 				}
 				preLine = preLine[:0]
 			} else {

@@ -76,7 +76,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 
 	err = connect.CreateClient(s.Addr, s.Port, s.User, r.serverAuthMethodMap[server])
 	if err != nil && isTempHost {
-		r.Conf.WriteTempHosts(server)
+		r.Conf.WriteTempHosts(server, s.Pass)
 	}
 
 	return connect, err

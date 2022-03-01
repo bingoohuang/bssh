@@ -81,7 +81,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	if isTempHost {
-		r.Conf.WriteTempHosts(server)
+		r.Conf.WriteTempHosts(server, config.Pass)
 	}
 
 	r.sshAgent(&config, connect, session)
@@ -194,7 +194,7 @@ func (r *Run) InitFileStash(port int, connect *sshlib.Connect) error {
 	rr := mux.NewRouter()
 	config := filestash.AppConfig{Port: port, R: rr}
 	dashStatic := http.FileServer(http.FS(linuxdash.DashStatic))
-	filestash.GET(rr, "/linuxdash", http.StripPrefix("/linuxdash", dashStatic).ServeHTTP)
+	filestash.GET(rr, "/dash", http.StripPrefix("/dash", dashStatic).ServeHTTP)
 	filestash.GET(rr, "/fonts-googleapis-com.css", dashStatic.ServeHTTP)
 	filestash.GET(rr, "/linuxDash.min.css", dashStatic.ServeHTTP)
 	filestash.GET(rr, "/linuxDash.min.js", dashStatic.ServeHTTP)

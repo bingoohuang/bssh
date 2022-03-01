@@ -101,7 +101,7 @@ func (r *Run) createConnMap() map[string]*sshlib.Connect {
 
 	// Create sshlib.Connect to connMap
 	for _, server := range r.ServerList {
-		_, isDirectServer := r.parseDirectServer(server)
+		cf, isDirectServer := r.parseDirectServer(server)
 
 		// check count AuthMethod
 		if len(r.serverAuthMethodMap[server]) == 0 {
@@ -116,7 +116,7 @@ func (r *Run) createConnMap() map[string]*sshlib.Connect {
 		}
 
 		if isDirectServer {
-			r.Conf.WriteTempHosts(server)
+			r.Conf.WriteTempHosts(server, cf.Pass)
 		}
 
 		connMap[server] = conn
