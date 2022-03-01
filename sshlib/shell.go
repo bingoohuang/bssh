@@ -6,14 +6,18 @@ package sshlib
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"regexp"
+	"strings"
 	"time"
 
+	"github.com/bingoohuang/gossh/pkg/gossh"
+
 	"github.com/bingoohuang/filestash"
+	"github.com/segmentio/ksuid"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -134,14 +138,83 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	return
 }
 
+func newInterruptReader(r io.Reader, port int, directWriter *io.PipeWriter) *interruptReader {
+	return &interruptReader{
+		r:            r,
+		port:         port,
+		directWriter: directWriter,
+	}
+}
+
+type interruptReader struct {
+	r            io.Reader
+	port         int
+	buf          bytes.Buffer
+	kPressed     bool
+	directWriter *io.PipeWriter
+}
+
+func (i *interruptReader) Read(p []byte) (n int, err error) {
+	n, err = i.r.Read(p)
+	if n == 0 {
+		return 0, err
+	}
+
+	if i.kPressed {
+		i.buf.Write(p[:n])
+		os.Stdout.Write(p[:n])
+		if n == 1 && p[0] == '\r' {
+			os.Stdout.Write([]byte("\n"))
+			cmd := i.buf.String()
+			cmdFields := strings.Fields(cmd)
+			if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "dl") {
+				file := cmdFields[1]
+				tag := ksuid.New().String()
+				i.directWriter.Write([]byte(fmt.Sprintf("echo open:%s && md5sum %s && echo close:%s\r", tag, file, tag)))
+				// 参考 https://github.com/M09Ic/rscp
+				// 		if opt.upload blockSize = 20480
+				//		if opt.download  blockSize = 102400
+				// 下载 cmd := fmt.Sprintf("dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", remotefile, blockSize, off)
+				// 上传 cmd := fmt.Sprintf("echo %s | base64 -d > %s && md5sum %s", content, tmpfile, tmpfile)
+				// 合并文件: cd %s && cat %s > %s
+			}
+			i.kPressed = false
+			i.buf.Reset()
+		}
+
+		return 0, err
+	}
+
+	if n == 1 {
+		switch p[0] {
+		case gossh.KeyCtrlL:
+			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
+			return 0, err
+		case gossh.KeyCtrlK:
+			i.kPressed = true
+			return 0, err
+		}
+	}
+
+	return n, err
+}
+
 func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
 	// set FD
-	session.Stdin = os.Stdin
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 
 	if webPort > 0 {
-		go c.listenBingoo(session, webPort)
+		pr, pw := io.Pipe()
+		session.Stdin = pr
+		go func() {
+			r := newInterruptReader(os.Stdin, webPort, pw)
+			if _, err := io.Copy(pw, r); err != nil && errors.Is(err, io.EOF) {
+				return
+			}
+		}()
+	} else {
+		session.Stdin = os.Stdin
 	}
 
 	// Logging
@@ -176,38 +249,6 @@ func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
 	return
 }
 
-func (c *Connect) listenBingoo(session *ssh.Session, webPort int) {
-	if webPort <= 0 {
-		return
-	}
-
-	buf := new(bytes.Buffer)
-	session.Stdout = io.MultiWriter(session.Stdout, buf)
-
-	bingoo := regexp.MustCompile(`[^\s\w] bingoo\r\n`)
-	func() {
-		var preLine []byte
-		for {
-			if buf.Len() > 0 {
-				line, err := buf.ReadBytes('\n')
-				preLine = append(preLine, line...)
-				if err == io.EOF {
-					continue
-				}
-
-				if bingoo.Match(preLine) {
-					addr := fmt.Sprintf("http://127.0.0.1:%d", webPort)
-					go filestash.OpenBrowser(addr)
-					go filestash.OpenBrowser(addr + "/dash")
-				}
-				preLine = preLine[:0]
-			} else {
-				time.Sleep(100 * time.Millisecond)
-			}
-		}
-	}()
-}
-
 // SetLog set up terminal log logging.
 // This only happens in Connect.Shell().
 func (c *Connect) SetLog(path string, timestamp bool) {
@@ -219,7 +260,7 @@ func (c *Connect) SetLog(path string, timestamp bool) {
 // logger is logging terminal log to c.logFile
 // TODO(blacknon): Writerを利用した処理方法に変更する(v0.1.1)
 func (c *Connect) logger(session *ssh.Session) (err error) {
-	logfile, err := os.OpenFile(c.logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0600)
+	logfile, err := os.OpenFile(c.logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0o600)
 	if err != nil {
 		return
 	}

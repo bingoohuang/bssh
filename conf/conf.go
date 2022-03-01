@@ -173,7 +173,7 @@ type ServerConfig struct {
 	ServerAliveCountInterval int `toml:"alive_interval"`
 
 	InitialCmd string `toml:"initial_cmd"`
-	WebPort    int    `toml:"web_port"`
+	WebPort    int    `toml:"web_port"` // -1 disable the web port
 	ID         string `toml:"id"`
 
 	Raw string // to register the raw template config, like `user:pass@host:port`
@@ -269,8 +269,8 @@ func checkConfPath(confPath string) {
 	fmt.Printf("Config file(%s) not found, auto create one, please edit later.\n", confPath)
 	fmt.Println("or directly run `bssh -H user:pass@192.168.1.30:8022`")
 
-	_ = os.MkdirAll(filepath.Dir(confPath), 0755)
-	_ = ioutil.WriteFile(confPath, initBsshToml, 0600)
+	_ = os.MkdirAll(filepath.Dir(confPath), 0o755)
+	_ = ioutil.WriteFile(confPath, initBsshToml, 0o600)
 
 	os.Exit(0)
 }
@@ -675,7 +675,7 @@ func (cf *Config) PrintServerList(names []string, printTitle bool) {
 }
 
 func AppendFile(file, line string) error {
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}
