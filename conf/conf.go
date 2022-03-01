@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -213,9 +214,8 @@ func ReadConf(confPath string) (config Config) {
 		os.Exit(1)
 	}
 
-	config.loadTempHosts(confPath)
-
 	viper.Set(pbe.PbePwd, str.EmptyThen(config.Extra.Passphrase, config.Passphrase))
+	config.loadTempHosts(confPath)
 
 	// reduce common setting (in .bssh.toml servers)
 	config.parseConfigServers(config.Server, config.Common)
@@ -614,6 +614,8 @@ func (cf *Config) IsDisableAutoEncryptPwd() bool {
 	return cf.Extra.DisableAutoEncryptPwd || cf.DisableAutoEncryptPwd
 }
 
+var tempLineBpe = regexp.MustCompile(`\{PBE\}[\w-_]+`)
+
 func (cf *Config) loadTempHosts(confPath string) {
 	tempHostsFile := strings.TrimSuffix(confPath, ".toml") + ".hosts"
 	cf.tempHostsFile = tempHostsFile
@@ -627,9 +629,11 @@ func (cf *Config) loadTempHosts(confPath string) {
 	for _, line := range strings.Split(string(file), "\n") {
 		hostLine := strings.TrimSpace(line)
 		if hostLine != "" && !strings.HasPrefix(hostLine, "#") {
-			if s, _ := pbe.Ebp(hostLine); s != "" {
-				cf.tempHosts[hostLine] = true
+			if sub := tempLineBpe.FindString(hostLine); sub != "" {
+				s, _ := pbe.Ebp(sub)
+				hostLine = strings.ReplaceAll(hostLine, sub, s)
 			}
+			cf.tempHosts[hostLine] = true
 		}
 	}
 
