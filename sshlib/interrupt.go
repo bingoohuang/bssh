@@ -100,8 +100,8 @@ func clearTag(tag string, b []byte) (string, bool) {
 		return "", false
 	}
 
-	s := string(b[openPos+len(openTag) : openPos+closePos-2])
-	return s, true
+	s := string(b[openPos+len(openTag) : openPos+closePos])
+	return strings.TrimSpace(s), true
 }
 
 func newInterruptWriter(r io.Reader, notifyC chan NotifyCmd, notifyRspC chan string) io.Reader {
@@ -160,6 +160,8 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 				go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
 			} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "web") {
 				go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
+			} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "up") {
+				i.up(cmdFields[1])
 			} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "dl") {
 				i.dl(cmdFields[1])
 

@@ -118,7 +118,7 @@ func (i *interruptReader) md5sum(file string) string {
 		Value: tag,
 	}
 	rsp := <-i.notifyRspC
-	md5sum := parseRspValue(rsp)
+	md5sum := field0(rsp)
 	return md5sum
 }
 
@@ -144,7 +144,7 @@ func (i *interruptReader) lsSize(file string) (size int64, err error) {
 	return 0, errors.New(rsp)
 }
 
-func parseRspValue(s string) string {
+func field0(s string) string {
 	f := strings.Fields(s)
 	if len(f) > 0 {
 		return f[0]
