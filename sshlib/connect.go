@@ -164,8 +164,10 @@ func (c *Connect) CheckClientAlive() error {
 // host. Terminal size is obtained from the currently connected terminal
 //
 func RequestTty(session *ssh.Session) (err error) {
+	sshEcho := GetEnvSshEnv()
+
 	modes := ssh.TerminalModes{
-		ssh.ECHO:          1,
+		ssh.ECHO:          sshEcho,
 		ssh.TTY_OP_ISPEED: 14400,
 		ssh.TTY_OP_OSPEED: 14400,
 	}
@@ -201,4 +203,13 @@ func RequestTty(session *ssh.Session) (err error) {
 	}()
 
 	return
+}
+
+func GetEnvSshEnv() uint32 {
+	sshEchoEnv := os.Getenv("SSH_ECHO")
+	sshEcho := uint32(1)
+	if sshEchoEnv == "0" {
+		sshEcho = 0
+	}
+	return sshEcho
 }

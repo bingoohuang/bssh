@@ -151,8 +151,7 @@ func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
 	err = nil
 
 	// Request tty
-	err = RequestTty(session)
-	if err != nil {
+	if err := RequestTty(session); err != nil {
 		return err
 	}
 

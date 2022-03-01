@@ -139,44 +139,48 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 		return 0, err
 	}
 
-	if n == 1 {
-		switch p[0] {
-		case gossh.KeyCtrlK:
-			screen := struct {
-				io.Reader
-				io.Writer
-			}{Reader: os.Stdin, Writer: os.Stdout}
-			term := terminal.NewTerminal(screen, "")
-			line, err := term.ReadLine()
-			if err != nil {
-				log.Printf("read line, error: %v", err)
-			}
-
-			cmdFields := strings.Fields(line)
-			i.connect.ToggleLogging(false)
-			defer i.connect.ToggleLogging(true)
-
-			if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "dash") {
-				go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
-			} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "web") {
-				go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
-			} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "up") {
-				i.up(cmdFields[1])
-			} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "dl") {
-				i.dl(cmdFields[1])
-
-				// 参考 https://github.com/M09Ic/rscp
-				// 		if opt.upload blockSize = 20480
-				//		if opt.download  blockSize = 102400
-				// 下载 cmd := fmt.Sprintf("dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", remotefile, blockSize, off)
-				// 上传 cmd := fmt.Sprintf("echo %s | base64 -d > %s && md5sum %s", content, tmpfile, tmpfile)
-				// 合并文件: cd %s && cat %s > %s
-			}
-
-			i.directWriter.Write([]byte("\r"))
-			return 0, err
-		}
+	if n == 1 && p[0] == gossh.KeyCtrlK {
+		os.Stdout.Write([]byte(">> "))
+		n = 0
+	} else {
+		return n, nil
 	}
 
-	return n, err
+	screen := struct {
+		io.Reader
+		io.Writer
+	}{Reader: os.Stdin, Writer: os.Stdout}
+	term := terminal.NewTerminal(screen, "")
+	line, err := term.ReadLine()
+	if err != nil {
+		if !errors.Is(err, io.EOF) {
+			log.Printf("read line, error: %v", err)
+		}
+		i.directWriter.Write([]byte("\r"))
+		return 0, err
+	}
+
+	cmdFields := strings.Fields(line)
+	i.connect.ToggleLogging(false)
+	defer i.connect.ToggleLogging(true)
+
+	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "dash") {
+		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
+	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "web") {
+		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
+	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "up") {
+		i.up(cmdFields[1])
+	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "dl") {
+		i.dl(cmdFields[1])
+
+		// 参考 https://github.com/M09Ic/rscp
+		// 		if opt.upload blockSize = 20480
+		//		if opt.download  blockSize = 102400
+		// 下载 cmd := fmt.Sprintf("dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", remotefile, blockSize, off)
+		// 上传 cmd := fmt.Sprintf("echo %s | base64 -d > %s && md5sum %s", content, tmpfile, tmpfile)
+		// 合并文件: cd %s && cat %s > %s
+	}
+
+	i.directWriter.Write([]byte("\r"))
+	return 0, err
 }
