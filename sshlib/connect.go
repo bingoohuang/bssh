@@ -5,6 +5,7 @@
 package sshlib
 
 import (
+	"go.uber.org/atomic"
 	"io"
 	"net"
 	"os"
@@ -60,7 +61,8 @@ type Connect struct {
 	logTimestamp bool
 
 	// terminal log path
-	logFile string
+	logFile       string
+	toggleLogging *atomic.Bool
 }
 
 // CreateClient set c.Client.

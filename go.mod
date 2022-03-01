@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.0.0
 	github.com/ScaleFT/sshkeys v0.0.0-20200327173127-6142f742bca5
 	github.com/ThalesIgnite/crypto11 v1.2.5
+	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/bingoohuang/filestash v0.0.0-20210826063619-eaa9271da225
@@ -17,6 +18,7 @@ require (
 	github.com/blacknon/go-sshlib v0.1.5
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.6
+	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gorilla/mux v1.8.0
@@ -37,7 +39,9 @@ require (
 	github.com/thoas/go-funk v0.9.1
 	github.com/urfave/cli v1.22.5
 	github.com/vbauerster/mpb v3.4.0+incompatible
+	go.uber.org/atomic v1.7.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
+	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	mvdan.cc/sh v2.6.4+incompatible
 )
