@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter) {
@@ -112,16 +113,6 @@ func newInterruptWriter(r io.Reader, notifyC chan NotifyCmd, notifyRspC chan str
 	}
 }
 
-type interruptReader struct {
-	r            io.Reader
-	port         int
-	buf          bytes.Buffer
-	directWriter *io.PipeWriter
-	notifyC      chan NotifyCmd
-	notifyRspC   chan string
-	connect      *Connect
-}
-
 type NotifyType int
 
 const (
@@ -133,19 +124,39 @@ type NotifyCmd struct {
 	Value string
 }
 
+type interruptReader struct {
+	r            io.Reader
+	port         int
+	buf          bytes.Buffer
+	directWriter *io.PipeWriter
+	notifyC      chan NotifyCmd
+	notifyRspC   chan string
+	connect      *Connect
+
+	LastKeyCtrK     bool
+	LastKeyCtrKTime time.Time
+}
+
 func (i *interruptReader) Read(p []byte) (n int, err error) {
-	n, err = i.r.Read(p)
-	if n == 0 {
-		return 0, err
-	}
+	if GetEnvSshEnv() == 1 {
+		n, err = i.r.Read(p)
+		if n == 0 {
+			return 0, err
+		}
 
-	if n == 1 && p[0] == gossh.KeyCtrlK {
+		isKeyCtrK := n == 1 && p[0] == gossh.KeyCtrlK
+		now := time.Now()
+		defer func() {
+			i.LastKeyCtrK = isKeyCtrK
+			i.LastKeyCtrKTime = now
+		}()
+		if !isKeyCtrK || !i.LastKeyCtrK || now.Sub(i.LastKeyCtrKTime) > time.Second {
+			return n, nil
+		}
 		os.Stdout.Write([]byte(">> "))
-		n = 0
-	} else {
-		return n, nil
 	}
 
+Next:
 	screen := struct {
 		io.Reader
 		io.Writer
@@ -164,13 +175,13 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 	i.connect.ToggleLogging(false)
 	defer i.connect.ToggleLogging(true)
 
-	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "dash") {
+	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
 		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
-	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "web") {
+	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%web") {
 		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
-	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "up") {
+	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "%up") {
 		i.up(cmdFields[1])
-	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "dl") {
+	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "%dl") {
 		i.dl(cmdFields[1])
 
 		// 参考 https://github.com/M09Ic/rscp
@@ -179,8 +190,13 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 		// 下载 cmd := fmt.Sprintf("dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", remotefile, blockSize, off)
 		// 上传 cmd := fmt.Sprintf("echo %s | base64 -d > %s && md5sum %s", content, tmpfile, tmpfile)
 		// 合并文件: cd %s && cat %s > %s
+	} else {
+		i.directWriter.Write([]byte(line))
 	}
 
 	i.directWriter.Write([]byte("\r"))
+	if GetEnvSshEnv() == 0 {
+		goto Next
+	}
 	return 0, err
 }

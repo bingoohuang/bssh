@@ -67,9 +67,7 @@ func (i *interruptReader) dl(file string) {
 	bar.Finish()
 
 	dlMd5 := fmt.Sprintf("%x", h.Sum(nil))
-	if dlMd5 == md5sum {
-		os.Stdout.Write([]byte("downloaded successfull"))
-	} else {
+	if dlMd5 != md5sum {
 		os.Stdout.Write([]byte("downloaded failed"))
 	}
 }

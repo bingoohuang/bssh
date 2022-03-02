@@ -73,12 +73,10 @@ func (i *interruptReader) up(file string) {
 	bar.Finish()
 
 	t := ksuid.New().String()
-	cmd := fmt.Sprintf("echo open:%s; cat %s.{1..%d} > %s; echo close:%s\r",
-		t, prefix, count, prefix, t)
+	cmd := fmt.Sprintf("echo open:%s; cat %s.{1..%d} > %s; echo close:%s\r", t, prefix, count, prefix, t)
 	i.directWriter.Write([]byte(cmd))
 	i.notifyC <- NotifyCmd{Type: NotifyTypeTag, Value: t}
 	<-i.notifyRspC
-	log.Printf("upload succesfully")
 }
 
 func Md5Hash(raw []byte) string {

@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -206,10 +207,10 @@ func RequestTty(session *ssh.Session) (err error) {
 }
 
 func GetEnvSshEnv() uint32 {
-	sshEchoEnv := os.Getenv("SSH_ECHO")
-	sshEcho := uint32(1)
-	if sshEchoEnv == "0" {
-		sshEcho = 0
+	env := os.Getenv("SSH_ECHO")
+	switch strings.ToLower(env) {
+	case "0", "off", "no", "n":
+		return 0
 	}
-	return sshEcho
+	return 1
 }
