@@ -1,5 +1,5 @@
 hosts = [
-    "user:pass@192.168.1.1:8022 note=host8022",
+    "user:pass@192.168.1.1:8022 note=host8022 id=host1 group=xxx",
 ]
 
 web_port = 0 # auto create a listening port for dash or system status page, -1 to disable it.
