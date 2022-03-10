@@ -5,15 +5,16 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/bingoohuang/gg/pkg/ss"
-	"github.com/cheggaaa/pb/v3"
-	"github.com/segmentio/ksuid"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/gg/pkg/ss"
+	"github.com/cheggaaa/pb/v3"
+	"github.com/segmentio/ksuid"
 )
 
 func (i *interruptReader) dl(file string) {

@@ -6,13 +6,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/cheggaaa/pb/v3"
-	"github.com/segmentio/ksuid"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/cheggaaa/pb/v3"
+	"github.com/segmentio/ksuid"
 )
 
 func (i *interruptReader) up(file string) {

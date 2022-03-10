@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/bingoohuang/filestash"
-	"github.com/bingoohuang/gossh/pkg/gossh"
-	"golang.org/x/crypto/ssh/terminal"
 	"io"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/filestash"
+	"github.com/bingoohuang/gossh/pkg/gossh"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter) {
@@ -175,7 +176,20 @@ Next:
 	i.connect.ToggleLogging(false)
 	defer i.connect.ToggleLogging(true)
 
-	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
+	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%?") {
+		fmt.Println(`Available commands:`)
+		fmt.Printf("\033[%dD", 26)
+		fmt.Println(`0) %? : to show help info`)
+		fmt.Printf("\033[%dD", 25)
+		fmt.Println(`1) %dash: to open the info page in default browser`)
+		fmt.Printf("\033[%dD", 50)
+		fmt.Println(`2) %web: to open the file explorer page in default browser`)
+		fmt.Printf("\033[%dD", 58)
+		fmt.Println(`3) %up localfile: to upload the local file to the remote`)
+		fmt.Printf("\033[%dD", 56)
+		fmt.Println(`4) %dl remotefile : to download the remote file to the local`)
+		fmt.Printf("\033[%dD", 60)
+	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
 		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%web") {
 		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))

@@ -5,11 +5,12 @@
 package sshlib
 
 import (
-	"go.uber.org/atomic"
 	"io"
 	"log"
 	"os"
 	"time"
+
+	"go.uber.org/atomic"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"

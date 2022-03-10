@@ -2,9 +2,10 @@ package sshlib
 
 import (
 	"bytes"
-	"go.uber.org/atomic"
 	"os"
 	"time"
+
+	"go.uber.org/atomic"
 )
 
 type logWriter struct {
