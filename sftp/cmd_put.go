@@ -151,5 +151,4 @@ func (r *RunSftp) pushFile(c *Connect, localFile io.Reader, path string, size in
 
 	r.ProgressWG.Add(1)
 	return c.Output.ProgressPrinter(size, rd, path)
-	return nil
 }

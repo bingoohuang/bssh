@@ -121,16 +121,11 @@ func (p *Proxy) CreateProxyCommandProxyDialer() (proxyDialer proxy.Dialer, err e
 	return
 }
 
-//
 type NetPipe struct {
 	Command string
 }
 
-//
 func (n *NetPipe) Dial(network, addr string) (con net.Conn, err error) {
-	network = ""
-	addr = ""
-
 	// Create net.Pipe(), and set proxyCommand
 	con, srv := net.Pipe()
 
@@ -143,11 +138,9 @@ func (n *NetPipe) Dial(network, addr string) (con net.Conn, err error) {
 
 	// run proxyCommand
 	err = cmd.Start()
-
 	return
 }
 
-//
 type httpProxy struct {
 	host     string
 	haveAuth bool

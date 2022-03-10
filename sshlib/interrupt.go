@@ -52,7 +52,6 @@ func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string
 type interruptWriter struct {
 	r          io.Reader
 	notifyC    chan NotifyCmd
-	result     chan string
 	notifyTag  string
 	buf        bytes.Buffer
 	notifyRspC chan string
@@ -128,7 +127,6 @@ type NotifyCmd struct {
 type interruptReader struct {
 	r            io.Reader
 	port         int
-	buf          bytes.Buffer
 	directWriter *io.PipeWriter
 	notifyC      chan NotifyCmd
 	notifyRspC   chan string
@@ -177,18 +175,13 @@ Next:
 	defer i.connect.ToggleLogging(true)
 
 	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%?") {
-		fmt.Println(`Available commands:`)
-		fmt.Printf("\033[%dD", 26)
-		fmt.Println(`0) %? : to show help info`)
-		fmt.Printf("\033[%dD", 25)
-		fmt.Println(`1) %dash: to open the info page in default browser`)
-		fmt.Printf("\033[%dD", 50)
-		fmt.Println(`2) %web: to open the file explorer page in default browser`)
-		fmt.Printf("\033[%dD", 58)
-		fmt.Println(`3) %up localfile: to upload the local file to the remote`)
-		fmt.Printf("\033[%dD", 56)
-		fmt.Println(`4) %dl remotefile : to download the remote file to the local`)
-		fmt.Printf("\033[%dD", 60)
+		fmt.Print("Available commands:\r\n" +
+			"0) %? : to show help info\r\n" +
+			"1) %dash: to open the info page in default browser\r\n" +
+			"2) %web: to open the file explorer page in default browser\r\n" +
+			"3) %up localfile: to upload the local file to the remote\r\n" +
+			"4) %dl remotefile : to download the remote file to the local\r\n",
+		)
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
 		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%web") {
