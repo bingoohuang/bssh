@@ -31,6 +31,7 @@ proxy:
 
 
 default: proxy
+	go mod tidy
 	go fmt ./...&&revive .&&goimports -w .&&golangci-lint run
 
 install: proxy

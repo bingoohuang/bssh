@@ -1,7 +1,3 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
-
 package sshlib
 
 import (
@@ -16,8 +12,8 @@ import (
 	"go.uber.org/atomic"
 
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/net/proxy"
+	"golang.org/x/term"
 )
 
 // Connect structure to store contents about ssh connection.
@@ -176,14 +172,14 @@ func RequestTty(session *ssh.Session) (err error) {
 
 	// Get terminal window size
 	fd := int(os.Stdin.Fd())
-	width, hight, err := terminal.GetSize(fd)
+	width, hight, err := term.GetSize(fd)
 	if err != nil {
 		return
 	}
 
 	// TODO(blacknon): 環境変数から取得する方式だと、Windowsでうまく動作するか不明なので確認して対処する
-	term := os.Getenv("TERM")
-	if err = session.RequestPty(term, hight, width, modes); err != nil {
+	termEnv := os.Getenv("TERM")
+	if err = session.RequestPty(termEnv, hight, width, modes); err != nil {
 		session.Close()
 		return
 	}
@@ -198,7 +194,7 @@ func RequestTty(session *ssh.Session) (err error) {
 			switch s {
 			case winch:
 				fd := int(os.Stdout.Fd())
-				width, hight, _ = terminal.GetSize(fd)
+				width, hight, _ = term.GetSize(fd)
 				session.WindowChange(hight, width)
 			}
 		}

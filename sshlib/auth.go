@@ -61,9 +61,9 @@ func CreateSignerPublicKey(key, password string) (signer ssh.Signer, err error) 
 func CreateSignerPublicKeyData(keyData []byte, password string) (signer ssh.Signer, err error) {
 	if password != "" { // password is not empty
 		// Parse key data
-		data, err := sshkeys.ParseEncryptedRawPrivateKey(keyData, []byte(password))
-		if err != nil {
-			return signer, err
+		data, err1 := sshkeys.ParseEncryptedRawPrivateKey(keyData, []byte(password))
+		if err1 != nil {
+			return signer, err1
 		}
 
 		// Create ssh.Signer
@@ -245,8 +245,6 @@ func CreateSignerPKCS11(provider, pin string) (signers []ssh.Signer, err error) 
 func CreateSignerAgent(sshAgent interface{}) (signers []ssh.Signer, err error) {
 	switch ag := sshAgent.(type) {
 	case agent.Agent:
-		signers, err = ag.Signers()
-	case agent.ExtendedAgent:
 		signers, err = ag.Signers()
 	}
 

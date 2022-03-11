@@ -15,7 +15,6 @@ require (
 	github.com/bingoohuang/gossh v0.0.0-20220224064123-403a0c816f58
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
-	github.com/blacknon/go-sshlib v0.1.5
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/cheggaaa/pb/v3 v3.0.8
@@ -43,5 +42,6 @@ require (
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	mvdan.cc/sh v2.6.4+incompatible
 )

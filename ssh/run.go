@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 
+	"golang.org/x/term"
+
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/gou/pbe"
@@ -16,7 +18,6 @@ import (
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // TDXX(blacknon): 自動再接続機能の追加(v0.6.1)
@@ -154,7 +155,7 @@ func (r *Run) Start() {
 	//                 => flagとして検知させて、あとはpushPipeWriterにos.Stdinを渡すことで対処する
 	if runtime.GOOS != "windows" {
 		stdin := 0
-		if !terminal.IsTerminal(stdin) {
+		if !term.IsTerminal(stdin) {
 			r.isStdinPipe = true
 		}
 	}

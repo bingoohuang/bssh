@@ -24,8 +24,9 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/term"
+
 	"github.com/urfave/cli"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // nolint
@@ -165,7 +166,7 @@ func GetPassPhrase(msg string) (input string, err error) {
 	defer tty.Close()
 
 	// get input
-	result, err := terminal.ReadPassword(int(tty.Fd()))
+	result, err := term.ReadPassword(int(tty.Fd()))
 
 	if len(result) == 0 {
 		err = fmt.Errorf("err: input is empty")

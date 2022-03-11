@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/term"
+
 	"github.com/bingoohuang/filestash"
 	"github.com/bingoohuang/gossh/pkg/gossh"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter) {
@@ -160,7 +161,7 @@ Next:
 		io.Reader
 		io.Writer
 	}{Reader: os.Stdin, Writer: os.Stdout}
-	term := terminal.NewTerminal(screen, "")
+	term := term.NewTerminal(screen, "")
 	line, err := term.ReadLine()
 	if err != nil {
 		if !errors.Is(err, io.EOF) {
@@ -176,11 +177,11 @@ Next:
 
 	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%?") {
 		fmt.Print("Available commands:\r\n" +
-			"0) %? : to show help info\r\n" +
-			"1) %dash: to open the info page in default browser\r\n" +
-			"2) %web: to open the file explorer page in default browser\r\n" +
-			"3) %up localfile: to upload the local file to the remote\r\n" +
-			"4) %dl remotefile : to download the remote file to the local\r\n",
+			"0) %?            : to show help info\r\n" +
+			"1) %dash         : to open the info page in browser\r\n" +
+			"2) %web          : to open the file explorer in browser\r\n" +
+			"3) %up localfile : to upload the local file to the remote\r\n" +
+			"4) %dl remotefile: to download the remote file to the local\r\n",
 		)
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
 		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))

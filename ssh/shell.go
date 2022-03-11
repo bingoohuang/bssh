@@ -146,9 +146,9 @@ func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
 		return nil, err
 	}
 
-	if stderr := stderrBuf.String(); stderr != "" {
-		//log.Printf("Exec cmd %s error: %s", cmd, stderr)
-	}
+	//if stderr := stderrBuf.String(); stderr != "" {
+	//	log.Printf("Exec cmd %s error: %s", cmd, stderr)
+	//}
 
 	return stdoutBuf.Bytes(), nil
 }

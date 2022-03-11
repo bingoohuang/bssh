@@ -255,6 +255,9 @@ func (c *Connect) TCPLocalForward(localAddr, remoteAddr string) (err error) {
 
 			// remote (type net.Conn)
 			remote, err := c.Client.Dial("tcp", remoteAddr)
+			if err != nil {
+				return
+			}
 
 			// forward
 			go c.forwarder(local, remote)

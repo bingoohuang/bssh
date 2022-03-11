@@ -10,21 +10,22 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/term"
+
 	"go.uber.org/atomic"
 
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // ShellInitial connect login shell over ssh.
 func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
+	state, err := term.MakeRaw(fd)
 	if err != nil {
 		return
 	}
-	defer terminal.Restore(fd, state)
+	defer term.Restore(fd, state)
 
 	var w io.WriteCloser
 	if len(initialInput) > 0 {
@@ -52,7 +53,7 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 	if w != nil {
 		for _, initialCmd := range initialInput {
 			time.Sleep(100 * time.Millisecond)
-			w.Write(initialCmd)
+			_, _ = w.Write(initialCmd)
 		}
 	}
 
@@ -68,11 +69,11 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 func (c *Connect) Shell(session *ssh.Session) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
+	state, err := term.MakeRaw(fd)
 	if err != nil {
 		return
 	}
-	defer terminal.Restore(fd, state)
+	defer term.Restore(fd, state)
 
 	// setup
 	err = c.setupShell(session, 0)
@@ -102,11 +103,11 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
+	state, err := term.MakeRaw(fd)
 	if err != nil {
 		return
 	}
-	defer terminal.Restore(fd, state)
+	defer term.Restore(fd, state)
 
 	// setup
 	err = c.setupShell(session, 0)
