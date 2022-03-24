@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -16,7 +15,7 @@ import (
 	"github.com/bingoohuang/gossh/pkg/gossh"
 )
 
-func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter) {
+func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter, *io.PipeWriter) {
 	r1, w1 := io.Pipe()
 	r2, w2 := io.Pipe()
 
@@ -36,7 +35,7 @@ func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter) {
 		}
 	}()
 
-	return r1, w2
+	return r1, w2, w1
 }
 
 func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string, directWriter *io.PipeWriter, connect *Connect) *interruptReader {
@@ -153,7 +152,7 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 		if !isKeyCtrK || !i.LastKeyCtrK || now.Sub(i.LastKeyCtrKTime) > time.Second {
 			return n, nil
 		}
-		os.Stdout.Write([]byte(">> "))
+		_, _ = os.Stdout.Write([]byte(">> "))
 	}
 
 Next:
@@ -161,13 +160,13 @@ Next:
 		io.Reader
 		io.Writer
 	}{Reader: os.Stdin, Writer: os.Stdout}
-	term := term.NewTerminal(screen, "")
-	line, err := term.ReadLine()
+	t := term.NewTerminal(screen, "")
+	line, err := t.ReadLine()
 	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			log.Printf("read line, error: %v", err)
+		if errors.Is(err, io.EOF) {
+			err = nil
 		}
-		i.directWriter.Write([]byte("\r"))
+		_, _ = i.directWriter.Write([]byte("\r"))
 		return 0, err
 	}
 
@@ -184,9 +183,17 @@ Next:
 			"4) %dl remotefile: to download the remote file to the local\r\n",
 		)
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
-		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
+		if i.port > 0 {
+			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
+		} else {
+			fmt.Print("dash is not available\r\n")
+		}
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%web") {
-		go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
+		if i.port > 0 {
+			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
+		} else {
+			fmt.Print("dash is not available\r\n")
+		}
 	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "%up") {
 		i.up(cmdFields[1])
 	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "%dl") {

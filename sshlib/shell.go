@@ -23,49 +23,32 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 	fd := int(os.Stdin.Fd())
 	state, err := term.MakeRaw(fd)
 	if err != nil {
-		return
+		return err
 	}
 	defer term.Restore(fd, state)
 
-	var w io.WriteCloser
-	if len(initialInput) > 0 {
-		w, _ = session.StdinPipe()
-		go func() {
-			_, _ = io.Copy(w, os.Stdin)
-		}()
-	}
-
 	// setup
-	err = c.setupShell(session, webPort)
+	pipeToStdin, err := c.setupShell(session, webPort)
 	if err != nil {
-		return
+		return err
 	}
 
 	// Start shell
-	err = session.Shell()
-	if err != nil {
-		return
+	if err := session.Shell(); err != nil {
+		return err
 	}
 
 	// keep alive packet
 	go c.SendKeepAlive(session)
-
-	if w != nil {
-		for _, initialCmd := range initialInput {
-			time.Sleep(100 * time.Millisecond)
-			_, _ = w.Write(initialCmd)
-		}
+	for _, initialCmd := range initialInput {
+		time.Sleep(100 * time.Millisecond)
+		_, _ = pipeToStdin.Write(initialCmd)
 	}
 
-	err = session.Wait()
-	if err != nil {
-		return
-	}
-
-	return
+	return session.Wait()
 }
 
-// Shell connect login shell over ssh.
+// Shell connects login shell over ssh.
 func (c *Connect) Shell(session *ssh.Session) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
@@ -76,29 +59,22 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	err = c.setupShell(session, 0)
-	if err != nil {
-		return
+	if _, err := c.setupShell(session, 0); err != nil {
+		return err
 	}
 
 	// Start shell
-	err = session.Shell()
-	if err != nil {
-		return
+	if err := session.Shell(); err != nil {
+		return err
 	}
 
 	// keep alive packet
 	go c.SendKeepAlive(session)
 
-	err = session.Wait()
-	if err != nil {
-		return
-	}
-
-	return
+	return session.Wait()
 }
 
-// Shell connect command shell over ssh.
+// CmdShell connect command shell over ssh.
 // Used to start a shell with a specified command.
 func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	// Input terminal Make raw
@@ -110,40 +86,25 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	err = c.setupShell(session, 0)
-	if err != nil {
-		return
+	if _, err := c.setupShell(session, 0); err != nil {
+		return err
 	}
 
 	// Start shell
-	err = session.Start(command)
-	if err != nil {
-		return
+	if err := session.Start(command); err != nil {
+		return err
 	}
 
 	// keep alive packet
 	go c.SendKeepAlive(session)
 
-	err = session.Wait()
-	if err != nil {
-		return
-	}
-
-	return
+	return session.Wait()
 }
 
-func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
-	// set FD
+func (c *Connect) setupShell(session *ssh.Session, webPort int) (pipeToStdin *io.PipeWriter, err error) {
+	session.Stdin, session.Stdout, pipeToStdin = c.interruptInput(webPort)
 	session.Stderr = os.Stderr
 
-	if webPort > 0 {
-		session.Stdin, session.Stdout = c.interruptInput(webPort)
-	} else {
-		session.Stdin = os.Stdin
-		session.Stdout = os.Stdout
-	}
-
-	// Logging
 	if c.logging {
 		err = c.logger(session)
 		if err != nil {
@@ -154,17 +115,15 @@ func (c *Connect) setupShell(session *ssh.Session, webPort int) (err error) {
 
 	// Request tty
 	if err := RequestTty(session); err != nil {
-		return err
+		return nil, err
 	}
 
 	// x11 forwarding
 	if c.ForwardX11 {
-		err = c.X11Forward(session)
-		if err != nil {
+		if err := c.X11Forward(session); err != nil {
 			log.Println(err)
 		}
 	}
-	err = nil
 
 	// ssh agent forwarding
 	if c.ForwardAgent {
