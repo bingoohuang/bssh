@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/bingoohuang/gossh/pkg/hostparse"
 	"io"
 	"log"
 	"net/http"
@@ -209,10 +210,15 @@ func (r *Run) InitFileStash(port int, connect *sshlib.Connect) error {
 }
 
 func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig, isDirectServer bool) {
-	sc, ok := conf.ParseDirectServer(server)
+	sc, ok := hostparse.ParseDirectServer(server)
 	if ok {
-		r.Conf.Server[server] = sc
-		r.registerAuthMapPassword(server, sc.Pass, sc.Raw)
+		r.Conf.Server[server] = conf.ServerConfig{
+			User: sc.User,
+			Pass: sc.Pass,
+			Addr: sc.Addr,
+			Port: sc.Port,
+		}
+		r.registerAuthMapPassword(server, sc.Pass, "")
 	}
 
 	return r.Conf.Server[server], ok

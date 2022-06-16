@@ -7,10 +7,10 @@ require (
 	github.com/ScaleFT/sshkeys v0.0.0-20200327173127-6142f742bca5
 	github.com/ThalesIgnite/crypto11 v1.2.5
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
-	github.com/bingoohuang/filestash v0.0.0-20210826063619-eaa9271da225
-	github.com/bingoohuang/gg v0.0.0-20220323073029-c9369d579b34
+	github.com/bingoohuang/filestash v0.0.0-20220616082721-46b0154b7355
+	github.com/bingoohuang/gg v0.0.0-20220615010848-e9657209b1f5
 	github.com/bingoohuang/gonet v0.0.0-20220310062416-70340a504d5e
-	github.com/bingoohuang/gossh v0.0.0-20220224064123-403a0c816f58
+	github.com/bingoohuang/gossh v0.0.0-20220616084134-a470a2cf680e
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/textcol v0.0.1
@@ -99,10 +99,10 @@ require (
 	github.com/src-d/gcfg v1.4.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/thales-e-security/pool v0.0.2 // indirect
-	github.com/tidwall/gjson v1.3.5 // indirect
-	github.com/tidwall/match v1.0.1 // indirect
-	github.com/tidwall/pretty v1.0.0 // indirect
-	github.com/tidwall/sjson v1.0.4 // indirect
+	github.com/tidwall/gjson v1.14.1 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/sjson v1.2.4 // indirect
 	github.com/xanzy/ssh-agent v0.2.1 // indirect
 	go.mongodb.org/mongo-driver v1.8.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
@@ -121,5 +121,5 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.13.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 )

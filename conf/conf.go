@@ -451,33 +451,6 @@ func IsDirectServer(server string) bool {
 	return strings.Index(server, "@") > 0
 }
 
-// ParseDirectServer parses a direct server address.
-func ParseDirectServer(server string) (ServerConfig, bool) {
-	// LastIndex of "@" will allow that password contains "@"
-	atPos := strings.LastIndex(server, "@")
-	sc := ServerConfig{}
-
-	if atPos < 0 {
-		return sc, false
-	}
-
-	left := server[:atPos]
-	right := server[atPos+1:]
-
-	sc.User, sc.Pass = splitBySep(left, []string{":", "/"})
-	commaPos := strings.Index(right, ":")
-
-	if commaPos == -1 {
-		sc.Addr = right
-		sc.Port = "22"
-	} else {
-		sc.Addr = right[:commaPos]
-		sc.Port = right[commaPos+1:]
-	}
-
-	return sc, true
-}
-
 // EnsureSearchHost searches the host name by glob pattern.
 func (cf *Config) EnsureSearchHost(host string) (string, []string) {
 	if IsDirectServer(host) {
