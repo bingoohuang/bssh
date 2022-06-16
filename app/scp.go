@@ -11,11 +11,11 @@ import (
 	"github.com/bingoohuang/bssh/list"
 	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/bingoohuang/bssh"
 	"github.com/bingoohuang/bssh/check"
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/scp"
+	"github.com/bingoohuang/gg/pkg/v"
 	"github.com/urfave/cli"
 )
 
@@ -57,7 +57,7 @@ func Lscp() (app *cli.App) {
 	app.Name = "bssh scp"
 	app.Usage = "TUI list select and parallel scp client command."
 	app.Copyright = misc.Copyright
-	app.Version = bssh.AppVersion()
+	app.Version = v.Version()
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},

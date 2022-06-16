@@ -2,12 +2,12 @@ package app
 
 import (
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/gg/pkg/v"
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/bingoohuang/bssh"
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/sftp"
 	"github.com/urfave/cli"
@@ -45,7 +45,7 @@ func Lsftp() (app *cli.App) {
 	app.Name = "bssh ftp"
 	app.Usage = "TUI list select and parallel sftp client command."
 	app.Copyright = misc.Copyright
-	app.Version = bssh.AppVersion()
+	app.Version = v.Version()
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},

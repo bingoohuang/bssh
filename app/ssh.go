@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"github.com/bingoohuang/bssh/list"
+	"github.com/bingoohuang/gg/pkg/v"
 
 	"github.com/bingoohuang/gou/str"
 	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/bingoohuang/bssh/misc"
 
-	"github.com/bingoohuang/bssh"
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
 	sshcmd "github.com/bingoohuang/bssh/ssh"
@@ -58,7 +58,7 @@ func Lssh() (app *cli.App) {
 	app.Name = "bssh"
 	app.Usage = "TUI list select and parallel ssh client command."
 	app.Copyright = misc.Copyright
-	app.Version = bssh.AppVersion()
+	app.Version = v.Version()
 
 	// TDXX(blacknon): オプションの追加
 	//     -f       ... バックグラウンドでの接続(X11接続やport forwardingをバックグラウンドで実行する場合など)。

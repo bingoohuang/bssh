@@ -7,3 +7,4 @@
 *.exe
 /.idea
 /dist
+.vscode
