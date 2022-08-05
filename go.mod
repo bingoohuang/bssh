@@ -22,6 +22,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/juju/ratelimit v1.0.1
 	github.com/kevinburke/ssh_config v1.1.0
+	github.com/lunixbochs/vtclean v0.0.0-20160125035106-4fbf7632a2c6
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-runewidth v0.0.13
 	github.com/mattn/go-shellwords v1.0.12
