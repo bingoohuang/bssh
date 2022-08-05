@@ -89,48 +89,25 @@ func (r *PbReader) Read(p []byte) (n int, err error) {
 }
 
 func (i *interruptReader) dlPart(file string, skip int, pw *io.PipeWriter) bool {
-	t := ksuid.New().String()
-	dd := fmt.Sprintf("echo open:%s; "+
-		"dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo; "+
-		"echo close:%s\r", t, file, 102400, skip, t)
-	i.directWriter.Write([]byte(dd))
-	i.notifyC <- NotifyCmd{
-		Type:  NotifyTypeTag,
-		Value: t,
-	}
-
-	if rsp := <-i.notifyRspC; rsp == "" {
+	rsp := i.executeCmd(fmt.Sprintf(
+		"dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", file, 102400, skip))
+	ok := rsp == ""
+	if ok {
 		pw.Close()
-		return true
 	} else {
 		pw.Write([]byte(rsp))
-		return false
 	}
+
+	return ok
 }
 
 func (i *interruptReader) md5sum(file string) string {
-	tag := ksuid.New().String()
-	i.directWriter.Write([]byte(fmt.Sprintf("echo open:%s; md5sum %s; echo close:%s\r", tag, file, tag)))
-
-	i.notifyC <- NotifyCmd{
-		Type:  NotifyTypeTag,
-		Value: tag,
-	}
-	rsp := <-i.notifyRspC
-	md5sum := field0(rsp)
-	return md5sum
+	rsp := i.executeCmd(fmt.Sprintf("md5sum %s", file))
+	return field0(rsp)
 }
 
 func (i *interruptReader) lsSize(file string) (size int64, err error) {
-	tag := ksuid.New().String()
-	c := fmt.Sprintf("echo open:%s; ls -l %s 2>&1; echo close:%s\r", tag, file, tag)
-	i.directWriter.Write([]byte(c))
-
-	i.notifyC <- NotifyCmd{
-		Type:  NotifyTypeTag,
-		Value: tag,
-	}
-	rsp := <-i.notifyRspC
+	rsp := i.executeCmd(fmt.Sprintf("ls -l %s 2>&1", file))
 	f := strings.Fields(rsp)
 	if len(f) >= 4 {
 		size = ss.ParseInt64(f[4])
@@ -141,6 +118,16 @@ func (i *interruptReader) lsSize(file string) (size int64, err error) {
 	}
 
 	return 0, errors.New(rsp)
+}
+
+func (i *interruptReader) executeCmd(cmd string) string {
+	tag := ksuid.New().String()
+	i.directWriter.Write([]byte(fmt.Sprintf("echo open:%s; %s; echo close:%s\r", tag, cmd, tag)))
+	i.notifyC <- NotifyCmd{
+		Type:  NotifyTypeTag,
+		Value: tag,
+	}
+	return <-i.notifyRspC
 }
 
 func field0(s string) string {

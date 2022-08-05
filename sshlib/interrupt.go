@@ -190,7 +190,9 @@ Next:
 		}
 	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%web") {
 		if i.port > 0 {
-			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d", i.port))
+			pwd := i.executeCmd("pwd")
+			// http://127.0.0.1:8333/files/home/footstone/
+			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
