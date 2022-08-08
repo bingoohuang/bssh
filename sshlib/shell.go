@@ -156,7 +156,37 @@ func (c *Connect) logger(session *ssh.Session) (err error) {
 	}
 
 	l := &logWriter{logfile: logfile, logTimestamp: c.logTimestamp, toggleLogging: c.toggleLogging}
-	session.Stdout = io.MultiWriter(session.Stdout, l)
-	session.Stderr = io.MultiWriter(session.Stderr, l)
+	session.Stdout = withLogWriters(session.Stdout, l)
+	session.Stderr = withLogWriters(session.Stderr, l)
 	return nil
+}
+
+func withLogWriters(writers ...io.Writer) io.Writer {
+	allWriters := make([]io.Writer, 0, len(writers))
+	for _, w := range writers {
+		if mw, ok := w.(*logWriters); ok {
+			allWriters = append(allWriters, mw.writers...)
+		} else {
+			allWriters = append(allWriters, w)
+		}
+	}
+	return &logWriters{allWriters}
+}
+
+type logWriters struct {
+	writers []io.Writer
+}
+
+func (t *logWriters) Write(p []byte) (n int, err error) {
+	for i, w := range t.writers {
+		n, err = w.Write(p)
+		if err != nil {
+			return
+		}
+		if i == 0 && n != len(p) { // only check the first writer response
+			err = io.ErrShortWrite
+			return
+		}
+	}
+	return len(p), nil
 }
