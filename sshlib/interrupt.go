@@ -153,6 +153,11 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 			return n, nil
 		}
 		_, _ = os.Stdout.Write([]byte(">> "))
+		if i.port > 0 {
+			pwd := i.executeCmd("pwd")
+			// http://127.0.0.1:8333/files/home/footstone/
+			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
+		}
 	}
 
 Next:
