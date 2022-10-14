@@ -12,7 +12,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	termbox "github.com/nsf/termbox-go"
+	"github.com/nsf/termbox-go"
 )
 
 // TDXX(blacknon):

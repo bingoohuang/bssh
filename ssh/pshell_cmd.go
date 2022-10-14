@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/output"
 	"github.com/bingoohuang/bssh/sshlib"
 	"golang.org/x/crypto/ssh"
@@ -169,8 +168,8 @@ func (ps *pShell) buildinOutlist(out *io.PipeWriter, ch chan<- bool) {
 
 // buildinOut is print exec history at number
 // example:
-//     - %out
-//     - %out <num>
+//   - %out
+//   - %out <num>
 func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 	stdout := setOutput(out)
 	histories := ps.History[num]
@@ -216,7 +215,8 @@ func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 // Didn't know how to send data from Writer to Channel, so switch the function if * io.PipeWriter is Nil.
 // nolint:funlen
 func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
-	ch chan<- bool, kill chan bool) {
+	ch chan<- bool, kill chan bool,
+) {
 	// join command
 	command := strings.Join(pline.Args, " ")
 
@@ -327,7 +327,8 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 // executePipeLineLocal is exec command in local machine.
 // TDXX(blacknon): 利用中のShellでの実行+functionや環境変数、aliasの引き継ぎを行えるように実装.
 func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
-	ch chan<- bool, kill chan bool) {
+	ch chan<- bool, kill chan bool,
+) {
 	// set stdin/stdout
 	stdin := setInput(in)
 	stdout := setOutput(out)

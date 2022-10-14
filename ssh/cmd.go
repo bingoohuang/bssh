@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/bingoohuang/bssh/conf"
-
 	"github.com/bingoohuang/bssh/output"
 	"github.com/bingoohuang/bssh/sshlib"
 )

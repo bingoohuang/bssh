@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/urfave/cli"
 )
 

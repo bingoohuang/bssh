@@ -169,7 +169,6 @@ func pushByClient(exit chan bool, client *Connect, pathset []PathSet, cp *Scp) {
 	}
 }
 
-//
 func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, base, path string) (err error) {
 	// get rel path
 	relpath, _ := filepath.Rel(base, path)
@@ -368,7 +367,7 @@ func (cp *Scp) pullPath(client *Connect) {
 	// if multi pull, servername add baseDir
 	if len(cp.From.Server) > 1 {
 		baseDir = filepath.Join(baseDir, client.Server)
-		_ = os.MkdirAll(baseDir, 0755)
+		_ = os.MkdirAll(baseDir, 0o755)
 	}
 
 	baseDir, _ = filepath.Abs(baseDir)
@@ -400,7 +399,7 @@ func (cp *Scp) pullPath(client *Connect) {
 
 				stat := walker.Stat()
 				if stat.IsDir() { // create dir
-					_ = os.MkdirAll(lpath, 0755)
+					_ = os.MkdirAll(lpath, 0o755)
 				} else { // create file
 					cp.createFile(stat, p, ow, lpath, client)
 				}
@@ -443,7 +442,7 @@ func (cp *Scp) createFile(stat os.FileInfo, p string, ow io.Writer, lpath string
 	defer rf.Close()
 
 	// open local file
-	lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	lf, err := os.OpenFile(lpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		fmt.Fprintf(ow, "os.OpenFile Error: %v\n", err)
 		return

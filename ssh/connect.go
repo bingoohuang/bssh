@@ -5,12 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bingoohuang/bssh/misc"
-
-	"github.com/bingoohuang/gonet"
-
 	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
+	"github.com/bingoohuang/gonet"
 	"golang.org/x/net/proxy"
 )
 
@@ -46,7 +44,6 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 			c := config.Server[p.Name]
 			pxy := &sshlib.Connect{ProxyDialer: dialer}
 			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[p.Name])
-
 			if err != nil {
 				return connect, err
 			}

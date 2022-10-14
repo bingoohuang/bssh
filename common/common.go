@@ -24,9 +24,8 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/term"
-
 	"github.com/urfave/cli"
+	"golang.org/x/term"
 )
 
 // nolint
@@ -140,7 +139,6 @@ func GetFilesBase64(paths []string) (string, error) {
 
 	for _, path := range paths {
 		file, err := ioutil.ReadFile(GetFullPath(path))
-
 		if err != nil {
 			return "", err
 		}
@@ -318,9 +316,9 @@ func GetNameFromID(file string, id uint32) (name string, err error) {
 // ParseForwardPort return forward address and port from string.
 //
 // ex.)
-//     - `localhost:8000:localhost:18000` => local: "localhost:8000", remote: "localhost:18000"
-//     - `8080:localhost:18080` => local: "localhost:8080", remote: "localhost:18080"
-//     - `localhost:2222:12222` => local: "localhost:2222", remote: "localhost:12222"
+//   - `localhost:8000:localhost:18000` => local: "localhost:8000", remote: "localhost:18000"
+//   - `8080:localhost:18080` => local: "localhost:8080", remote: "localhost:18080"
+//   - `localhost:2222:12222` => local: "localhost:2222", remote: "localhost:12222"
 func ParseForwardPort(value string) (local, remote string, err error) {
 	// count column
 	count := strings.Count(value, ":")

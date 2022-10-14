@@ -10,11 +10,9 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/term"
-
 	"go.uber.org/atomic"
-
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/term"
 )
 
 // ShellInitial connect login shell over ssh.

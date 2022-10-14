@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/bingoohuang/gossh/pkg/hostparse"
-
 	"github.com/bingoohuang/gou/str"
 )
 

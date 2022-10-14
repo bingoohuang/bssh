@@ -11,13 +11,12 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/urfave/cli"
-
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/output"
 	sshl "github.com/bingoohuang/bssh/ssh"
-	prompt "github.com/c-bata/go-prompt"
+	"github.com/c-bata/go-prompt"
 	"github.com/pkg/sftp"
+	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
 
@@ -145,7 +144,8 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connec
 }
 
 func (r *RunSftp) doLs(lsdata map[string]sftpLs, c *cli.Context, exit chan bool, m sync.Locker,
-	client *Connect, server, argpath string) {
+	client *Connect, server, argpath string,
+) {
 	defer func() { exit <- true }()
 
 	// get output

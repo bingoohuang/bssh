@@ -14,7 +14,6 @@ import (
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 	"github.com/mattn/go-shellwords"
@@ -430,7 +429,6 @@ func (r *RunSftp) prepareRemotePath(path string, client *Connect) (string, error
 func (r *RunSftp) GetLocalComplete(path string) {
 	path = common.ExpandHomeDir(path)
 	stat, err := os.Lstat(path)
-
 	if err != nil {
 		return
 	}

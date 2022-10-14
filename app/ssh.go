@@ -4,17 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bingoohuang/bssh/list"
-	"github.com/bingoohuang/gg/pkg/v"
-
-	"github.com/bingoohuang/gou/str"
-	homedir "github.com/mitchellh/go-homedir"
-
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/list"
+	"github.com/bingoohuang/bssh/misc"
 	sshcmd "github.com/bingoohuang/bssh/ssh"
+	"github.com/bingoohuang/gg/pkg/v"
+	"github.com/bingoohuang/gou/str"
+	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 )
 
@@ -77,8 +74,10 @@ func Lssh() (app *cli.App) {
 	app.Flags = []cli.Flag{
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
-		cli.StringFlag{Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
-			Usage: "config `filepath`."},
+		cli.StringFlag{
+			Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
+			Usage: "config `filepath`.",
+		},
 
 		// port forward option
 		cli.StringFlag{Name: "L", Usage: "Local port forward mode.Specify a `[bind_address:]port:remote_addr:port`."},

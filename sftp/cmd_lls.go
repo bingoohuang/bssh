@@ -16,14 +16,12 @@ import (
 	"syscall"
 	"text/tabwriter"
 
-	"github.com/bingoohuang/gou/mat"
-	funk "github.com/thoas/go-funk"
-
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/gou/mat"
 	"github.com/blacknon/textcol"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
+	"github.com/thoas/go-funk"
 	"github.com/urfave/cli"
 )
 

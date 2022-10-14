@@ -5,17 +5,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bingoohuang/gou/str"
-	homedir "github.com/mitchellh/go-homedir"
-
-	"github.com/bingoohuang/bssh/list"
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/check"
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/list"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/scp"
 	"github.com/bingoohuang/gg/pkg/v"
+	"github.com/bingoohuang/gou/str"
+	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 )
 
@@ -61,8 +59,10 @@ func Lscp() (app *cli.App) {
 
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},
-		cli.StringFlag{Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
-			Usage: "config file path"},
+		cli.StringFlag{
+			Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
+			Usage: "config file path",
+		},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
 	}
 	app.EnableBashCompletion = true

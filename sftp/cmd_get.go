@@ -12,9 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
@@ -82,7 +81,7 @@ func (r *RunSftp) pullPath(client *Connect, path, target string) {
 
 			//
 			if stat.IsDir() { // is directory
-				_ = os.Mkdir(localpath, 0755)
+				_ = os.Mkdir(localpath, 0o755)
 			} else if err := pullFile(stat, client, localpath, p, r); err != nil { // is not directory
 				fmt.Fprintf(ow, "Error: %s\n", err)
 				continue
@@ -108,7 +107,6 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 	// set path
 	source := c.Args()[0]
 	target, err := r.parseTarget(c)
-
 	if err != nil {
 		return err
 	}
@@ -126,7 +124,7 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 		if len(r.Client) > 1 {
 			targetdir = filepath.Join(target, server)
 			// mkdir local target directory
-			err = os.MkdirAll(targetdir, 0755)
+			err = os.MkdirAll(targetdir, 0o755)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 				return nil
@@ -174,7 +172,7 @@ func (r *RunSftp) parseTarget(c *cli.Context) (string, error) {
 	}
 
 	// mkdir local target directory
-	err = os.MkdirAll(target, 0755)
+	err = os.MkdirAll(target, 0o755)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		return "", err
@@ -196,7 +194,7 @@ func pullFile(stat os.FileInfo, client *Connect, localpath, p string, r *RunSftp
 	defer remotefile.Close()
 
 	// open local file
-	localfile, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	localfile, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}

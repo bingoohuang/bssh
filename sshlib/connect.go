@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"go.uber.org/atomic"
-
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
 	"golang.org/x/term"
@@ -160,7 +159,6 @@ func (c *Connect) CheckClientAlive() error {
 
 // RequestTty requests the association of a pty with the session on the remote
 // host. Terminal size is obtained from the currently connected terminal
-//
 func RequestTty(session *ssh.Session) (err error) {
 	sshEcho := GetEnvSshEnv()
 

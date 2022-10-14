@@ -9,10 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/term"
-
 	"github.com/bingoohuang/filestash"
 	"github.com/bingoohuang/gossh/pkg/gossh"
+	"golang.org/x/term"
 )
 
 func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter, *io.PipeWriter) {

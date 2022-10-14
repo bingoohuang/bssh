@@ -3,6 +3,7 @@ package conf
 
 import (
 	"crypto/md5" // nolint
+	_ "embed"
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
@@ -14,19 +15,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bingoohuang/gossh/pkg/hostparse"
-
-	_ "embed"
-
-	"github.com/jedib0t/go-pretty/table"
-
-	"github.com/bingoohuang/gou/str"
-
-	"github.com/bingoohuang/gou/pbe"
-	"github.com/spf13/viper"
-
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/gossh/pkg/hostparse"
+	"github.com/bingoohuang/gou/pbe"
+	"github.com/bingoohuang/gou/str"
+	"github.com/jedib0t/go-pretty/table"
+	"github.com/spf13/viper"
 )
 
 // Config is Struct that stores the entire configuration file.

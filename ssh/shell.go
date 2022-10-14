@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/bingoohuang/gossh/pkg/hostparse"
 	"io"
 	"log"
 	"net/http"
@@ -13,23 +12,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
-
-	"github.com/bingoohuang/linuxdash"
-
+	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/filestash"
 	filestashcommon "github.com/bingoohuang/filestash/server/common"
 	"github.com/bingoohuang/filestash/server/middleware"
 	"github.com/bingoohuang/filestash/server/model/backend"
 	"github.com/bingoohuang/gossh/pkg/gossh"
+	"github.com/bingoohuang/gossh/pkg/hostparse"
+	"github.com/bingoohuang/linuxdash"
+	"github.com/gorilla/mux"
 	"github.com/pkg/sftp"
-
-	"github.com/bingoohuang/bssh/conf"
-
-	"github.com/bingoohuang/bssh/misc"
-
-	"github.com/bingoohuang/bssh/common"
-	"github.com/bingoohuang/bssh/sshlib"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -322,7 +317,7 @@ func (r *Run) getLogDirPath(server string) (dir string, dateFound, hostnameFound
 	dir, hostnameFound = Replace(dir, "<ServerName>", server, 1)
 
 	// create directory
-	err = os.MkdirAll(dir, 0700)
+	err = os.MkdirAll(dir, 0o700)
 
 	return
 }
@@ -360,6 +355,5 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 // noneExecute is not execute command and shell.
 func (r *Run) noneExecute() {
 	for range time.After(500 * time.Millisecond) { // nolint:gomnd
-
 	}
 }

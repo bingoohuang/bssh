@@ -17,11 +17,10 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/blacknon/textcol"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )
@@ -212,7 +211,8 @@ func (r *RunSftp) longList(lsdata map[string]sftpLs, c *cli.Context) {
 }
 
 func (r *RunSftp) listFile(f os.FileInfo, c *cli.Context, lsdata map[string]sftpLs,
-	server string, maxSizeWidth int, tabw io.Writer, prompt string) {
+	server string, maxSizeWidth int, tabw io.Writer, prompt string,
+) {
 	sys := f.Sys()
 
 	// TDXX(blacknon): count hardlink (2列目)の取得方法がわからないため、わかったら追加。

@@ -11,9 +11,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )

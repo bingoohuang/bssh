@@ -9,15 +9,13 @@ import (
 	"runtime"
 	"strings"
 
-	"golang.org/x/term"
-
 	"github.com/bingoohuang/bssh/common"
-	"github.com/bingoohuang/bssh/sshlib"
-	"github.com/bingoohuang/gou/pbe"
-
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/bssh/sshlib"
+	"github.com/bingoohuang/gou/pbe"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/term"
 )
 
 // TDXX(blacknon): 自動再接続機能の追加(v0.6.1)
@@ -290,7 +288,6 @@ func readConfContent(confPath string) (string, error) {
 func writeConfContent(confPath, content string) error {
 	confPath = common.ExpandHomeDir(confPath)
 	stat, err := os.Stat(confPath)
-
 	if err != nil {
 		return err
 	}
@@ -316,6 +313,7 @@ func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
 		}
 	}
 }
+
 func (r *Run) autoEncryptPwd() {
 	if r.Conf.IsDisableAutoEncryptPwd() || len(r.decodedPasswordMap) == 0 {
 		return

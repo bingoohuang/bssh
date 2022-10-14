@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bingoohuang/bssh/list"
-
 	"github.com/stretchr/testify/assert"
 )
 

@@ -87,7 +87,6 @@ func parsePipeLine(command string) (pslice [][]pipeLine, err error) {
 	// Create parser
 	in := strings.NewReader(command)
 	f, err := syntax.NewParser().Parse(in, " ")
-
 	if err != nil {
 		return
 	}

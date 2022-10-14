@@ -10,10 +10,9 @@ import (
 	"syscall"
 
 	"github.com/bingoohuang/bssh/conf"
-
 	"github.com/bingoohuang/bssh/output"
 	"github.com/bingoohuang/bssh/sshlib"
-	prompt "github.com/c-bata/go-prompt"
+	"github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 )
 

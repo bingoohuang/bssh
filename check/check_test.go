@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bingoohuang/bssh/check"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,26 +15,46 @@ func TestExistServer(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "Server exists", inputServer: []string{"server1"},
-			nameList: []string{"server1", "server2"}, expect: true},
-		{desc: "Server exists", inputServer: []string{"server2"},
-			nameList: []string{"server1", "server2"}, expect: true},
-		{desc: "Server exists", inputServer: []string{"serverA", "server2"},
-			nameList: []string{"server1", "server2"}, expect: true},
-		{desc: "Server doesn't exist", inputServer: []string{"server3"},
-			nameList: []string{"server1", "server2"}, expect: false},
-		{desc: "Input servers are empty", inputServer: []string{},
-			nameList: []string{"server1", "server2"}, expect: false},
-		{desc: "Input servers are nil", inputServer: nil,
-			nameList: []string{"server1", "server2"}, expect: false},
-		{desc: "Namelist are empty", inputServer: []string{"server1"},
-			nameList: []string{}, expect: false},
-		{desc: "Namelist are nil", inputServer: []string{"server1"},
-			nameList: nil, expect: false},
-		{desc: "Input servers and Namelist are empty", inputServer: []string{},
-			nameList: []string{}, expect: false},
-		{desc: "Input servers and Namelist are nil", inputServer: nil,
-			nameList: nil, expect: false},
+		{
+			desc: "Server exists", inputServer: []string{"server1"},
+			nameList: []string{"server1", "server2"}, expect: true,
+		},
+		{
+			desc: "Server exists", inputServer: []string{"server2"},
+			nameList: []string{"server1", "server2"}, expect: true,
+		},
+		{
+			desc: "Server exists", inputServer: []string{"serverA", "server2"},
+			nameList: []string{"server1", "server2"}, expect: true,
+		},
+		{
+			desc: "Server doesn't exist", inputServer: []string{"server3"},
+			nameList: []string{"server1", "server2"}, expect: false,
+		},
+		{
+			desc: "Input servers are empty", inputServer: []string{},
+			nameList: []string{"server1", "server2"}, expect: false,
+		},
+		{
+			desc: "Input servers are nil", inputServer: nil,
+			nameList: []string{"server1", "server2"}, expect: false,
+		},
+		{
+			desc: "Namelist are empty", inputServer: []string{"server1"},
+			nameList: []string{}, expect: false,
+		},
+		{
+			desc: "Namelist are nil", inputServer: []string{"server1"},
+			nameList: nil, expect: false,
+		},
+		{
+			desc: "Input servers and Namelist are empty", inputServer: []string{},
+			nameList: []string{}, expect: false,
+		},
+		{
+			desc: "Input servers and Namelist are nil", inputServer: nil,
+			nameList: nil, expect: false,
+		},
 	}
 
 	for _, v := range tds {

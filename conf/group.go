@@ -9,7 +9,7 @@ import (
 func (c ServerConfig) BelongsToGroup(cf *Config, name string) bool {
 	othersGroupName := cf.pickOthersGroupName()
 
-	if len(c.Group) == 0 { //others
+	if len(c.Group) == 0 { // others
 		return name == "" || name == othersGroupName
 	}
 

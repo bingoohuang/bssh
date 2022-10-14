@@ -15,10 +15,9 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/bingoohuang/bssh/misc"
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/sftp"
 	"github.com/urfave/cli"
 )

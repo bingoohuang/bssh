@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	runewidth "github.com/mattn/go-runewidth"
-	termbox "github.com/nsf/termbox-go"
+	"github.com/mattn/go-runewidth"
+	"github.com/nsf/termbox-go"
 )
 
 // Draw a string based on the specified coordinate information.

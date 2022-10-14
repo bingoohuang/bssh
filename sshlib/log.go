@@ -2,10 +2,10 @@ package sshlib
 
 import (
 	"bytes"
-	"github.com/lunixbochs/vtclean"
 	"os"
 	"time"
 
+	"github.com/lunixbochs/vtclean"
 	"go.uber.org/atomic"
 )
 

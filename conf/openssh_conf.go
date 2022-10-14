@@ -13,9 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/kevinburke/ssh_config"
 )
 

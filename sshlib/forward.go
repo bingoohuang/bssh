@@ -103,7 +103,6 @@ func x11Connect() (conn net.Conn, err error) {
 // x11forwarder forwarding socket x11 data.
 func x11forwarder(channel ssh.Channel) {
 	conn, err := x11Connect()
-
 	if err != nil {
 		return
 	}
@@ -145,8 +144,8 @@ func getX11Display() string {
 
 // readAuthority Read env `$XAUTHORITY`. If not set value, read `~/.Xauthority`.
 func readAuthority(hostname, display string) (
-	name string, data []byte, err error) {
-
+	name string, data []byte, err error,
+) {
 	// b is a scratch buffer to use and should be at least 256 bytes long
 	// (i.e. it should be able to hold a hostname).
 	b := make([]byte, 256)

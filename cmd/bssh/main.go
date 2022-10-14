@@ -7,13 +7,11 @@ package main
 import (
 	"os"
 
-	"github.com/bingoohuang/gou/str"
-	"github.com/mitchellh/go-homedir"
-
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/app"
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/gou/str"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/pflag"
 	"github.com/urfave/cli"
 )

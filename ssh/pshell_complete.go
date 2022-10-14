@@ -15,9 +15,8 @@ import (
 	"sync"
 
 	"github.com/bingoohuang/bssh/common"
-
 	"github.com/bingoohuang/bssh/misc"
-	prompt "github.com/c-bata/go-prompt"
+	"github.com/c-bata/go-prompt"
 )
 
 // TDXX(blacknon): `!!`や`!$`についても実装を行う
@@ -34,7 +33,6 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	// Get cursor left
 	left := t.CurrentLineBeforeCursor()
 	pslice, err := parsePipeLine(left)
-
 	if err != nil {
 		return prompt.FilterHasPrefix(nil, t.GetWordBeforeCursor(), false)
 	}

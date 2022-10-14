@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/bingoohuang/bssh/common"
-
 	"github.com/bingoohuang/bssh/output"
 )
 
@@ -26,7 +25,6 @@ type pShellHistory struct {
 	Output    *output.Output
 }
 
-//
 func (ps *pShell) NewHistoryWriter(server string, output *output.Output, m sync.Locker) *io.PipeWriter {
 	// craete pShellHistory struct
 	psh := &pShellHistory{
@@ -79,7 +77,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 	histfile := common.ExpandHomeDir(ps.HistoryFile)
 
 	// Open history file
-	file, err := os.OpenFile(histfile, os.O_RDONLY, 0600)
+	file, err := os.OpenFile(histfile, os.O_RDONLY, 0o600)
 	if err != nil {
 		return
 	}
@@ -108,14 +106,15 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 
 // PutHistoryFile put history text to s.HistoryFile
 // ex.) write history(history file format)
-//     YYYY-mm-dd_HH:MM:SS command...
-//     YYYY-mm-dd_HH:MM:SS command...
-//     ...
+//
+//	YYYY-mm-dd_HH:MM:SS command...
+//	YYYY-mm-dd_HH:MM:SS command...
+//	...
 func (ps *pShell) PutHistoryFile(cmd string) (err error) {
 	histfile := common.ExpandHomeDir(ps.HistoryFile)
 
 	// Open history file
-	file, err := os.OpenFile(histfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	file, err := os.OpenFile(histfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o600)
 	if err != nil {
 		return
 	}

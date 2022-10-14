@@ -4,9 +4,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/gou/pbe"
 	"github.com/manifoldco/promptui"
@@ -97,7 +96,6 @@ func (r *Run) decodePassword(password string, rawTemplLine string) string {
 	}
 }
 
-//
 func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error) {
 	if key == "" {
 		return nil
@@ -125,7 +123,6 @@ func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error)
 	return
 }
 
-//
 func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) error {
 	if command == "" {
 		return nil
@@ -137,7 +134,6 @@ func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) 
 		// Run key command
 		cmd := exec.Command("sh", "-c", command)
 		keyData, err := cmd.Output()
-
 		if err != nil {
 			return err
 		}
@@ -161,7 +157,6 @@ func (r *Run) registerAuthMapPublicKeyCommand(server, command, password string) 
 	return nil
 }
 
-//
 func (r *Run) registerAuthMapCertificate(server, cert string, signer ssh.Signer) (err error) {
 	authKey := AuthKey{AuthKeyCert, cert}
 

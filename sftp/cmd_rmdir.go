@@ -7,13 +7,11 @@ package sftp
 import (
 	"fmt"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/urfave/cli"
 )
 
-//
 func (r *RunSftp) rmdir(args []string) {
 	// create app
 	app := cli.NewApp()

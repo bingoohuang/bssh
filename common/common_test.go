@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bingoohuang/bssh/common"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,22 +37,30 @@ func TestMapReduce(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "(string) Overrides value if key exists but value is empty",
+		{
+			desc:   "(string) Overrides value if key exists but value is empty",
 			map1:   map[string]interface{}{"a": "1", "b": "2", "c": "3"},
 			map2:   map[string]interface{}{"a": "", "b": "1"},
-			expect: map[string]interface{}{"a": "1", "b": "1"}},
-		{desc: "([]string) Overrides value if key exists but value is empty",
+			expect: map[string]interface{}{"a": "1", "b": "1"},
+		},
+		{
+			desc:   "([]string) Overrides value if key exists but value is empty",
 			map1:   map[string]interface{}{"a": []string{"1"}, "b": "2", "c": "3"},
 			map2:   map[string]interface{}{"a": "", "b": "1"},
-			expect: map[string]interface{}{"a": []string{"1"}, "b": "1"}},
-		{desc: "(bool) Overrides value if key exists but value is empty",
+			expect: map[string]interface{}{"a": []string{"1"}, "b": "1"},
+		},
+		{
+			desc:   "(bool) Overrides value if key exists but value is empty",
 			map1:   map[string]interface{}{"a": true, "b": "2", "c": "3"},
 			map2:   map[string]interface{}{"a": false, "b": "1"},
-			expect: map[string]interface{}{"a": true, "b": "1"}},
-		{desc: "Returns map2 if map1 doesn't has keys",
+			expect: map[string]interface{}{"a": true, "b": "1"},
+		},
+		{
+			desc:   "Returns map2 if map1 doesn't has keys",
 			map1:   map[string]interface{}{},
 			map2:   map[string]interface{}{"a": "", "b": "1"},
-			expect: map[string]interface{}{"a": "", "b": "1"}},
+			expect: map[string]interface{}{"a": "", "b": "1"},
+		},
 	}
 
 	for _, v := range tds {
@@ -77,12 +84,18 @@ func TestStructToMap(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "Converts struct to map", val: A{S: "a", I: 1},
-			mapVal: map[string]interface{}{"S": "a", "I": 1}, ok: false},
-		{desc: "Sets zero value if val is a empty struct", val: A{},
-			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false},
-		{desc: "Private field doesn't set", val: A{f: 1.0},
-			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false},
+		{
+			desc: "Converts struct to map", val: A{S: "a", I: 1},
+			mapVal: map[string]interface{}{"S": "a", "I": 1}, ok: false,
+		},
+		{
+			desc: "Sets zero value if val is a empty struct", val: A{},
+			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false,
+		},
+		{
+			desc: "Private field doesn't set", val: A{f: 1.0},
+			mapVal: map[string]interface{}{"S": "", "I": 0}, ok: false,
+		},
 	}
 
 	for _, v := range tds {
@@ -107,10 +120,14 @@ func TestMapToStruct(t *testing.T) {
 	}
 
 	tds := []TestData{
-		{desc: "Converts map to struct",
-			mapVal: map[string]interface{}{"S": "a", "I": 1}, val: A{S: "a", I: 1}, ok: false},
-		{desc: "Empty map",
-			mapVal: map[string]interface{}{}, val: A{S: "", I: 0}, ok: false},
+		{
+			desc:   "Converts map to struct",
+			mapVal: map[string]interface{}{"S": "a", "I": 1}, val: A{S: "a", I: 1}, ok: false,
+		},
+		{
+			desc:   "Empty map",
+			mapVal: map[string]interface{}{}, val: A{S: "", I: 0}, ok: false,
+		},
 		// mapVal: map[string]interface{}{"f":1.0} raises panic
 		// mapVal: map[string]interface{}{"NoField":1.0} raises panic
 	}

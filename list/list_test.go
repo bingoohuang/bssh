@@ -87,14 +87,18 @@ func TestAllToggle(t *testing.T) {
 				ViewText:   texts,
 			},
 			allFlag: true,
-			expect: []string{"prd_web1", "prd_web2", "prd_app1", "prd_app2",
-				"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
+			expect: []string{
+				"prd_web1", "prd_web2", "prd_app1", "prd_app2",
+				"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1",
+			},
 		},
 		{
 			desc: "Toggle all",
 			l: Info{
-				SelectName: []string{"prd_web1", "prd_web2", "prd_app1", "prd_app2",
-					"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
+				SelectName: []string{
+					"prd_web1", "prd_web2", "prd_app1", "prd_app2",
+					"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1",
+				},
 				ViewText: texts,
 			},
 			allFlag: true,
@@ -107,8 +111,10 @@ func TestAllToggle(t *testing.T) {
 				ViewText:   texts,
 			},
 			allFlag: false,
-			expect: []string{"dev_web1", "prd_web1", "prd_web2", "prd_app1", "prd_app2",
-				"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1"},
+			expect: []string{
+				"dev_web1", "prd_web1", "prd_web2", "prd_app1", "prd_app2",
+				"prd_db1", "dev_web2", "dev_app1", "dev_app2", "dev_db1",
+			},
 		},
 	}
 

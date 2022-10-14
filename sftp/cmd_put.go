@@ -13,9 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
@@ -54,7 +53,6 @@ func (r *RunSftp) putAction(c *cli.Context) error {
 	target := c.Args()[1]
 
 	data, err := common.WalkDir(source)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		return nil
@@ -115,7 +113,7 @@ func (r *RunSftp) pushPath(client *Connect, target, base, path string) (err erro
 	fInfo, _ := os.Lstat(path)
 	if fInfo.IsDir() { // directory
 		_ = client.Connect.Mkdir(rpath)
-	} else { //file
+	} else { // file
 		localFile, err := os.Open(path)
 		if err != nil {
 			return err

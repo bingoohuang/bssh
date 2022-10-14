@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	termbox "github.com/nsf/termbox-go"
+	"github.com/nsf/termbox-go"
 )
 
 // InsertRune adds rune to search keywords(l.Keyword).
@@ -103,7 +103,7 @@ func (l *Info) keyEvent() {
 				l.draw()
 
 			// Ctrl + h Key(Help Window)
-			//case termbox.KeyCtrlH:
+			// case termbox.KeyCtrlH:
 
 			// Enter Key
 			case termbox.KeyEnter:

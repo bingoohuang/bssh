@@ -58,7 +58,6 @@ func (c *Connect) Command(command string) (err error) {
 	return
 }
 
-//
 func (c *Connect) setOption(session *ssh.Session) (err error) {
 	// Request tty
 	if c.TTY {

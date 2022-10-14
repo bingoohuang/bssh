@@ -12,13 +12,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bingoohuang/bssh/misc"
-
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/misc"
 	"github.com/urfave/cli"
 )
 
-//
 func (r *RunSftp) mkdir(args []string) {
 	// create app
 	app := cli.NewApp()
@@ -98,7 +96,6 @@ func (r *RunSftp) mkdirAction(c *cli.Context) error {
 	return nil
 }
 
-//
 func (r *RunSftp) lmkdir(args []string) {
 	// create app
 	app := cli.NewApp()
@@ -133,9 +130,9 @@ func (r *RunSftp) lmkdir(args []string) {
 		var err error
 
 		if c.Bool("p") {
-			err = os.MkdirAll(path, 0755)
+			err = os.MkdirAll(path, 0o755)
 		} else {
-			err = os.Mkdir(path, 0755)
+			err = os.Mkdir(path, 0o755)
 		}
 
 		if err != nil {
