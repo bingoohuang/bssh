@@ -225,7 +225,8 @@ Next:
 }
 
 func (i *interruptReader) openWebExplorer() {
-	pwd := i.executeCmd("pwd")
+	// TODO: support current directory on d5k
+	// pwd := i.executeCmd("pwd")
 	pwd := ""
 	// http://127.0.0.1:8333/files/home/footstone/
 	go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
