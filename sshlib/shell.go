@@ -23,7 +23,11 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 	if err != nil {
 		return err
 	}
-	defer term.Restore(fd, state)
+		c.termRestoreFn = func() {
+			term.Restore(fd, state)
+		}
+
+		defer c.TermRestore()
 
 	// setup
 	pipeToStdin, err := c.setupShell(session, webPort)

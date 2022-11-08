@@ -60,6 +60,19 @@ type Connect struct {
 	// terminal log path
 	logFile       string
 	toggleLogging *atomic.Bool
+
+	termRestoreFn  func()
+}
+
+func (c *Connect) TermRestore() {
+	if c.termRestoreFn != nil {
+		c.termRestoreFn()
+	}
+}
+
+func (c *Connect) Exit(code int) {
+	c.TermRestore()
+	os.Exit(code)
 }
 
 // CreateClient set c.Client.

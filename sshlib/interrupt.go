@@ -154,9 +154,7 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 		}
 		_, _ = os.Stdout.Write([]byte(">> "))
 		if i.port > 0 {
-			pwd := i.executeCmd("pwd")
-			// http://127.0.0.1:8333/files/home/footstone/
-			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
+			go i.openWebExplorer()
 		}
 	}
 
@@ -197,14 +195,12 @@ Next:
 		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%web") {
 		if i.port > 0 {
-			pwd := i.executeCmd("pwd")
-			// http://127.0.0.1:8333/files/home/footstone/
-			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
+			go i.openWebExplorer()
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%exit", "%quit") {
-		os.Exit(0)
+		i.connect.Exit(0)
 	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%up") {
 		i.up(cmdFields[1])
 	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%dl") {
@@ -225,4 +221,10 @@ Next:
 		goto Next
 	}
 	return 0, err
+}
+
+func (i *interruptReader) openWebExplorer() {
+	pwd := i.executeCmd("pwd")
+	// http://127.0.0.1:8333/files/home/footstone/
+	go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
 }
