@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bingoohuang/filestash"
+	"github.com/bingoohuang/gg/pkg/ss"
 	"github.com/bingoohuang/gossh/pkg/gossh"
 	"golang.org/x/term"
 )
@@ -178,21 +179,23 @@ Next:
 	i.connect.ToggleLogging(false)
 	defer i.connect.ToggleLogging(true)
 
-	if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%?") {
-		fmt.Print("Available commands:\r\n" +
-			"0) %?            : to show help info\r\n" +
-			"1) %dash         : to open the info page in browser\r\n" +
-			"2) %web          : to open the file explorer in browser\r\n" +
-			"3) %up localfile : to upload the local file to the remote\r\n" +
+	cmd := strings.ToLower(cmdFields[0])
+	if len(cmdFields) == 1 && ss.AnyOf(cmd, "%?") {
+		fmt.Print("Available commands:\r\n"+
+			"0) %?            : to show help info\r\n"+
+			"1) %dash         : to open the info page in browser\r\n"+
+			"2) %web          : to open the file explorer in browser\r\n"+
+			"3) %up localfile : to upload the local file to the remote\r\n"+
 			"4) %dl remotefile: to download the remote file to the local\r\n",
+			"5) %exit:          to exit the current bssh connection\r\n",
 		)
-	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%dash") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%dash") {
 		if i.port > 0 {
 			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
-	} else if len(cmdFields) == 1 && strings.EqualFold(cmdFields[0], "%web") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%web") {
 		if i.port > 0 {
 			pwd := i.executeCmd("pwd")
 			// http://127.0.0.1:8333/files/home/footstone/
@@ -200,9 +203,11 @@ Next:
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
-	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "%up") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%exit", "%quit") {
+		os.Exit(0)
+	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%up") {
 		i.up(cmdFields[1])
-	} else if len(cmdFields) == 2 && strings.EqualFold(cmdFields[0], "%dl") {
+	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%dl") {
 		i.dl(cmdFields[1])
 
 		// 参考 https://github.com/M09Ic/rscp
