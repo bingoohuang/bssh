@@ -61,7 +61,7 @@ type Connect struct {
 	logFile       string
 	toggleLogging *atomic.Bool
 
-	termRestoreFn  func()
+	termRestoreFn func()
 }
 
 func (c *Connect) TermRestore() {
