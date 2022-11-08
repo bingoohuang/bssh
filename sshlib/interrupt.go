@@ -154,7 +154,7 @@ func (i *interruptReader) Read(p []byte) (n int, err error) {
 		}
 		_, _ = os.Stdout.Write([]byte(">> "))
 		if i.port > 0 {
-			go i.openWebExplorer()
+			i.openWebExplorer()
 		}
 	}
 
@@ -177,7 +177,8 @@ Next:
 	i.connect.ToggleLogging(false)
 	defer i.connect.ToggleLogging(true)
 
-	cmd := strings.ToLower(cmdFields[0])
+	cmd := ss.If(len(cmdFields) > 0, strings.ToLower(cmdFields[0]), "")
+
 	if len(cmdFields) == 1 && ss.AnyOf(cmd, "%?") {
 		fmt.Print("Available commands:\r\n"+
 			"0) %?            : to show help info\r\n"+
@@ -195,7 +196,7 @@ Next:
 		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%web") {
 		if i.port > 0 {
-			go i.openWebExplorer()
+			i.openWebExplorer()
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
@@ -225,6 +226,7 @@ Next:
 
 func (i *interruptReader) openWebExplorer() {
 	pwd := i.executeCmd("pwd")
+	pwd := ""
 	// http://127.0.0.1:8333/files/home/footstone/
 	go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
 }
