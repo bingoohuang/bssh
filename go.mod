@@ -39,8 +39,8 @@ require (
 	github.com/vbauerster/mpb v3.4.0+incompatible
 	go.uber.org/atomic v1.9.0
 	golang.org/x/crypto v0.1.0
-	golang.org/x/net v0.1.0
-	golang.org/x/term v0.1.0
+	golang.org/x/net v0.8.0
+	golang.org/x/term v0.6.0
 	mvdan.cc/sh v2.6.4+incompatible
 )
 
@@ -109,8 +109,8 @@ require (
 	go.mongodb.org/mongo-driver v1.8.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
-	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/api v0.81.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd // indirect
