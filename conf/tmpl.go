@@ -58,6 +58,10 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 		c.ID = v
 	}
 
+	if v := t.Props["key"]; v != "" && c.Key == "" {
+		c.Key = v
+	}
+
 	c.InitialCmd = substituteProps(c.InitialCmd, t.Props)
 	c.Note = substituteProps(c.Note, t.Props)
 	c.Raw = t.Raw

@@ -387,10 +387,10 @@ func CheckFormatServerConf(c Config) (isFormat bool) {
 	return
 }
 
-// CheckFormatServerConfAuth checkes format of server config authentication.
+// CheckFormatServerConfAuth checks format of server config authentication.
 //
 // Note: Checking Pass, Key, Cert, AgentAuth, PKCS11Use, PKCS11Provider, Keys or
-// Passes having a value. No checking a validity of each fields.
+// Passes having a value. No checking a validity of each field.
 func CheckFormatServerConfAuth(c ServerConfig) (isFormat bool) {
 	isFormat = false
 	if c.Pass != "" || c.Key != "" || c.Cert != "" {
@@ -593,7 +593,7 @@ func (cf *Config) loadTempHosts(confPath string) {
 		return
 	}
 
-	file, _ := ioutil.ReadFile(tempHostsFile)
+	file, _ := os.ReadFile(tempHostsFile)
 	for _, line := range strings.Split(string(file), "\n") {
 		hostLine := strings.TrimSpace(line)
 		if hostLine != "" && !strings.HasPrefix(hostLine, "#") {
