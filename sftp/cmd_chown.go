@@ -39,7 +39,7 @@ func (r *RunSftp) chown(args []string) {
 }
 
 func (r *RunSftp) chownAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint:gomnd
+	if len(c.Args()) != 2 {
 		fmt.Println("Requires two arguments")
 		fmt.Println("chown group path")
 
@@ -62,7 +62,6 @@ func (r *RunSftp) chownAction(c *cli.Context) error {
 	return nil
 }
 
-// nolint:dupl
 func (r *RunSftp) doChown(exit chan bool, client *Connect, server string, path string, user string) {
 	defer func() { exit <- true }()
 

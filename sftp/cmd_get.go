@@ -93,7 +93,7 @@ func (r *RunSftp) pullPath(client *Connect, path, target string) {
 }
 
 func (r *RunSftp) getAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint:gomnd
+	if len(c.Args()) != 2 {
 		fmt.Println("Requires two arguments")
 		fmt.Println("get source(remote) target(local)")
 
@@ -143,7 +143,7 @@ func (r *RunSftp) getAction(c *cli.Context) error {
 	r.Progress.Wait()
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint:gomnd
+	time.Sleep(300 * time.Millisecond)
 
 	return nil
 }

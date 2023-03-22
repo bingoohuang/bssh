@@ -41,7 +41,7 @@ func ParseScpPath(arg string) (isRemote bool, path string) {
 	argArray := strings.SplitN(arg, ":", 2)
 
 	// check split count
-	if len(argArray) < 2 { // nolint:gomnd
+	if len(argArray) < 2 {
 		return false, argArray[0]
 	}
 

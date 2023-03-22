@@ -72,7 +72,6 @@ const (
 	defaultHistoryFile = "~/.lssh_history"
 )
 
-// nolint:funlen
 func (r *Run) pshell() (err error) {
 	// print header
 	fmt.Println("Start parallel-shell...")

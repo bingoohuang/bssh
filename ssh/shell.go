@@ -29,7 +29,7 @@ import (
 )
 
 // run shell
-// nolint:funlen
+
 func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
 	config, ok := r.Conf.Server[server]
@@ -42,7 +42,7 @@ func (r *Run) shell() (err error) {
 	if len(r.serverAuthMethodMap[server]) == 0 {
 		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", server)
 
-		return errors.New(msg) // nolint:goerr113
+		return errors.New(msg)
 	}
 
 	r.overwritePortForwardConfig(&config)
@@ -354,6 +354,6 @@ func localrcShell(connect *sshlib.Connect, session *ssh.Session, localrcPath []s
 
 // noneExecute is not execute command and shell.
 func (r *Run) noneExecute() {
-	for range time.After(500 * time.Millisecond) { // nolint:gomnd
+	for range time.After(500 * time.Millisecond) {
 	}
 }

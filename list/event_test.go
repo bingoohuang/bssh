@@ -42,7 +42,6 @@ func TestDeleteRune(t *testing.T) {
 		{desc: "Delete multibyte rune", l: list.Info{Keyword: "あいう"}, expect: "あい"},
 		{desc: "Expect is empty", l: list.Info{Keyword: "a"}, expect: ""},
 
-		// nolint:godox
 		// FIXME raise panic {desc: "Delete empty", l: Info{Keyword: ""}, expect: ""},
 	}
 

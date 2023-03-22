@@ -78,7 +78,7 @@ func lscpAction(c *cli.Context) error {
 	// check count args
 	args, argOptions := conf.ParseMoreOptions(c.Args())
 	nargs := len(args)
-	if nargs < 2 { // nolint:gomnd
+	if nargs < 2 {
 		_, _ = fmt.Fprintln(os.Stderr, "Too few arguments.")
 		_ = cli.ShowAppHelp(c)
 

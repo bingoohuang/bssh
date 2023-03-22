@@ -146,7 +146,7 @@ func (cp *Scp) push() {
 	}
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint:gomnd
+	time.Sleep(300 * time.Millisecond)
 
 	// exit messages
 	fmt.Println("all push exit.")
@@ -248,7 +248,7 @@ func (cp *Scp) viaPush() {
 	}
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint:gomnd
+	time.Sleep(300 * time.Millisecond)
 
 	// exit messages
 	fmt.Println("all push exit.")
@@ -347,7 +347,7 @@ func (cp *Scp) pull() {
 	}
 
 	// wait 0.3 sec
-	time.Sleep(300 * time.Millisecond) // nolint:gomnd
+	time.Sleep(300 * time.Millisecond)
 
 	// exit messages
 	fmt.Println("all pull exit.")

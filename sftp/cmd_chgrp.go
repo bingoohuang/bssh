@@ -39,7 +39,7 @@ func (r *RunSftp) chgrp(args []string) {
 }
 
 func (r *RunSftp) chgrpAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint:gomnd
+	if len(c.Args()) != 2 {
 		fmt.Println("Requires two arguments")
 		fmt.Println("chgrp group path")
 
@@ -61,7 +61,6 @@ func (r *RunSftp) chgrpAction(c *cli.Context) error {
 	return nil
 }
 
-// nolint:dupl
 func (r *RunSftp) doChgrp(exit chan bool, client *Connect, server, path, group string) {
 	defer func() { exit <- true }()
 

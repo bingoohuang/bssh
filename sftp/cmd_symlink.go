@@ -34,7 +34,7 @@ func (r *RunSftp) symlink(args []string) {
 }
 
 func (r *RunSftp) symlinkAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint:gomnd
+	if len(c.Args()) != 2 {
 		fmt.Println("Requires two arguments")
 		fmt.Println("symlink source target")
 

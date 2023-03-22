@@ -213,7 +213,7 @@ func (ps *pShell) buildinOut(num int, out *io.PipeWriter, ch chan<- bool) {
 
 // executePipeLineRemote is exec command in remote machine.
 // Didn't know how to send data from Writer to Channel, so switch the function if * io.PipeWriter is Nil.
-// nolint:funlen
+
 func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.PipeWriter,
 	ch chan<- bool, kill chan bool,
 ) {
@@ -306,7 +306,7 @@ func (ps *pShell) executeRemotePipeLine(pline pipeLine, in io.Reader, out *io.Pi
 	wait(len(sessions), exit)
 
 	// wait time (0.500 sec)
-	time.Sleep(5000 * time.Millisecond) // nolint:gomnd
+	time.Sleep(5000 * time.Millisecond)
 
 	// Print message `Please input enter` (Only when input is os.Stdin and output is os.Stdout).
 	// Note: This necessary for using Blocking.IO.
@@ -351,7 +351,7 @@ func (ps *pShell) executeLocalPipeLine(pline pipeLine, in io.Reader, out *io.Pip
 	// delete command prefix(`!`)
 	pline.Args[0] = regexp.MustCompile(`^!`).ReplaceAllString(pline.Args[0], "")
 
-	cmd := exec.Command("sh", "-c", strings.Join(pline.Args, " ")) // nolint:gosec
+	cmd := exec.Command("sh", "-c", strings.Join(pline.Args, " "))
 
 	// set stdin, stdout, stderr
 	cmd.Stdin = stdin

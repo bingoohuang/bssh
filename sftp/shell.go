@@ -37,7 +37,7 @@ func (r *RunSftp) shell() {
 		prompt.OptionLivePrefix(r.CreatePrompt),
 		prompt.OptionInputTextColor(prompt.Green),
 		prompt.OptionPrefixTextColor(prompt.Blue),
-		prompt.OptionMaxSuggestion(16),                                              // nolint:gomnd
+		prompt.OptionMaxSuggestion(16),
 		prompt.OptionCompletionWordSeparator(completer.FilePathCompletionSeparator), // test
 	)
 
@@ -46,7 +46,7 @@ func (r *RunSftp) shell() {
 }
 
 // Executor sftp Shell mode function.
-func (r *RunSftp) Executor(command string) { // nolint:funlen
+func (r *RunSftp) Executor(command string) {
 	p := shellwords.NewParser()
 	p.ParseEnv = true
 	cmdline, _ := p.Parse(command)
@@ -125,7 +125,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
 		case 1:
 			return r.PathComplete(true, 1, t) // remote
-		case 2: // nolint:gomnd
+		case 2:
 			return r.PathComplete(false, 2, t) // local
 		}
 	case "lcd":
@@ -145,7 +145,7 @@ func (r *RunSftp) Completer(t prompt.Document) []prompt.Suggest {
 		switch strings.Count(t.CurrentLineBeforeCursor(), " ") {
 		case 1:
 			return r.PathComplete(false, 1, t) // local
-		case 2: // nolint:gomnd
+		case 2:
 			return r.PathComplete(true, 2, t) // remote
 		}
 	case misc.Rename:

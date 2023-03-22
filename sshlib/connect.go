@@ -85,7 +85,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 	}
 
 	// Create new ssh.ClientConfig{}
-	config := &ssh.ClientConfig{
+	sc := &ssh.ClientConfig{
 		User:            user,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
@@ -104,7 +104,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 	}
 
 	// Create new ssh connect
-	sshCon, channel, req, err := ssh.NewClientConn(netConn, uri, config)
+	sshCon, channel, req, err := ssh.NewClientConn(netConn, uri, sc)
 	if err != nil {
 		return
 	}

@@ -3,7 +3,7 @@
 // that can be found in the LICENSE file.
 
 // Package common is a package that summarizes the common processing of bssh package.
-// nolint:goerr113
+
 package common
 
 import (
@@ -178,7 +178,6 @@ func GetPassPhrase(msg string) (input string, err error) {
 	return
 }
 
-// nolint:gochecknoinits
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -326,11 +325,11 @@ func ParseForwardPort(value string) (local, remote string, err error) {
 
 	// switch count
 	switch count {
-	case 3: // nolint:gomnd
+	case 3:
 		// `localhost:8000:localhost:18000`
 		local = data[0] + ":" + data[1]
 		remote = data[2] + ":" + data[3]
-	case 2: // nolint:gomnd
+	case 2:
 		// check 1st column is int
 		_, e := strconv.Atoi(data[0])
 		if e == nil { // 1st column is port (int)

@@ -31,7 +31,7 @@ func (r *RunSftp) rename(args []string) {
 }
 
 func (r *RunSftp) renameAction(c *cli.Context) error {
-	if len(c.Args()) != 2 { // nolint:gomnd
+	if len(c.Args()) != 2 {
 		fmt.Println("Requires two arguments")
 		fmt.Println("rename [old] [new]")
 

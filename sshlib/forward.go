@@ -36,7 +36,7 @@ func (c *Connect) X11Forward(session *ssh.Session) (err error) {
 	display := getX11Display()
 
 	_, xAuth, err := readAuthority("", display)
-	if err != io.EOF && err != nil {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return
 	}
 

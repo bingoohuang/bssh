@@ -62,7 +62,7 @@ func (r *Run) cmd() {
 
 	close(exitInput)
 
-	time.Sleep(300 * time.Millisecond) // nolint:gomnd
+	time.Sleep(300 * time.Millisecond)
 }
 
 func (r *Run) createWriter(connMap map[string]*sshlib.Connect) []io.WriteCloser {

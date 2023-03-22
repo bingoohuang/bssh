@@ -132,7 +132,7 @@ func (o *Output) Printer(reader io.Reader) {
 			break
 		}
 
-		<-time.After(50 * time.Millisecond) // nolint:gomnd
+		<-time.After(50 * time.Millisecond)
 	}
 }
 
@@ -157,8 +157,8 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) erro
 			decor.OnComplete(decor.Name(path, decor.WCSyncSpaceR), fmt.Sprintf("%s done!", path)),
 		),
 		mpb.AppendDecorators(
-			decor.OnComplete(decor.Percentage(decor.WC{W: 5}), ""), // nolint:gomnd
-			decor.Elapsed(decor.ET_STYLE_HHMMSS, decor.WC{W: 10}),  // nolint:gomnd
+			decor.OnComplete(decor.Percentage(decor.WC{W: 5}), ""),
+			decor.Elapsed(decor.ET_STYLE_HHMMSS, decor.WC{W: 10}),
 		),
 	)
 
@@ -192,7 +192,7 @@ func (o *Output) ProgressPrinter(size int64, reader io.Reader, path string) erro
 // OutColorStrings ...
 func OutColorStrings(num int, inStrings string) (str string) {
 	// 1=Red,2=Yellow,3=Blue,4=Magenta,0=Cyan
-	color := 31 + num%5 // nolint:gomnd
+	color := 31 + num%5
 
 	str = fmt.Sprintf("\x1b[%dm%s\x1b[0m", color, inStrings)
 
@@ -215,17 +215,18 @@ loop:
 			}
 		}
 
-		switch err {
-		case nil:
+		if err == nil {
 			continue
-		case io.ErrClosedPipe, io.EOF:
+		}
+
+		if errors.Is(err, io.ErrClosedPipe) || errors.Is(err, io.EOF) {
 			break loop
 		}
 
 		select {
 		case <-isExit:
 			break loop
-		case <-time.After(10 * time.Millisecond): // nolint:gomnd
+		case <-time.After(10 * time.Millisecond):
 			continue
 		}
 	}
@@ -250,7 +251,7 @@ loop:
 		select {
 		case <-isExit:
 			break loop
-		case <-time.After(10 * time.Millisecond): // nolint:gomnd
+		case <-time.After(10 * time.Millisecond):
 			continue
 		}
 	}

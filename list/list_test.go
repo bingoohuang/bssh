@@ -1,7 +1,7 @@
 // Copyright (c) 2019 Blacknon. All rights reserved.
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
-// nolint:testpackage
+
 package list
 
 import (
@@ -124,7 +124,6 @@ func TestAllToggle(t *testing.T) {
 	}
 }
 
-// nolint:funlen
 func TestGetText(t *testing.T) {
 	type TestData struct {
 		desc   string
@@ -232,7 +231,6 @@ func TestGetText(t *testing.T) {
 	}
 }
 
-// nolint:funlen
 func TestGetFilterText(t *testing.T) {
 	type TestData struct {
 		desc   string

@@ -23,7 +23,7 @@ import (
 // TDXX(blacknon): `!command`だとまとめてパイプ経由でデータを渡すことになっているが、`!!command`で個別のローカルコマンドにデータを渡すように実装する
 
 // Completer parallel-shell complete function
-// nolint:funlen
+
 func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 	// if current line data is none.
 	if len(t.CurrentLine()) == 0 {

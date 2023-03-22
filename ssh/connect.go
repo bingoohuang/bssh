@@ -27,7 +27,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 	}
 
 	// setup dialer
-	var dialer proxy.Dialer = gonet.DialerTimeoutBean{ConnTimeout: 10 * time.Second} // nolint:gomnd
+	var dialer proxy.Dialer = gonet.DialerTimeoutBean{ConnTimeout: 10 * time.Second}
 
 	// Connect loop proxy server
 	for _, p := range proxyRoute {
@@ -122,7 +122,7 @@ proxyLoop:
 		}
 
 		if !isOk {
-			err = fmt.Errorf("not Found proxy : %s", server) // nolint:goerr113
+			err = fmt.Errorf("not Found proxy : %s", server)
 			return nil, err
 		}
 
