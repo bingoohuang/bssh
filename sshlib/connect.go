@@ -92,6 +92,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		Timeout:         time.Duration(timeout) * time.Second,
 	}
 
+	sc.SetDefaults()
 	sc.KeyExchanges = append(sc.KeyExchanges, "diffie-hellman-group-exchange-sha256")
 
 	// check Dialer
