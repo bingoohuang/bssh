@@ -197,7 +197,7 @@ type OpenSSHConfig struct {
 // ReadConf load configuration file and return Config structure.
 func ReadConf(confPath string) (config Config) {
 	confPath = common.ExpandHomeDir(confPath)
-	checkConfPath(confPath)
+	confPath = checkConfPath(confPath)
 
 	config.Server = map[string]ServerConfig{}
 	config.SSHConfig = map[string]OpenSSHConfig{}
@@ -255,9 +255,10 @@ func ReadConf(confPath string) (config Config) {
 //go:embed conf.toml
 var initBsshToml []byte
 
-func checkConfPath(confPath string) {
-	if common.IsExist(confPath) {
-		return
+func checkConfPath(confPath string) string {
+	confPath, exits := common.IsExist(confPath)
+	if exits {
+		return confPath
 	}
 
 	fmt.Printf("Config file(%s) not found, auto create one, please edit later.\n", confPath)
@@ -267,6 +268,7 @@ func checkConfPath(confPath string) {
 	_ = os.WriteFile(confPath, initBsshToml, 0o600)
 
 	os.Exit(0)
+	return ""
 }
 
 func generateKey(tmplsNum, hostsNum, i int, j int) string {
@@ -588,7 +590,8 @@ func (cf *Config) loadTempHosts(confPath string) {
 	cf.tempHostsFile = tempHostsFile
 	cf.tempHosts = make(map[string]bool)
 
-	if !common.IsExist(tempHostsFile) {
+	tempHostsFile, exists := common.IsExist(tempHostsFile)
+	if !exists {
 		return
 	}
 

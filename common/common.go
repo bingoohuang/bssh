@@ -31,9 +31,23 @@ import (
 var characterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 // IsExist returns existence of file.
-func IsExist(filename string) bool {
-	_, err := os.Stat(filename)
-	return err == nil
+func IsExist(filename string) (string, bool) {
+	fi, err := os.Lstat(filename)
+	if err != nil {
+		log.Printf("stat %s: %v", filename, err)
+		return filename, false
+	}
+
+	if fi.Mode()&os.ModeSymlink != 0 {
+		s, err := os.Readlink(filename)
+		if err != nil {
+			log.Printf("readlink %s: %v", filename, err)
+			return filename, false
+		}
+		return s, true
+	}
+
+	return filename, true
 }
 
 // MapReduce sets map1 value to map2 if map1 and map2 have same key, and value

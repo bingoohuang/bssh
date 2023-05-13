@@ -25,7 +25,7 @@ func TestIsExist(t *testing.T) {
 	}
 
 	for _, v := range tds {
-		got := common.IsExist(v.filename)
+		_, got := common.IsExist(v.filename)
 		assert.Equal(t, v.expect, got, v.desc)
 	}
 }
