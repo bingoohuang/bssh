@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -46,7 +45,7 @@ func (r *Run) cmd() {
 		}
 	case !r.IsParallel && len(r.ServerList) > 1:
 		if r.isStdinPipe {
-			stdinData, _ = ioutil.ReadAll(os.Stdin)
+			stdinData, _ = io.ReadAll(os.Stdin)
 		}
 	}
 

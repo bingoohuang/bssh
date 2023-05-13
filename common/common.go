@@ -13,7 +13,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -138,7 +137,7 @@ func GetFilesBase64(paths []string) (string, error) {
 	var data bytes.Buffer
 
 	for _, path := range paths {
-		file, err := ioutil.ReadFile(GetFullPath(path))
+		file, err := os.ReadFile(GetFullPath(path))
 		if err != nil {
 			return "", err
 		}

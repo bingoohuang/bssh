@@ -6,7 +6,6 @@ import (
 	_ "embed"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -265,7 +264,7 @@ func checkConfPath(confPath string) {
 	fmt.Println("or directly run `bssh -H user:pass@192.168.1.30:8022`")
 
 	_ = os.MkdirAll(filepath.Dir(confPath), 0o755)
-	_ = ioutil.WriteFile(confPath, initBsshToml, 0o600)
+	_ = os.WriteFile(confPath, initBsshToml, 0o600)
 
 	os.Exit(0)
 }

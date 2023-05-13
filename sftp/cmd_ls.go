@@ -10,7 +10,6 @@ package sftp
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"sync"
@@ -40,7 +39,7 @@ func ClientReadFile(client *Connect, file string) (string, error) {
 		return "", err
 	}
 
-	bytes, err := ioutil.ReadAll(f)
+	bytes, err := io.ReadAll(f)
 	if err != nil {
 		return "", err
 	}

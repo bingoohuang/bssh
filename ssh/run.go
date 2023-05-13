@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -280,7 +279,7 @@ func (r *Run) registerAutoEncryptPwd(oldPwd string) {
 
 func readConfContent(confPath string) (string, error) {
 	confPath = common.ExpandHomeDir(confPath)
-	bytes, err := ioutil.ReadFile(confPath)
+	bytes, err := os.ReadFile(confPath)
 
 	return string(bytes), err
 }
@@ -292,7 +291,7 @@ func writeConfContent(confPath, content string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(confPath, []byte(content), stat.Mode())
+	return os.WriteFile(confPath, []byte(content), stat.Mode())
 }
 
 func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
