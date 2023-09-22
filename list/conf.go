@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/bingoohuang/bssh/conf"
+	"github.com/bingoohuang/gg/pkg/ss"
 )
 
 // ShowServersView shows view for servers.
@@ -19,7 +20,7 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 	l.RowFn = func(name string) string {
 		s := cf.Server[name]
 
-		return name + "\t" + s.User + "@" + s.Addr + "\t" + s.Note
+		return name + "\t" + s.User + "@" + s.Addr + ss.If(s.Port != "", ":"+s.Port, "") + "\t" + s.Note
 	}
 	l.MultiFlag = isMulti
 
