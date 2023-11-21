@@ -1,6 +1,8 @@
 package sshlib
 
 import (
+	"crypto/sha1"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
@@ -82,6 +84,13 @@ var frp = func() string {
 		return ""
 	}
 	if strings.HasPrefix(env, ":") {
+		if l := env[1]; 'a' <= l && l <= 'z' || 'A' <= l && l <= 'Z' {
+			h := sha1.New()
+			h.Write([]byte(env[1:]))
+			sum := h.Sum(nil)
+			port := binary.BigEndian.Uint16(sum[:2])
+			env = fmt.Sprintf(":%d", port)
+		}
 		return "127.0.0.1" + env
 	}
 
