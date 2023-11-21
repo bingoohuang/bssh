@@ -1,6 +1,7 @@
 package sshlib
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -75,6 +76,8 @@ func (c *Connect) Exit(code int) {
 	os.Exit(code)
 }
 
+var frp = os.Getenv("FRP")
+
 // CreateClient set c.Client.
 func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod) (err error) {
 	uri := net.JoinHostPort(host, port)
@@ -100,10 +103,22 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		c.ProxyDialer = proxy.Direct
 	}
 
+	var targetInfo []byte
+	if frp != "" {
+		targetInfo = []byte(fmt.Sprintf("TARGET %s;", uri))
+		uri = frp
+	}
+
 	// Dial to host:port
 	netConn, err := c.ProxyDialer.Dial("tcp", uri)
 	if err != nil {
 		return
+	}
+
+	if len(targetInfo) > 0 {
+		if _, err := netConn.Write(targetInfo); err != nil {
+			return err
+		}
 	}
 
 	// Create new ssh connect
