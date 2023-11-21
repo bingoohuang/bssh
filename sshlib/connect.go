@@ -76,7 +76,17 @@ func (c *Connect) Exit(code int) {
 	os.Exit(code)
 }
 
-var frp = os.Getenv("FRP")
+var frp = func() string {
+	env := os.Getenv("FRP")
+	if env == "" {
+		return ""
+	}
+	if strings.HasPrefix(env, ":") {
+		return "127.0.0.1" + env
+	}
+
+	return env
+}()
 
 // CreateClient set c.Client.
 func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod) (err error) {
