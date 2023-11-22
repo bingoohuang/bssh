@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -78,23 +79,33 @@ func (c *Connect) Exit(code int) {
 	os.Exit(code)
 }
 
-var frp = func() string {
+var frp = func() (proxies []string) {
 	env := os.Getenv("FRP")
 	if env == "" {
-		return ""
+		return nil
 	}
-	if strings.HasPrefix(env, ":") {
-		if l := env[1]; 'a' <= l && l <= 'z' || 'A' <= l && l <= 'Z' {
-			h := sha1.New()
-			h.Write([]byte(env[1:]))
-			sum := h.Sum(nil)
-			port := binary.BigEndian.Uint16(sum[:2])
-			env = fmt.Sprintf(":%d", port)
+	parts := strings.Split(env, ",")
+	for _, part := range parts {
+		host, port, err := net.SplitHostPort(part)
+		if err != nil {
+			log.Panicf("invalid %s, should [host]:port", part)
 		}
-		return "127.0.0.1" + env
+
+		if host == "" {
+			host = "127.0.0.1"
+		}
+		if l := port[0]; 'a' <= l && l <= 'z' || 'A' <= l && l <= 'Z' {
+			h := sha1.New()
+			h.Write([]byte(port))
+			sum := h.Sum(nil)
+			portNum := binary.BigEndian.Uint16(sum[:2])
+			port = fmt.Sprintf("%d", portNum)
+		}
+
+		proxies = append(proxies, fmt.Sprintf("%s:%s", host, port))
 	}
 
-	return env
+	return
 }()
 
 // CreateClient set c.Client.
@@ -122,10 +133,13 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		c.ProxyDialer = proxy.Direct
 	}
 
-	var targetInfo []byte
-	if frp != "" {
-		targetInfo = []byte(fmt.Sprintf("TARGET %s;", uri))
-		uri = frp
+	var targetInfo []string
+	if len(frp) > 0 {
+		for _, p := range frp[1:] {
+			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", p))
+		}
+		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
+		uri = frp[0]
 	}
 
 	// Dial to host:port
@@ -134,8 +148,11 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		return
 	}
 
-	if len(targetInfo) > 0 {
-		if _, err := netConn.Write(targetInfo); err != nil {
+	for i, target := range targetInfo {
+		if i > 0 {
+			time.Sleep(100 * time.Millisecond)
+		}
+		if _, err := netConn.Write([]byte(target)); err != nil {
 			return err
 		}
 	}
