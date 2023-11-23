@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/term"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // getAbsPath return absolute path convert.
@@ -38,7 +38,7 @@ func getPassphrase(msg string) (input string, err error) {
 	defer tty.Close()
 
 	// get input
-	result, err := term.ReadPassword(int(tty.Fd()))
+	result, err := terminal.ReadPassword(int(tty.Fd()))
 
 	if len(result) == 0 {
 		err = fmt.Errorf("err: input is empty")

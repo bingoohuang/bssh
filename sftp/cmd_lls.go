@@ -13,7 +13,6 @@ import (
 	"os"
 	pkguser "os/user"
 	"strconv"
-	"syscall"
 	"text/tabwriter"
 
 	"github.com/bingoohuang/bssh/common"
@@ -109,14 +108,7 @@ func longList(data []os.FileInfo) {
 	lsData := make([]*sftpLsData, len(data))
 
 	for i, f := range data {
-		var uid, gid uint32
-
-		var size int64
-
-		sys := f.Sys()
-		if stat, ok := sys.(*syscall.Stat_t); ok {
-			uid, gid, size = stat.Uid, stat.Gid, stat.Size
-		}
+		uid, gid, size, _ := SyscallStat(f)
 
 		user := strconv.FormatUint(uint64(uid), 10)
 		group := strconv.FormatUint(uint64(gid), 10)

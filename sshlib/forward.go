@@ -33,7 +33,7 @@ type x11Request struct {
 //
 // Also, the value of COOKIE transfers the local value as it is. This will be addressed in the future.
 func (c *Connect) X11Forward(session *ssh.Session) (err error) {
-	display := getX11Display()
+	display := getX11Display(os.Getenv("DISPLAY"))
 
 	_, xAuth, err := readAuthority("", display)
 	if err != nil && !errors.Is(err, io.EOF) {
@@ -77,32 +77,20 @@ func (c *Connect) X11Forward(session *ssh.Session) (err error) {
 }
 
 // x11Connect return net.Conn x11 socket.
-func x11Connect() (conn net.Conn, err error) {
-	display := os.Getenv("DISPLAY")
-	display0 := display
-	colonIdx := strings.LastIndex(display, ":")
-	dotIdx := strings.LastIndex(display, ".")
-
-	if colonIdx < 0 {
-		err = errors.New("bad display string: " + display0)
-		return
-	}
-
+func x11Connect(display string) (conn net.Conn, err error) {
 	var conDisplay string
 	if display[0] == '/' { // PATH type socket
 		conDisplay = display
 	} else { // /tmp/.X11-unix/X0
-		conDisplay = "/tmp/.X11-unix/X" + display[colonIdx+1:dotIdx]
+		conDisplay = "/tmp/.X11-unix/X" + getX11Display(display)
 	}
 
-	// fmt.Println(conDisplay)
-	conn, err = net.Dial("unix", conDisplay)
-	return
+	return net.Dial("unix", conDisplay)
 }
 
 // x11forwarder forwarding socket x11 data.
 func x11forwarder(channel ssh.Channel) {
-	conn, err := x11Connect()
+	conn, err := x11Connect(os.Getenv("DISPLAY"))
 	if err != nil {
 		return
 	}
@@ -126,8 +114,7 @@ func x11forwarder(channel ssh.Channel) {
 }
 
 // getX11Display return X11 display number from env $DISPLAY
-func getX11Display() string {
-	display := os.Getenv("DISPLAY")
+func getX11Display(display string) string {
 	colonIdx := strings.LastIndex(display, ":")
 	dotIdx := strings.LastIndex(display, ".")
 
@@ -135,8 +122,8 @@ func getX11Display() string {
 		return "0"
 	}
 
-	if len(display) > dotIdx {
-		return "0"
+	if dotIdx < 0 {
+		dotIdx = len(display)
 	}
 
 	return display[colonIdx+1 : dotIdx]
@@ -352,10 +339,30 @@ func (c *Connect) TCPDynamicForward(address, port string) (err error) {
 	return
 }
 
-// TODO(blacknon):
-//     OpenSsh独自の実装っぽいので、追加はちょっと厳しいかも？
-//     とりあえず調べてみる。
-//
 // TCPReverseDynamicForward reverse forwarding tcp data.
 // Like Openssh Reverse Dynamic forward (`ssh -R <port>`).
-// func (c *Connect) TCPReverseDynamicForward(address, port string) (err error) {}
+func (c *Connect) TCPReverseDynamicForward(address, port string) (err error) {
+	// Create Socks5 config
+	conf := &socks5.Config{
+		Dial: func(ctx context.Context, n, addr string) (net.Conn, error) {
+			return net.Dial(n, addr)
+		},
+		Resolver: socks5Resolver{},
+	}
+
+	// create listner
+	listner, err := c.Client.Listen("tcp", net.JoinHostPort(address, port))
+	if err != nil {
+		return
+	}
+
+	// Create Socks5 server
+	s, err := socks5.New(conf)
+	if err != nil {
+		return
+	}
+
+	// Listen
+	err = s.Serve(listner)
+	return
+}

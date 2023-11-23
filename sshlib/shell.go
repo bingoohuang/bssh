@@ -12,22 +12,18 @@ import (
 
 	"go.uber.org/atomic"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/term"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // ShellInitial connect login shell over ssh.
 func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := term.MakeRaw(fd)
+	state, err := terminal.MakeRaw(fd)
 	if err != nil {
 		return err
 	}
-	c.termRestoreFn = func() {
-		term.Restore(fd, state)
-	}
-
-	defer c.TermRestore()
+	defer terminal.Restore(fd, state)
 
 	// setup
 	pipeToStdin, err := c.setupShell(session, webPort)
@@ -54,11 +50,11 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 func (c *Connect) Shell(session *ssh.Session) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := term.MakeRaw(fd)
+	state, err := terminal.MakeRaw(fd)
 	if err != nil {
-		return
+		return err
 	}
-	defer term.Restore(fd, state)
+	defer terminal.Restore(fd, state)
 
 	// setup
 	if _, err := c.setupShell(session, 0); err != nil {
@@ -81,11 +77,11 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := term.MakeRaw(fd)
+	state, err := terminal.MakeRaw(fd)
 	if err != nil {
 		return
 	}
-	defer term.Restore(fd, state)
+	defer terminal.Restore(fd, state)
 
 	// setup
 	if _, err := c.setupShell(session, 0); err != nil {
@@ -157,7 +153,7 @@ func (c *Connect) logger(session *ssh.Session) (err error) {
 		return
 	}
 
-	l := &logWriter{logfile: logfile, logTimestamp: c.logTimestamp, toggleLogging: c.toggleLogging}
+	l := NewLogWrite(logfile, c.toggleLogging, c.logTimestamp, c.LogKeepAnsiCode)
 	session.Stdout = withLogWriters(session.Stdout, l)
 	session.Stderr = withLogWriters(session.Stderr, l)
 	return nil

@@ -16,7 +16,6 @@ require (
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/cheggaaa/pb/v3 v3.1.4
-	github.com/chzyer/readline v1.5.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gorilla/mux v1.8.1
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
@@ -28,6 +27,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/miekg/pkcs11 v1.1.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/moby/term v0.5.0
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pkg/sftp v1.13.6
 	github.com/segmentio/ksuid v1.0.4
@@ -40,6 +40,7 @@ require (
 	go.uber.org/atomic v1.11.0
 	golang.org/x/crypto v0.15.0
 	golang.org/x/net v0.18.0
+	golang.org/x/sys v0.14.0
 	golang.org/x/term v0.14.0
 	mvdan.cc/sh v2.6.4+incompatible
 )
@@ -47,6 +48,7 @@ require (
 require (
 	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
@@ -54,6 +56,7 @@ require (
 	github.com/averagesecurityguy/random v0.0.0-20210803154528-d84c3ae3b767 // indirect
 	github.com/bingoohuang/gor v0.0.0-20230310012915-2ad15da4d290 // indirect
 	github.com/bingoohuang/strcase v0.0.0-20200312105414-ac2c85cfc85d // indirect
+	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/creack/pty v1.1.21 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -118,7 +121,6 @@ require (
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/oauth2 v0.14.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.15.0 // indirect
 	google.golang.org/api v0.151.0 // indirect
@@ -135,3 +137,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/ThalesIgnite/crypto11 v1.2.5 => github.com/blacknon/crypto11 v1.2.6

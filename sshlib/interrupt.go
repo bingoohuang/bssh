@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bingoohuang/filestash"
+	"github.com/bingoohuang/bssh/internal/util"
 	"github.com/bingoohuang/gg/pkg/ss"
 	"github.com/bingoohuang/gossh/pkg/gossh"
 	"golang.org/x/term"
@@ -40,7 +40,7 @@ func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter, *
 
 func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string, directWriter *io.PipeWriter, connect *Connect) *interruptReader {
 	return &interruptReader{
-		r:            os.Stdin,
+		r:            GetStdin(),
 		port:         port,
 		directWriter: directWriter,
 		notifyC:      notifyC,
@@ -190,7 +190,7 @@ Next:
 		)
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%dash") {
 		if i.port > 0 {
-			go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
+			go util.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
@@ -201,7 +201,7 @@ Next:
 			fmt.Print("dash is not available\r\n")
 		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%exit", "%quit") {
-		i.connect.Exit(0)
+		i.directWriter.Write([]byte("exit"))
 	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%up") {
 		i.up(cmdFields[1])
 	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%dl") {
@@ -229,5 +229,5 @@ func (i *interruptReader) openWebExplorer() {
 	// pwd := i.executeCmd("pwd")
 	pwd := ""
 	// http://127.0.0.1:8333/files/home/footstone/
-	go filestash.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
+	go util.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/files%s", i.port, pwd))
 }

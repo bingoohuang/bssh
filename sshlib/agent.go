@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Blacknon. All rights reserved.
+// Copyright (c) 2021 Blacknon. All rights reserved.
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
@@ -46,6 +46,8 @@ func (c *Connect) AddKeySshAgent(sshAgent interface{}, key interface{}) {
 	switch ag := sshAgent.(type) {
 	case agent.Agent:
 		ag.Add(addedKey)
+	case agent.ExtendedAgent:
+		ag.Add(addedKey)
 	}
 }
 
@@ -54,6 +56,8 @@ func (c *Connect) ForwardSshAgent(session *ssh.Session) {
 	// forward ssh-agent
 	switch ag := c.Agent.(type) {
 	case agent.Agent:
+		agent.ForwardToAgent(c.Client, ag)
+	case agent.ExtendedAgent:
 		agent.ForwardToAgent(c.Client, ag)
 	}
 

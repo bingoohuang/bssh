@@ -2,6 +2,8 @@ package sshlib
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -13,6 +15,26 @@ type logWriter struct {
 	logfile       *os.File
 	logTimestamp  bool
 	toggleLogging *atomic.Bool
+
+	// keep ansi code on terminal log.
+	logKeepAnsiCode bool
+
+	buf bytes.Buffer
+}
+
+func NewLogWrite(logfile *os.File, toggleLogging *atomic.Bool, logTimestamp, logKeepAnsiCode bool) io.Writer {
+	w := &logWriter{
+		logfile:         logfile,
+		logTimestamp:    logTimestamp,
+		toggleLogging:   toggleLogging,
+		logKeepAnsiCode: logKeepAnsiCode,
+	}
+
+	if !logKeepAnsiCode {
+		go w.cleanLog()
+	}
+
+	return w
 }
 
 func (l *logWriter) Write(p []byte) (n int, err error) {
@@ -20,26 +42,45 @@ func (l *logWriter) Write(p []byte) (n int, err error) {
 		return len(p), nil
 	}
 
-	if !l.logTimestamp {
-		return l.write(p)
+	if !l.logKeepAnsiCode || l.logTimestamp {
+		return l.buf.Write(p)
 	}
 
-	pos := bytes.IndexByte(p, '\n')
-	if pos < 0 {
-		return l.write(p)
-	}
-
-	_, _ = l.write(p[:pos+1])
-	timestamp := time.Now().Format("2006/01/02 15:04:05 ") // yyyy/mm/dd HH:MM:SS
-	_, _ = l.logfile.Write([]byte(timestamp))
-	if pos+1 < len(p) {
-		_, _ = l.write(p[pos+1:])
-	}
-
-	return len(p), nil
+	return l.logfile.Write(p)
 }
 
-func (l *logWriter) write(p []byte) (n int, err error) {
-	c := vtclean.Clean(string(p), false)
-	return l.logfile.WriteString(c)
+func (l *logWriter) cleanLog() {
+	var preLine []byte
+	for {
+		if l.buf.Len() > 0 {
+			// get line
+			line, err := l.buf.ReadBytes('\n')
+
+			if err == io.EOF {
+				preLine = append(preLine, line...)
+				continue
+			} else {
+				printLine := string(append(preLine, line...))
+
+				if l.logTimestamp {
+					timestamp := time.Now().Format("2006/01/02 15:04:05 ") // yyyy/mm/dd HH:MM:SS
+					printLine = timestamp + printLine
+				}
+
+				// remove ansi code.
+				if !l.logKeepAnsiCode {
+					// NOTE:
+					//     In vtclean.Clean, the beginning of the line is deleted for some reason.
+					//     for that reason, one character add at line head.
+					printLine = "." + printLine
+					printLine = vtclean.Clean(printLine, false)
+				}
+
+				fmt.Fprintf(l.logfile, printLine)
+				preLine = []byte{}
+			}
+		} else {
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
 }
