@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/binary"
 	"fmt"
+	"github.com/bingoohuang/bssh/internal/tmpjson"
 	"io"
 	"log"
 	"net"
@@ -128,6 +129,24 @@ var frp = func() (proxies []string) {
 	return
 }()
 
+const BrgJsonFile = "brg.json"
+
+type FrpState struct {
+	ProxyName   string            `json:"proxyName"`
+	VisitorName string            `json:"visitorName"`
+	BsshTargets map[string]Target `json:"bsshTargets"`
+}
+
+type Target struct {
+	Addr string `json:"addr"`
+}
+
+var brgTargets = func() map[string]Target {
+	var state FrpState
+	_, _ = tmpjson.Read(BrgJsonFile, &state)
+	return state.BsshTargets
+}()
+
 // CreateClient set c.Client.
 func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod) (err error) {
 	uri := net.JoinHostPort(host, port)
@@ -169,6 +188,12 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		}
 		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
 		uri = frp[0]
+	} else if target, ok := brgTargets[uri]; ok {
+		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
+		uri = target.Addr
+		if strings.HasPrefix(uri, ":") {
+			uri = "127.0.0.1" + uri
+		}
 	}
 
 	// Dial to host:port
