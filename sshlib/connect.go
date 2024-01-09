@@ -100,11 +100,20 @@ func (c *Connect) Exit() {
 	c.Session.Close()
 }
 
-var frp = func() (proxies []string) {
-	env := os.Getenv("FRP")
+var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
+	env := os.Getenv("BRG")
 	if env == "" {
-		return nil
+		return nil, nil
 	}
+
+	var state FrpState
+	_, _ = tmpjson.Read(BrgJsonFile, &state)
+	targets = state.BsshTargets
+
+	if env == "1" {
+		return
+	}
+
 	parts := strings.Split(env, ",")
 	for _, part := range parts {
 		host, port, err := net.SplitHostPort(part)
@@ -141,12 +150,6 @@ type Target struct {
 	Addr string `json:"addr"`
 }
 
-var brgTargets = func() map[string]Target {
-	var state FrpState
-	_, _ = tmpjson.Read(BrgJsonFile, &state)
-	return state.BsshTargets
-}()
-
 // CreateClient set c.Client.
 func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod) (err error) {
 	uri := net.JoinHostPort(host, port)
@@ -182,12 +185,12 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 	}
 
 	var targetInfo []string
-	if len(frp) > 0 {
-		for _, p := range frp[1:] {
+	if len(brg) > 0 {
+		for _, p := range brg[1:] {
 			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", p))
 		}
 		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
-		uri = frp[0]
+		uri = brg[0]
 	} else if target, ok := brgTargets[uri]; ok {
 		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
 		uri = target.Addr
