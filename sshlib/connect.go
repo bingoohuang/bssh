@@ -185,14 +185,20 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 	}
 
 	var targetInfo []string
+
+	proxy := os.Getenv("PROXY")
+	if proxy != "" {
+		proxy = " proxy=" + proxy
+	}
+
 	if len(brg) > 0 {
 		for _, p := range brg[1:] {
-			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", p))
+			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", p, proxy))
 		}
-		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
+		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", uri, proxy))
 		uri = brg[0]
 	} else if target, ok := brgTargets[uri]; ok {
-		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s;", uri))
+		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", uri, proxy))
 		uri = target.Addr
 		if strings.HasPrefix(uri, ":") {
 			uri = "127.0.0.1" + uri
