@@ -65,7 +65,7 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 	c.InitialCmd = substituteProps(c.InitialCmd, t.Props)
 	c.Note = substituteProps(c.Note, t.Props)
 	c.Raw = t.Raw
-	c.Host = t
+	c.Host = &t
 }
 
 func substituteProps(s string, props map[string]string) string {
