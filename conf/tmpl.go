@@ -42,24 +42,24 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 	c.User = t.User
 	c.Pass = t.Password
 
-	if v := t.Props["proxy"]; v != "" && c.Proxy == "" {
-		c.Proxy = v
+	if v := t.Props["proxy"]; len(v) > 0 && c.Proxy == "" {
+		c.Proxy = v[0]
 	}
 
-	if v := t.Props["group"]; v != "" && len(c.Group) == 0 {
-		c.Group = str.SplitTrim(v, ",")
+	if v := t.Props["group"]; len(v) > 0 && len(c.Group) == 0 {
+		c.Group = str.SplitTrim(v[0], ",")
 	}
 
-	if v := t.Props["note"]; v != "" && c.Note == "" {
-		c.Note = v
+	if v := t.Props["note"]; len(v) > 0 && c.Note == "" {
+		c.Note = v[0]
 	}
 
-	if v := t.Props["id"]; v != "" && c.ID == "" {
-		c.ID = v
+	if v := t.Props["id"]; len(v) > 0 && c.ID == "" {
+		c.ID = v[0]
 	}
 
-	if v := t.Props["key"]; v != "" && c.Key == "" {
-		c.Key = v
+	if v := t.Props["key"]; len(v) > 0 && c.Key == "" {
+		c.Key = v[0]
 	}
 
 	c.InitialCmd = substituteProps(c.InitialCmd, t.Props)
@@ -68,13 +68,13 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 	c.Host = &t
 }
 
-func substituteProps(s string, props map[string]string) string {
+func substituteProps(s string, props map[string][]string) string {
 	if s == "" {
 		return s
 	}
 
 	for k, v := range props {
-		s = strings.ReplaceAll(s, "{"+k+"}", v)
+		s = strings.ReplaceAll(s, "{"+k+"}", v[0])
 	}
 
 	return s

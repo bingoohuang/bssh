@@ -118,8 +118,8 @@ github.com/bingoohuang/gor v0.0.0-20200321095356-94cf6290c6ea/go.mod h1:ahEOivpx
 github.com/bingoohuang/gor v0.0.0-20200628053500-ec6cb95c0e1b/go.mod h1:6kZE8zuEyuhWpwUBjVbUw9lj8Ufuf1AIBqHB0/uUWL0=
 github.com/bingoohuang/gor v0.0.0-20230310012915-2ad15da4d290 h1:nh+MTvj0lK5TfQ4hcq8LtY+R86L+3T8degT5akVCACk=
 github.com/bingoohuang/gor v0.0.0-20230310012915-2ad15da4d290/go.mod h1:pAoLBYCnrPiRMN6jzNTlN2xXt28JfDt+TigDycUN24s=
-github.com/bingoohuang/gossh v0.0.0-20221025095843-e2c1c8b7c3c8 h1:Vep168+cZewYG9LisuYH1tfY4RtvfkkY1ns7DdQ7Ct0=
-github.com/bingoohuang/gossh v0.0.0-20221025095843-e2c1c8b7c3c8/go.mod h1:3Ou35BPaRG02mPRs1IQi4j2okq/ZoNiBbr1JLDTlUqQ=
+github.com/bingoohuang/gossh v0.0.0-20240116094913-3ab0cc70a7b8 h1:AXcbg+HVYnC9Sb1k48ILbcujbEmS+2SsAYhH7uomspM=
+github.com/bingoohuang/gossh v0.0.0-20240116094913-3ab0cc70a7b8/go.mod h1:KKAxX+ZgVtFzs5IXvnGbP7YezymUKHOf6cpI9q7Pio4=
 github.com/bingoohuang/gou v0.0.0-20200427104110-9b847a792b6b/go.mod h1:aDOwtkuv68JHEEsHoWJhqyUODo79t5k/erZCZllNBhc=
 github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df h1:FKeJig2sfsHRBfKdOLJYQDMdV3wiM2YUxhya3u9H9Qg=
 github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df/go.mod h1:FBqLIBHSjvb+0sAy1uo9bZkSaqmRRXKSoAIdTWlDLoI=
@@ -739,7 +739,7 @@ github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6L
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
 github.com/rogpeppe/go-internal v1.8.0/go.mod h1:WmiCO8CzOY8rg0OYDC4/i/2WRWAB6poM+XZ2dLUbcbE=
-github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
+github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rs/xid v1.2.1/go.mod h1:+uKXf+4Djp6Md1KODXJxgGQPKngRmWyn10oCKFzNHOQ=
 github.com/rs/zerolog v1.13.0/go.mod h1:YbFCdg8HfsridGWAh22vktObvhZbQsZXe4/zB0OKkWU=
 github.com/rs/zerolog v1.15.0/go.mod h1:xYTKnLHcpfU2225ny5qZjxnj9NvkumZYjJHlAThCjNc=

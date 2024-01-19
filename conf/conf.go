@@ -173,7 +173,7 @@ type ServerConfig struct {
 
 	Raw string // to register the raw template config, like `user:pass@host:port`
 
-	Host *hostparse.Host
+	Host *hostparse.Host `toml:"-"` // hostparse.Host
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.

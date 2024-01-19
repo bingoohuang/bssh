@@ -10,7 +10,7 @@ require (
 	github.com/bingoohuang/filestash v0.0.0-20220616082721-46b0154b7355
 	github.com/bingoohuang/gg v0.0.0-20231220005642-cc3afaff0454
 	github.com/bingoohuang/gonet v0.0.0-20230804022419-67aac8effd70
-	github.com/bingoohuang/gossh v0.0.0-20221025095843-e2c1c8b7c3c8
+	github.com/bingoohuang/gossh v0.0.0-20240116094913-3ab0cc70a7b8
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/textcol v0.0.1
