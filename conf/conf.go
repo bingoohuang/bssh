@@ -172,6 +172,8 @@ type ServerConfig struct {
 	ID         string `toml:"id"`
 
 	Raw string // to register the raw template config, like `user:pass@host:port`
+
+	Host hostparse.Host
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.
