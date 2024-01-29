@@ -1,6 +1,9 @@
 package conf
 
 import (
+	"encoding/base64"
+	"log"
+	"os"
 	"sort"
 	"strings"
 
@@ -74,6 +77,23 @@ func (cf *Config) ExpandHosts(c *cli.Context, options *ArgOptions) ([]string, []
 		hosts = append(hosts, options.Values("host")...)
 	}
 
+	if target := os.Getenv("TARGET"); target != "" {
+		targetLineBytes, err := base64.RawURLEncoding.DecodeString(target)
+		if err != nil {
+			log.Printf("parse target error: %v", err)
+		} else {
+			targetLine := string(targetLineBytes)
+			targetHost, props := parseTargetLine(targetLine)
+			var hostUser string
+			if user := props["user"]; len(user) > 0 {
+				hostUser = user[0]
+			}
+			if hostUser != "" {
+				hosts = append(hosts, hostUser+"@"+targetHost)
+			}
+		}
+	}
+
 	expanded := make([]string, 0)
 
 	for _, h := range hosts {
@@ -96,4 +116,17 @@ func (cf *Config) ExpandHosts(c *cli.Context, options *ArgOptions) ([]string, []
 	}
 
 	return expanded, nil
+}
+
+func parseTargetLine(targetLine string) (string, map[string][]string) {
+	p := strings.Fields(targetLine)
+	target := p[0]
+	props := make(map[string][]string)
+	for i := 1; i < len(p); i++ {
+		f := p[i]
+		if pos := strings.IndexByte(f, '='); pos > 0 {
+			props[f[:pos]] = append(props[f[:pos]], f[pos+1:])
+		}
+	}
+	return target, props
 }
