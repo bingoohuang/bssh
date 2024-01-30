@@ -8,14 +8,14 @@ require (
 	github.com/ThalesIgnite/crypto11 v1.2.5
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/bingoohuang/filestash v0.0.0-20220616082721-46b0154b7355
-	github.com/bingoohuang/gg v0.0.0-20231220005642-cc3afaff0454
+	github.com/bingoohuang/gg v0.0.0-20240127024150-7fbfc15d5fb9
 	github.com/bingoohuang/gonet v0.0.0-20230804022419-67aac8effd70
 	github.com/bingoohuang/gossh v0.0.0-20240116094913-3ab0cc70a7b8
 	github.com/bingoohuang/gou v0.0.0-20210727012756-4873089fc9df
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.6
-	github.com/cheggaaa/pb/v3 v3.1.4
+	github.com/cheggaaa/pb/v3 v3.1.5
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gorilla/mux v1.8.1
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
@@ -72,7 +72,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
-	github.com/google/uuid v1.5.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
@@ -101,7 +101,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.6 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
@@ -125,15 +125,15 @@ require (
 	go.opentelemetry.io/otel/metric v1.22.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
+	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
-	google.golang.org/api v0.157.0 // indirect
+	google.golang.org/api v0.160.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
-	google.golang.org/grpc v1.60.1 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240125205218-1f4bbc51befe // indirect
+	google.golang.org/grpc v1.61.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect

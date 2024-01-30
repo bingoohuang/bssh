@@ -620,6 +620,10 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 		return
 	}
 
+	if target := os.Getenv("TARGET"); target != "" {
+		return
+	}
+
 	cf.tempHosts[tempHost] = true
 
 	pbePass := ""
