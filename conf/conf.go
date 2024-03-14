@@ -121,9 +121,10 @@ type ServerConfig struct {
 	KeyCommandPass string   `toml:"keycmdpass"`
 	KeyPass        string   `toml:"keypass"`
 	Keys           []string `toml:"keys"` // "keypath::passphrase"
-	Cert           string
-	CertKey        string `toml:"certkey"`
-	CertKeyPass    string `toml:"certkeypass"`
+
+	Cert        string `toml:"cert"`
+	CertKey     string `toml:"certkey"`
+	CertKeyPass string `toml:"certkeypass"`
 
 	CertPKCS11  bool `toml:"certpkcs11"`
 	AgentAuth   bool `toml:"agentauth"`
