@@ -1,12 +1,7 @@
 package sshlib
 
 import (
-	"crypto/sha1"
-	"encoding/binary"
-	"fmt"
-	"github.com/bingoohuang/bssh/internal/tmpjson"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -100,56 +95,6 @@ func (c *Connect) Exit() {
 	c.Session.Close()
 }
 
-var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
-	env := os.Getenv("BRG")
-	if env == "" {
-		return nil, nil
-	}
-
-	var state FrpState
-	_, _ = tmpjson.Read(BrgJsonFile, &state)
-	targets = state.BsshTargets
-
-	if env == "1" {
-		return
-	}
-
-	parts := strings.Split(env, ",")
-	for _, part := range parts {
-		host, port, err := net.SplitHostPort(part)
-		if err != nil {
-			log.Panicf("invalid %s, should [host]:port", part)
-		}
-
-		if host == "" {
-			host = "127.0.0.1"
-		}
-		if l := port[0]; 'a' <= l && l <= 'z' || 'A' <= l && l <= 'Z' {
-			h := sha1.New()
-			h.Write([]byte(port))
-			sum := h.Sum(nil)
-			portNum := binary.BigEndian.Uint16(sum[:2])
-			port = fmt.Sprintf("%d", portNum)
-		}
-
-		proxies = append(proxies, fmt.Sprintf("%s:%s", host, port))
-	}
-
-	return
-}()
-
-const BrgJsonFile = "brg.json"
-
-type FrpState struct {
-	ProxyName   string            `json:"proxyName"`
-	VisitorName string            `json:"visitorName"`
-	BsshTargets map[string]Target `json:"bsshTargets"`
-}
-
-type Target struct {
-	Addr string `json:"addr"`
-}
-
 // CreateClient set c.Client.
 func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod) (err error) {
 	uri := net.JoinHostPort(host, port)
@@ -184,26 +129,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		c.ProxyDialer = proxy.Direct
 	}
 
-	var targetInfo []string
-
-	proxy := os.Getenv("PROXY")
-	if proxy != "" {
-		proxy = " proxy=" + proxy
-	}
-
-	if len(brg) > 0 {
-		for _, p := range brg[1:] {
-			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", p, proxy))
-		}
-		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", uri, proxy))
-		uri = brg[0]
-	} else if target, ok := brgTargets[uri]; ok {
-		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", uri, proxy))
-		uri = target.Addr
-		if strings.HasPrefix(uri, ":") {
-			uri = "127.0.0.1" + uri
-		}
-	}
+	targetInfo, uri := CreateTargetInfo(uri)
 
 	// Dial to host:port
 	netConn, err := c.ProxyDialer.Dial("tcp", uri)
