@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/bingoohuang/bssh/internal/tmpjson"
@@ -81,11 +82,12 @@ var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
 
 	parts := strings.Split(brgEnv, ",")
 	for _, part := range parts {
-		if part == "1" {
-			if port := FindPort(1000); port > 0 {
-				proxies = append(proxies, fmt.Sprintf("127.0.0.1:%d", port))
+		if len(part) == 1 {
+			p, err := strconv.Atoi(part)
+			if err == nil && (p >= 1 && p <= 9) {
+				proxies = append(proxies, fmt.Sprintf("127.0.0.1:%d", 1000+p-1))
+				continue
 			}
-			continue
 		}
 
 		host, port, err := net.SplitHostPort(part)
