@@ -19,7 +19,11 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 		for i, t := range tc.t {
 			sc := tc.c
 			createServerConfigFromHost(t, &sc)
-			cf.Server[tc.createKey(t.ID, i)] = sc
+			key := tc.createKey(t.ID, i)
+			if strings.HasPrefix(sc.Pass, `{PBE}`) {
+				key += "*"
+			}
+			cf.Server[key] = sc
 		}
 	}
 }
@@ -78,14 +82,4 @@ func substituteProps(s string, props map[string][]string) string {
 	}
 
 	return s
-}
-
-func splitBySep(s string, seps []string) (string, string) {
-	for _, sep := range seps {
-		if strings.Contains(s, sep) {
-			return str.Split2(s, sep, false, false)
-		}
-	}
-
-	return s, ""
 }

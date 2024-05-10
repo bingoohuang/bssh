@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -225,6 +224,9 @@ func ReadConf(confPath string) (config Config) {
 
 			if sc.ID == "" {
 				sc.ID = generateKey(len(tmpls), len(config.Hosts), i, j)
+			}
+			if strings.HasPrefix(sc.Pass, `{PBE}`) {
+				sc.ID += "*"
 			}
 			config.Server[sc.ID] = sc
 		}
@@ -586,8 +588,6 @@ func (cf *Config) IsDisableAutoEncryptPwd() bool {
 	return cf.Extra.DisableAutoEncryptPwd || cf.DisableAutoEncryptPwd
 }
 
-var tempLineBpe = regexp.MustCompile(`\{PBE\}[\w-_]+`)
-
 func (cf *Config) loadTempHosts(confPath string) {
 	tempHostsFile := strings.TrimSuffix(confPath, ".toml") + ".hosts"
 	cf.tempHostsFile = tempHostsFile
@@ -602,10 +602,6 @@ func (cf *Config) loadTempHosts(confPath string) {
 	for _, line := range strings.Split(string(file), "\n") {
 		hostLine := strings.TrimSpace(line)
 		if hostLine != "" && !strings.HasPrefix(hostLine, "#") {
-			if sub := tempLineBpe.FindString(hostLine); sub != "" {
-				s, _ := pbe.Ebp(sub)
-				hostLine = strings.ReplaceAll(hostLine, sub, s)
-			}
 			cf.tempHosts[hostLine] = true
 		}
 	}
@@ -627,11 +623,12 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 
 	cf.tempHosts[tempHost] = true
 
-	pbePass := ""
 	if pass != "" {
-		pbePass, _ = pbe.Pbe(pass)
+		if pbePwd := viper.GetString(pbe.PbePwd); pbePwd != "" {
+			pbePass, _ := pbe.Pbe(pass)
+			tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
+		}
 	}
-	tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
 	if err := AppendFile(cf.tempHostsFile, tempHost); err != nil {
 		fmt.Println(err)
 	}

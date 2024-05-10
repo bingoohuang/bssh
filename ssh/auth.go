@@ -69,7 +69,7 @@ func (r *Run) registerAuthMapPassword(server, password, rawTemplLine string) {
 	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
 }
 
-func (r *Run) decodePassword(password string, rawTemplLine string) string {
+func (r *Run) decodePassword(password, rawTemplLine string) string {
 	if strings.EqualFold(password, "{Prompt}") {
 		prompt := promptui.Prompt{
 			Label:       "Password",
@@ -91,7 +91,6 @@ func (r *Run) decodePassword(password string, rawTemplLine string) string {
 		panic(err)
 	} else {
 		r.registerAutoEncryptPwd(password)
-
 		return pwd
 	}
 }

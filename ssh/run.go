@@ -13,6 +13,7 @@ import (
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/gou/pbe"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/term"
 )
@@ -301,14 +302,15 @@ func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
 		return
 	}
 
-	pp, _ := pbe.Pbe(password)
-	newTemplLine := strings.ReplaceAll(rawTemplLine, promptTag, pp)
-	newContent := strings.ReplaceAll(content, rawTemplLine, newTemplLine)
+	if pbePwd := viper.GetString(pbe.PbePwd); pbePwd != "" {
+		pp, _ := pbe.Pbe(password)
+		newTemplLine := strings.ReplaceAll(rawTemplLine, promptTag, pp)
+		newContent := strings.ReplaceAll(content, rawTemplLine, newTemplLine)
 
-	if newContent != content {
-		if err := writeConfContent(r.confFile, newContent); err != nil {
-			fmt.Fprintf(os.Stderr, "write conf file %s, error %v\n", r.confFile, err)
-			return
+		if newContent != content {
+			if err := writeConfContent(r.confFile, newContent); err != nil {
+				fmt.Fprintf(os.Stderr, "write conf file %s, error %v\n", r.confFile, err)
+			}
 		}
 	}
 }
@@ -326,15 +328,17 @@ func (r *Run) autoEncryptPwd() {
 
 	newContent := content
 
-	for pwd := range r.decodedPasswordMap {
-		newPwd, err := pbe.Pbe(pwd)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
-			return
-		}
+	if pbePwd := viper.GetString(pbe.PbePwd); pbePwd != "" {
+		for pwd := range r.decodedPasswordMap {
+			newPwd, err := pbe.Pbe(pwd)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
+				return
+			}
 
-		reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
-		newContent = reg.ReplaceAllString(newContent, newPwd)
+			reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
+			newContent = reg.ReplaceAllString(newContent, newPwd)
+		}
 	}
 
 	if newContent != content {
