@@ -228,6 +228,10 @@ func ReadConf(confPath string) (config Config) {
 			if strings.HasPrefix(sc.Pass, `{PBE}`) {
 				sc.ID += "*"
 			}
+
+			if _, ok := config.Server[sc.ID]; ok {
+				sc.ID += "-" + sc.User
+			}
 			config.Server[sc.ID] = sc
 		}
 	}
