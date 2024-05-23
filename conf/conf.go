@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -615,12 +616,27 @@ func (cf *Config) loadTempHosts(confPath string) {
 	}
 }
 
+var re = regexp.MustCompile(`\{PBE}.*?@`)
+
+func removePBEStrings(input string) string {
+	// 使用正则表达式替换匹配的子串，保留 @ 符号
+	return re.ReplaceAllStringFunc(input, func(s string) string {
+		return "@"
+	})
+}
+
 // WriteTempHosts writes a new host to temporary file.
 func (cf *Config) WriteTempHosts(tempHost, pass string) {
-	if _, ok := cf.tempHosts[tempHost]; ok {
-		return
+	// 排除密码，查找是否已经存储过临时 hosts 文件
+	ch := strings.ReplaceAll(tempHost, pass, "")
+	for k := range cf.tempHosts {
+		if removePBEStrings(k) == ch {
+			return
+		}
 	}
 
+	// 从 brg 界面中拷贝过来的 bssh 命令，例如:
+	//BRG=:1000 TARGET=MTkyLjEOC4yMjkuMTExOjgwMjIgdXNlcj1hZG1pbi9GcmlkYXky5QGJqY2E bssh
 	if target := os.Getenv("TARGET"); target != "" {
 		return
 	}
