@@ -2,6 +2,7 @@ package sshlib
 
 import (
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -9,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bingoohuang/gg/pkg/codec"
 	"go.uber.org/atomic"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -121,8 +123,23 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		sc.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 	}
 
-	sc.SetDefaults()
-	sc.KeyExchanges = append(sc.KeyExchanges, "diffie-hellman-group-exchange-sha256")
+	if env := os.Getenv("SSH_CIPHERS"); env != "" {
+		sc.Ciphers = strings.Split(env, ",")
+	}
+	if env := os.Getenv("SSH_MACS"); env != "" {
+		sc.MACs = strings.Split(env, ",")
+	}
+
+	// if env := os.Getenv("SSH_KEXS"); env != "" {
+	// 	sc.KeyExchanges = strings.Split(env, ",")
+	// }
+
+	sc.KeyExchanges = ssh.DefinedKexAlgos()
+	if verbose := os.Getenv("SSH_VERBOSE"); verbose == "1" {
+		sc.AlgorithmsCallback = func(algorithms ssh.Algorithms) {
+			log.Printf("algorithms: %s", codec.Json(algorithms))
+		}
+	}
 
 	// check Dialer
 	if c.ProxyDialer == nil {
