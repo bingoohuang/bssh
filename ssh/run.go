@@ -336,8 +336,10 @@ func (r *Run) autoEncryptPwd() {
 				return
 			}
 
-			reg := regexp.MustCompile(`\b` + regexp.QuoteMeta(pwd) + `\b`)
-			newContent = reg.ReplaceAllString(newContent, newPwd)
+			reg := regexp.MustCompile(`["=:/]` + regexp.QuoteMeta(pwd) + `[@"\s]`)
+			newContent = reg.ReplaceAllStringFunc(newContent, func(s string) string {
+				return s[:1] + newPwd + s[len(s)-1:]
+			})
 		}
 	}
 

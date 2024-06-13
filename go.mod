@@ -13,7 +13,7 @@ require (
 	github.com/ScaleFT/sshkeys v1.2.0
 	github.com/ThalesIgnite/crypto11 v1.2.5
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
-	github.com/bingoohuang/filestash v0.0.0-20240304100254-1b0e6446d9d4
+	github.com/bingoohuang/filestash v0.0.0-20240613081414-e66bed70f730
 	github.com/bingoohuang/gg v0.0.0-20240531020828-1fc72d0e46f0
 	github.com/bingoohuang/gonet v0.0.0-20230804022419-67aac8effd70
 	github.com/bingoohuang/gossh v0.0.0-20240314074636-b579cd982160
@@ -82,7 +82,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/gorilla/websocket v1.5.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -94,7 +94,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mattn/go-tty v0.0.5 // indirect
 	github.com/mickael-kerjean/net v0.0.0-20191120063050-2457c043ba06 // indirect
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
@@ -135,11 +135,10 @@ require (
 	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	google.golang.org/api v0.183.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240429193739-8cf5692501f6 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
+	google.golang.org/api v0.184.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240610135401-a8a62080eff3 // indirect
 	google.golang.org/grpc v1.64.0 // indirect
-	google.golang.org/protobuf v1.34.1 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
