@@ -123,18 +123,19 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		sc.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 	}
 
-	if env := os.Getenv("SSH_CIPHERS"); env != "" {
+	if env := os.Getenv("SSH_CIPHER"); env != "" {
 		sc.Ciphers = strings.Split(env, ",")
 	}
-	if env := os.Getenv("SSH_MACS"); env != "" {
+	if env := os.Getenv("SSH_MAC"); env != "" {
 		sc.MACs = strings.Split(env, ",")
 	}
+	if env := os.Getenv("SSH_KEX"); env != "" {
+		sc.KeyExchanges = strings.Split(env, ",")
+	}
 
-	// if env := os.Getenv("SSH_KEXS"); env != "" {
-	// 	sc.KeyExchanges = strings.Split(env, ",")
-	// }
-
-	sc.KeyExchanges = ssh.DefinedKexAlgos()
+	if len(sc.KeyExchanges) == 0 {
+		sc.KeyExchanges = ssh.DefinedKexAlgos()
+	}
 	if verbose := os.Getenv("SSH_VERBOSE"); verbose == "1" {
 		sc.AlgorithmsCallback = func(algorithms ssh.Algorithms) {
 			log.Printf("algorithms: %s", codec.Json(algorithms))
