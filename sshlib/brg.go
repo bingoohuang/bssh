@@ -11,9 +11,15 @@ import (
 	"strings"
 
 	"github.com/bingoohuang/bssh/internal/tmpjson"
+	"github.com/bingoohuang/gg/pkg/ss"
 )
 
 func CreateTargetInfo(uri string) (targetInfo []string, newUri string) {
+	host, _, _ := net.SplitHostPort(uri)
+	if ss.AnyOf(host, "127.0.0.1", "localhost") {
+		return nil, uri
+	}
+
 	proxy := Getenv("PROXY", "P")
 	if proxy != "" {
 		proxy = " proxy=" + proxy
