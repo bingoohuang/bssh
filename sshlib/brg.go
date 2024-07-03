@@ -78,7 +78,7 @@ func Getenv(keys ...string) string {
 
 var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
 	brgEnv := Getenv("BRG", "B")
-	if brgEnv == "" {
+	if brgEnv == "" || brgEnv == "0"{
 		return nil, nil
 	}
 
