@@ -4,8 +4,8 @@ go 1.22
 
 replace (
 	github.com/ThalesIgnite/crypto11 v1.2.5 => github.com/blacknon/crypto11 v1.2.6
-	//replace golang.org/x/crypto => github.com/goldstd/crypto v0.0.0-20240605024249-7ed30f67e898
-	golang.org/x/crypto => /Volumes/e2t/Github/crypto
+	golang.org/x/crypto => github.com/goldstd/crypto v0.0.0-20240620011023-5817ff2c8f02
+//golang.org/x/crypto => /Volumes/e2t/Github/crypto
 )
 
 require (
