@@ -1,5 +1,5 @@
 .PHONY: test install git.commit git.branch default
-all: test install
+all: install
 
 app=$(notdir $(shell pwd))
 appVersion := 1.2.8
@@ -7,7 +7,8 @@ goVersion := $(shell go version | sed 's/go version //'|sed 's/ /_/')
 # e.g. 2021-10-28T11:49:52+0800
 buildTime := $(shell date +%FT%T%z)
 # https://git-scm.com/docs/git-rev-list#Documentation/git-rev-list.txt-emaIem
-gitCommit := $(shell [ -f git.commit ] && cat git.commit || git rev-list --oneline --format=format:'%h@%aI' --max-count=1 `git rev-parse HEAD` | tail -1)
+# e.g. ffd23d3@2022-04-06T18:07:14+08:00
+gitCommit := $(shell [ -f git.commit ] && cat git.commit || git log --format=format:'%h@%aI' -1)
 gitBranch := $(shell [ -f git.branch ] && cat git.branch || git rev-parse --abbrev-ref HEAD)
 gitInfo = $(gitBranch)-$(gitCommit)
 #gitCommit := $(shell git rev-list -1 HEAD)
@@ -19,31 +20,53 @@ extldflags := -extldflags -static
 # https://github.com/kubermatic/kubeone/blob/master/Makefile
 flags1 = -s -w -X $(pkg).BuildTime=$(buildTime) -X $(pkg).AppVersion=$(appVersion) -X $(pkg).GitCommit=$(gitInfo) -X $(pkg).GoVersion=$(goVersion)
 flags2 = ${extldflags} ${flags1}
-goinstall1 = go install -trimpath -ldflags='${flags1}' ./...
-goinstall2 = go install -trimpath -ldflags='${flags2}' ./...
+buildTags = $(if $(TAGS),-tags=$(TAGS),)
+buildFlags = ${buildTags} -trimpath -ldflags="'${flags1}'"
+goinstall_target = $(if $(TARGET),$(TARGET),./...)
+
+goinstall = go install ${buildTags} -trimpath -ldflags='${flags1}' ${goinstall_target}
 gobin := $(shell go env GOBIN)
 # try $GOPATN/bin if $gobin is empty
 gobin := $(if $(gobin),$(gobin),$(shell go env GOPATH)/bin)
 
+export GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,https://goproxy.io,direct
+# Active module mode, as we use go modules to manage dependencies
+export GO111MODULE=on
+
+# usage: t=$(mktemp); echo $t; echo "set -x; go build -o build/rig_linux_arm64 $(make -f ~/github/gg/Makefile build.flags) ./cmd/rig" > $t && sh $t
+build.flags:
+	@echo ${buildFlags}
+
 git.commit:
 	echo ${gitCommit} > git.commit
 	echo ${gitBranch} > git.branch
-
-tool:
-	go get github.com/securego/gosec/cmd/gosec
 
 sec:
 	@gosec ./...
 	@echo "[OK] Go security check was completed!"
 
 init:
-	export GOPROXY=https://goproxy.cn
 
 lint-all:
 	golangci-lint run --enable-all
 
 lint:
 	golangci-lint run ./...
+
+fmt-update:
+	go install mvdan.cc/gofumpt@latest
+	go install golang.org/x/tools/cmd/...@latest 	# for goimports
+	# go install github.com/mgechev/revive@master
+	go install github.com/daixiang0/gci@latest
+	go install github.com/google/osv-scanner/cmd/osv-scanner@latest
+	go install github.com/polyfloyd/go-errorlint@latest
+	go install github.com/dkorunic/betteralign/cmd/betteralign@latest
+	go install -v github.com/go-critic/go-critic/cmd/gocritic@latest
+	# Use right mirror functions for string/[]byte performance bust
+	go install github.com/butuzov/mirror/cmd/mirror@latest
+	go install golang.org/x/vuln/cmd/govulncheck@latest
+	go install github.com/securego/gosec/v2/cmd/gosec@latest
+	go install go.uber.org/nilaway/cmd/nilaway@latest
 
 fmt:
 	gofumpt -l -w .
@@ -52,28 +75,62 @@ fmt:
 	go fmt ./...
 	revive .
 	goimports -w .
-	gci -w -local github.com/daixiang0/gci
+	gci write .
+	osv-scanner -r .
+	go-errorlint ./...
+	gocritic check ./...
+	betteralign ./...
+	nilaway ./...
+	# Use right mirror functions for string/[]byte performance bust
+	# too slow
+	# mirror ./...
+	govulncheck ./...
+
+align:
+	betteralign -apply ./...
+
+install-upx: init
+	${goinstall}
+	upx --best --lzma ${gobin}/${app}*
+	ls -lh ${gobin}/${app}*
 
 install: init
-	${goinstall1}
-	upx --best --lzma ${gobin}/${app}
-	ls -lh ${gobin}/${app}
+	${goinstall}
+	ls -lh ${gobin}/${app}*
+
 linux: init
-	GOOS=linux GOARCH=amd64 ${goinstall1}
+	GOOS=linux GOARCH=amd64 ${goinstall}
+	ls -lh  ${gobin}/linux_amd64/${app}*
+linux-upx: init
+	GOOS=linux GOARCH=amd64 ${goinstall}
 	upx --best --lzma ${gobin}/linux_amd64/${app}*
 	ls -lh  ${gobin}/linux_amd64/${app}*
+windows: init
+	GOOS=windows GOARCH=amd64 ${goinstall}
+	ls -lh  ${gobin}/windows_amd64/${app}*
+windows-upx: init
+	GOOS=windows GOARCH=amd64 ${goinstall}
+	upx --best --lzma ${gobin}/windows_amd64/${app}*
+	ls -lh  ${gobin}/windows_amd64/${app}*
 arm: init
-	GOOS=linux GOARCH=arm64 ${goinstall1}
+	GOOS=linux GOARCH=arm64 ${goinstall}
+	ls -lh  ${gobin}/linux_arm64/${app}*
+arm-upx: init
+	GOOS=linux GOARCH=arm64 ${goinstall}
 	upx --best --lzma ${gobin}/linux_arm64/${app}*
 	ls -lh  ${gobin}/linux_arm64/${app}*
+mac-arm: init
+	GOOS=darwin GOARCH=arm64 ${goinstall}
+	# upx --best --lzma ${gobin}/darwin_arm64/${app}*
+	ls -lh  ${gobin}/darwin_arm64/${app}*
 
 upx:
-	ls -lh ${gobin}/${app}
-	upx ${gobin}/${app}
-	ls -lh ${gobin}/${app}
-	ls -lh ${gobin}/linux_amd64/${app}
-	upx ${gobin}/linux_amd64/${app}
-	ls -lh ${gobin}/linux_amd64/${app}
+	ls -lh ${gobin}/${app}*
+	upx ${gobin}/${app}*
+	ls -lh ${gobin}/${app}*
+	ls -lh ${gobin}/linux_amd64/${app}*
+	upx ${gobin}/linux_amd64/${app}*
+	ls -lh ${gobin}/linux_amd64/${app}*
 
 test: init
 	#go test -v ./...
