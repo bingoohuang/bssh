@@ -57,8 +57,9 @@ func Lscp() (app *cli.App) {
 	app.Copyright = misc.Copyright
 	app.Version = v.Version()
 
+	envHosts := cli.StringSlice(strings.Split(os.Getenv("BSSH_HOST"), ","))
 	app.Flags = []cli.Flag{
-		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names"},
+		cli.StringSliceFlag{Name: "host,H", Usage: "connect server names", Value: &envHosts},
 		cli.StringFlag{
 			Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config file path",

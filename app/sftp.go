@@ -1,6 +1,9 @@
 package app
 
 import (
+	"os"
+	"strings"
+
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
@@ -45,8 +48,9 @@ func Lsftp() (app *cli.App) {
 	app.Copyright = misc.Copyright
 	app.Version = v.Version()
 
+	envHosts := cli.StringSlice(strings.Split(os.Getenv("BSSH_HOST"), ","))
 	app.Flags = []cli.Flag{
-		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
+		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},
 		cli.StringFlag{
 			Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config file path",

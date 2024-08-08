@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
@@ -71,9 +72,10 @@ func Lssh() (app *cli.App) {
 	// TDXX(blacknon): コマンドオプションの指定方法(特にポートフォワーディング)をOpenSSHに合わせる
 
 	// Set options
+	envHosts := cli.StringSlice(strings.Split(os.Getenv("BSSH_HOST"), ","))
 	app.Flags = []cli.Flag{
 		// common option
-		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`."},
+		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},
 		cli.StringFlag{
 			Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
 			Usage: "config `filepath`.",
