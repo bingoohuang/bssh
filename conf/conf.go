@@ -373,24 +373,21 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 func CheckFormatServerConf(c Config) (isFormat bool) {
 	isFormat = true
 
-	for k, v := range c.Server {
+	for _, v := range c.Server {
 		// Address Set Check
 		if v.Addr == "" {
-			fmt.Printf("%s: 'addr' is not set.\n", k)
-
+			// fmt.Printf("%s: 'addr' is not set.\n", k)
 			isFormat = false
 		}
 
 		// User Set Check
 		if v.User == "" {
-			fmt.Printf("%s: 'user' is not set.\n", k)
-
+			// fmt.Printf("%s: 'user' is not set.\n", k)
 			isFormat = false
 		}
 
 		if !CheckFormatServerConfAuth(v) {
-			fmt.Printf("%s: Authentication information is not set.\n", k)
-
+			// fmt.Printf("%s: Authentication information is not set.\n", k)
 			isFormat = false
 		}
 	}
