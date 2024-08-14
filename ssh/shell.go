@@ -58,7 +58,7 @@ func (r *Run) shell() (err error) {
 		return err
 	}
 
-	if config.WebPort >= 0 {
+	if config.WebPort > 0 {
 		r.webPort, err = stash.InitFileStash(config.WebPort, connect, execCmd, SftpUpload)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "InitFileStash error %s.\n", err.Error())

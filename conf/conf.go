@@ -169,7 +169,7 @@ type ServerConfig struct {
 	ServerAliveCountInterval int `toml:"alive_interval"`
 
 	InitialCmd string `toml:"initial_cmd"`
-	WebPort    int    `toml:"web_port"` // -1 disable the web port
+	WebPort    int    `toml:"web_port"` // <= 0 disable the web port
 	ID         string `toml:"id"`
 
 	Raw string // to register the raw template config, like `user:pass@host:port`
