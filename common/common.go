@@ -34,14 +34,14 @@ var characterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY
 func IsExist(filename string) (string, bool) {
 	fi, err := os.Lstat(filename)
 	if err != nil {
-		log.Printf("stat %s: %v", filename, err)
+		// log.Printf("stat %s: %v", filename, err)
 		return filename, false
 	}
 
 	if fi.Mode()&os.ModeSymlink != 0 {
 		s, err := os.Readlink(filename)
 		if err != nil {
-			log.Printf("readlink %s: %v", filename, err)
+			// log.Printf("readlink %s: %v", filename, err)
 			return filename, false
 		}
 		return s, true
