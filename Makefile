@@ -229,11 +229,15 @@ bin_cp:
 	upx ./built/*
 	cd ./built/; for file in *; do [ -f "$$file" ] && mv "$$file" "$${file}_${osname}_${osarch}"; done
 
-# BSSH_HOST=240f make bssh1
-bssh1: targz1
+# BSSH_HOST=240f make bssh1r
+bssh1r: targz1
 	bssh scp ../${app}.tar.gz r:.
 	rm -fr ../${app}.tar.gz
 	bssh 'rm -fr ${app} && tar zxf ${app}.tar.gz && rm -fr ${app}.tar.gz && cd ${app} && make install bin_cp && ls -hl ./built/* && md5sum ./built/* && readlink -f ./built/*'
+
+
+# BSSH_HOST=240f make bssh1
+bssh1: bssh1_remote
 	mkdir -p ./${app}.built
 	bssh scp r:${app}/built ./${app}.built/
 	# 显示大小

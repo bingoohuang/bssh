@@ -8,3 +8,5 @@
 /.idea
 /dist
 .vscode
+git.branch
+git.commit
