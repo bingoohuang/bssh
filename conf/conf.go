@@ -16,6 +16,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/gum"
 	"github.com/bingoohuang/gossh/pkg/hostparse"
 	"github.com/bingoohuang/gou/pbe"
 	"github.com/bingoohuang/gou/str"
@@ -603,9 +604,11 @@ func (cf *Config) loadTempHosts(confPath string) {
 	file, _ := os.ReadFile(tempHostsFile)
 	for _, line := range strings.Split(string(file), "\n") {
 		hostLine := strings.TrimSpace(line)
-		if hostLine != "" && !strings.HasPrefix(hostLine, "#") {
-			cf.tempHosts[hostLine] = true
+		if hostLine == "" || strings.HasPrefix(hostLine, "#") {
+			continue
 		}
+
+		cf.tempHosts[hostLine] = true
 	}
 
 	for k := range cf.tempHosts {
@@ -616,6 +619,10 @@ func (cf *Config) loadTempHosts(confPath string) {
 var re = regexp.MustCompile(`\{PBE}.*?@`)
 
 func removePBEStrings(input string) string {
+	if commentIndex := strings.Index(input, "#"); commentIndex > 0 {
+		input = strings.TrimSpace(input[:commentIndex])
+	}
+
 	// 使用正则表达式替换匹配的子串，保留 @ 符号
 	return re.ReplaceAllStringFunc(input, func(s string) string {
 		return "@"
@@ -646,6 +653,15 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 			tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
 		}
 	}
+
+	gumInput := &gum.InputOptions{
+		Prompt:      "新增临时主机信息，加点注释说明用途呗: ",
+		Placeholder: "e.g. 测试用",
+	}
+	if note, _ := gumInput.Run(); note != "" {
+		tempHost += " # " + note
+	}
+
 	if err := AppendFile(cf.tempHostsFile, tempHost); err != nil {
 		fmt.Println(err)
 	}
