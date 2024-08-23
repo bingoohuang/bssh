@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"fmt"
+	"github.com/bingoohuang/ngg/ss"
 	"os"
 	"os/exec"
 	"regexp"
@@ -12,7 +13,6 @@ import (
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
-	"github.com/bingoohuang/gou/pbe"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/term"
@@ -302,8 +302,8 @@ func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
 		return
 	}
 
-	if pbePwd := viper.GetString(pbe.PbePwd); pbePwd != "" {
-		pp, _ := pbe.Pbe(password)
+	if pbePwd := viper.GetString(ss.PbePwd); pbePwd != "" {
+		pp, _ := ss.PbeEncode(password)
 		newTemplLine := strings.ReplaceAll(rawTemplLine, promptTag, pp)
 		newContent := strings.ReplaceAll(content, rawTemplLine, newTemplLine)
 
@@ -328,9 +328,9 @@ func (r *Run) autoEncryptPwd() {
 
 	newContent := content
 
-	if pbePwd := viper.GetString(pbe.PbePwd); pbePwd != "" {
+	if pbePwd := viper.GetString(ss.PbePwd); pbePwd != "" {
 		for pwd := range r.decodedPasswordMap {
-			newPwd, err := pbe.Pbe(pwd)
+			newPwd, err := ss.PbeEncode(pwd)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "read conf file %s, error %v\n", r.confFile, err)
 				return

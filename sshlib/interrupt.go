@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/bingoohuang/bssh/internal/util"
-	"github.com/bingoohuang/gg/pkg/ss"
 	"github.com/bingoohuang/gossh/pkg/gossh"
+	"github.com/bingoohuang/ngg/ss"
 	"golang.org/x/term"
 )
 

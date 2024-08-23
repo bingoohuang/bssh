@@ -17,7 +17,6 @@ import (
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
-	"github.com/bingoohuang/gou/mat"
 	"github.com/blacknon/textcol"
 	"github.com/dustin/go-humanize"
 	"github.com/thoas/go-funk"
@@ -115,14 +114,14 @@ func longList(data []os.FileInfo) {
 
 		userData, _ := pkguser.LookupId(user)
 		user += `(` + userData.Username + `)`
-		maxUserWidth = mat.MaxInt(maxUserWidth, len(user))
+		maxUserWidth = max(maxUserWidth, len(user))
 
 		groupData, _ := pkguser.LookupGroupId(group)
 		group += `(` + groupData.Name + `)`
-		maxGroupWidth = mat.MaxInt(maxGroupWidth, len(group))
+		maxGroupWidth = max(maxGroupWidth, len(group))
 
 		sizestr := strconv.FormatUint(uint64(size), 10) + `(` + humanize.Bytes(uint64(size)) + `)`
-		maxSizeWidth = mat.MaxInt(maxSizeWidth, len(sizestr))
+		maxSizeWidth = max(maxSizeWidth, len(sizestr))
 
 		// set data
 		lsData[i] = &sftpLsData{

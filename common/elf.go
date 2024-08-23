@@ -5,15 +5,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/bingoohuang/gg/pkg/man"
-	"github.com/bingoohuang/gg/pkg/osx"
-	"github.com/bingoohuang/gg/pkg/ss"
+	"github.com/bingoohuang/ngg/rt"
+	"github.com/bingoohuang/ngg/ss"
+	"github.com/bingoohuang/ngg/unit"
 	"github.com/juju/ratelimit"
 )
 
 // ExpandHomeDir expands the ~ in the path if it is available.
 func ExpandHomeDir(f string) string {
-	return osx.ExpandHome(f)
+	return rt.ExpandHome(f)
 }
 
 // Contains tells if s contains element e.
@@ -28,7 +28,7 @@ func CreateRateLimit(r io.Reader) io.Reader {
 		return r
 	}
 
-	rateLimitBytes, err := man.ParseBytes(rateLimitEnv)
+	rateLimitBytes, err := unit.ParseBytes(rateLimitEnv)
 	if err != nil {
 		log.Fatalf("failed to parse rate limit %s, error %v", rateLimitEnv, err)
 	}

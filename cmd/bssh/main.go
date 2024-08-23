@@ -11,8 +11,7 @@ import (
 	"github.com/bingoohuang/bssh/app"
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
-	"github.com/bingoohuang/gou/str"
-	"github.com/mitchellh/go-homedir"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/spf13/pflag"
 	"github.com/urfave/cli"
 )
@@ -21,7 +20,7 @@ func main() {
 	flagSet := pflag.NewFlagSet(os.Args[0], pflag.ContinueOnError)
 	flagSet.SetInterspersed(false)
 	flagSet.StringSliceP("host", "H", strings.Split(os.Getenv("BSSH_HOST"), ","), "connect server names")
-	flagSet.StringP("cnf", "c", str.PickFirst(homedir.Expand("~/.bssh.toml")), " config file path")
+	flagSet.StringP("cnf", "c", ss.ExpandHome("~/.bssh.toml"), " config file path")
 	_ = flagSet.Parse(os.Args[1:])
 
 	var ap *cli.App

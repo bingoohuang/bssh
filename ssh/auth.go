@@ -1,13 +1,13 @@
 package ssh
 
 import (
+	"github.com/bingoohuang/ngg/ss"
 	"os/exec"
 	"strings"
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
-	"github.com/bingoohuang/gou/pbe"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/crypto/ssh"
 )
@@ -87,7 +87,7 @@ func (r *Run) decodePassword(password, rawTemplLine string) string {
 
 		return result
 	}
-	if pwd, err := pbe.Ebp(password); err != nil {
+	if pwd, err := ss.PbeDecode(password); err != nil {
 		panic(err)
 	} else {
 		r.registerAutoEncryptPwd(password)
@@ -100,7 +100,7 @@ func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error)
 		return nil
 	}
 
-	authKey := AuthKey{AuthKeyKey, key}
+	authKey := AuthKey{Type: AuthKeyKey, Value: key}
 
 	if _, ok := r.authMethodMap[authKey]; !ok {
 		// Create signer with key input

@@ -2,13 +2,13 @@ package ssh
 
 import (
 	"fmt"
+	"github.com/bingoohuang/ngg/gnet"
 	"strings"
 	"time"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
-	"github.com/bingoohuang/gonet"
 	"golang.org/x/net/proxy"
 )
 
@@ -27,7 +27,7 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 	}
 
 	// setup dialer
-	var dialer proxy.Dialer = gonet.DialerTimeoutBean{ConnTimeout: 10 * time.Second}
+	var dialer proxy.Dialer = gnet.DialerTimeoutBean{ConnTimeout: 10 * time.Second}
 
 	// Connect loop proxy server
 	for _, p := range proxyRoute {

@@ -9,7 +9,7 @@ endif
 
 export TAGS := all
 app=$(notdir $(shell pwd))
-appVersion := 1.2.8
+appVersion := 1.0.0
 goVersion := $(shell go version | sed 's/go version //'|sed 's/ /_/')
 # e.g. 2021-10-28T11:49:52+0800
 buildTime := $(shell date +%FT%T%z)
@@ -22,7 +22,7 @@ gitBranch := $(shell [ -f git.branch ] && cat git.branch || git reflog | head -1
 gitInfo = $(gitBranch)-$(gitCommit)
 #gitCommit := $(shell git rev-list -1 HEAD)
 # https://stackoverflow.com/a/47510909
-pkg := github.com/bingoohuang/gg/pkg/v
+pkg := github.com/bingoohuang/ngg/ver
 hostname := $(shell hostname)
 hostip := $(shell hostname -I 2>/dev/null || ifconfig -a | grep inet | grep -v inet6 | grep -v 127.0.0.1 | awk '{print $$2}')
 BuildCI := $(if $(BUILD_TAG),$(BUILD_TAG),Unknown)
@@ -133,10 +133,9 @@ install: init
 	${LS_BIN}
 
 linux: init
-	GOOS=linux GOARCH=amd64 ${goinstall}
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC="zig cc -target x86_64-linux-musl" CXX="zig c++ -target x86_64-linux-musl" ${goinstall}
 	ls -lh  ${gobin}/linux_amd64/${app}*
-linux-upx: init
-	GOOS=linux GOARCH=amd64 ${goinstall}
+linux-upx: linux
 	upx --best --lzma ${gobin}/linux_amd64/${app}*
 	ls -lh  ${gobin}/linux_amd64/${app}*
 windows: init
@@ -229,15 +228,11 @@ bin_cp:
 	upx ./built/*
 	cd ./built/; for file in *; do [ -f "$$file" ] && mv "$$file" "$${file}_${osname}_${osarch}"; done
 
-# BSSH_HOST=240f make bssh1r
-bssh1r: targz1
+# BSSH_HOST=240f make bssh1
+bssh1: targz1
 	bssh scp ../${app}.tar.gz r:.
 	rm -fr ../${app}.tar.gz
 	bssh 'rm -fr ${app} && tar zxf ${app}.tar.gz && rm -fr ${app}.tar.gz && cd ${app} && make install bin_cp && ls -hl ./built/* && md5sum ./built/* && readlink -f ./built/*'
-
-
-# BSSH_HOST=240f make bssh1
-bssh1: bssh1_remote
 	mkdir -p ./${app}.built
 	bssh scp r:${app}/built ./${app}.built/
 	# 显示大小

@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bingoohuang/gg/pkg/codec"
+	"github.com/bingoohuang/ngg/ss"
 	"go.uber.org/atomic"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -138,7 +138,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 	}
 	if verbose := os.Getenv("SSH_VERBOSE"); verbose == "1" {
 		sc.AlgorithmsCallback = func(algorithms ssh.Algorithms) {
-			log.Printf("algorithms: %s", codec.Json(algorithms))
+			log.Printf("algorithms: %s", ss.Json(algorithms))
 		}
 	}
 

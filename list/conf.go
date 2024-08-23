@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/bingoohuang/bssh/conf"
-	"github.com/bingoohuang/gg/pkg/ss"
+	"github.com/bingoohuang/ngg/ss"
 )
 
 // ShowServersView shows view for servers.

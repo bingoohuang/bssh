@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/bingoohuang/gossh/pkg/hostparse"
-	"github.com/bingoohuang/gou/str"
+	"github.com/bingoohuang/ngg/ss"
 )
 
 type tmplConfig struct {
@@ -51,7 +51,7 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 	}
 
 	if v := t.Props["group"]; len(v) > 0 && len(c.Group) == 0 {
-		c.Group = str.SplitTrim(v[0], ",")
+		c.Group = ss.Split(v[0], ",")
 	}
 
 	if v := t.Props["note"]; len(v) > 0 && c.Note == "" {

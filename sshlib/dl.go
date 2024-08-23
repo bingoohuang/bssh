@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bingoohuang/gg/pkg/ss"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/segmentio/ksuid"
 )
@@ -110,7 +110,7 @@ func (i *interruptReader) lsSize(file string) (size int64, err error) {
 	rsp := i.executeCmd(fmt.Sprintf("ls -l %s 2>&1", file))
 	f := strings.Fields(rsp)
 	if len(f) >= 4 {
-		size = ss.ParseInt64(f[4])
+		size, _ = ss.Parse[int64](f[4])
 	}
 
 	if size > 0 {

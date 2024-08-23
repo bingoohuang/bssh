@@ -2,12 +2,12 @@ package conf
 
 import (
 	"encoding/base64"
+	"github.com/bingoohuang/ngg/ss"
 	"log"
 	"os"
 	"sort"
 	"strings"
 
-	"github.com/bingoohuang/gou/str"
 	"github.com/urfave/cli"
 )
 
@@ -97,7 +97,7 @@ func (cf *Config) ExpandHosts(c *cli.Context, options *ArgOptions) ([]string, []
 	expanded := make([]string, 0)
 
 	for _, h := range hosts {
-		subHosts := str.SplitN(h, ",", true, true)
+		subHosts := ss.Split(h, ",")
 		for _, sh := range subHosts {
 			if _, ok := cf.Server[sh]; ok {
 				expanded = append(expanded, sh)

@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"encoding/hex"
 	"fmt"
+	"github.com/bingoohuang/ngg/ss"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -18,8 +19,6 @@ import (
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/gum"
 	"github.com/bingoohuang/gossh/pkg/hostparse"
-	"github.com/bingoohuang/gou/pbe"
-	"github.com/bingoohuang/gou/str"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
 )
@@ -212,7 +211,7 @@ func ReadConf(confPath string) (config Config) {
 		os.Exit(1)
 	}
 
-	viper.Set(pbe.PbePwd, str.EmptyThen(config.Extra.Passphrase, config.Passphrase))
+	viper.Set(ss.PbePwd, ss.Or(config.Extra.Passphrase, config.Passphrase))
 	config.loadTempHosts(confPath)
 
 	// reduce common setting (in .bssh.toml servers)
@@ -648,8 +647,8 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 	cf.tempHosts[tempHost] = true
 
 	if pass != "" {
-		if pbePwd := viper.GetString(pbe.PbePwd); pbePwd != "" {
-			pbePass, _ := pbe.Pbe(pass)
+		if pbePwd := viper.GetString(ss.PbePwd); pbePwd != "" {
+			pbePass, _ := ss.PbeEncode(pass)
 			tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
 		}
 	}

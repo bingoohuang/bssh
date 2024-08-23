@@ -10,9 +10,8 @@ import (
 	"github.com/bingoohuang/bssh/list"
 	"github.com/bingoohuang/bssh/misc"
 	sshcmd "github.com/bingoohuang/bssh/ssh"
-	"github.com/bingoohuang/gg/pkg/v"
-	"github.com/bingoohuang/gou/str"
-	"github.com/mitchellh/go-homedir"
+	"github.com/bingoohuang/ngg/ss"
+	"github.com/bingoohuang/ngg/ver"
 	"github.com/urfave/cli"
 )
 
@@ -56,7 +55,7 @@ func Lssh() (app *cli.App) {
 	app.Name = "bssh"
 	app.Usage = "TUI list select and parallel ssh client command."
 	app.Copyright = misc.Copyright
-	app.Version = v.Version()
+	app.Version = ver.Version()
 
 	// TDXX(blacknon): オプションの追加
 	//     -f       ... バックグラウンドでの接続(X11接続やport forwardingをバックグラウンドで実行する場合など)。
@@ -77,7 +76,7 @@ func Lssh() (app *cli.App) {
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},
 		cli.StringFlag{
-			Name: "cnf,c", Value: str.PickFirst(homedir.Expand("~/.bssh.toml")),
+			Name: "cnf,c", Value: ss.ExpandHome("~/.bssh.toml"),
 			Usage: "config `filepath`.",
 		},
 

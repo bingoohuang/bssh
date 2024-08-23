@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/bingoohuang/bssh/internal/tmpjson"
-	"github.com/bingoohuang/gg/pkg/ss"
+	"github.com/bingoohuang/ngg/ss"
 )
 
 func CreateTargetInfo(uri string) (targetInfo []string, newUri string) {
@@ -78,7 +78,7 @@ func Getenv(keys ...string) string {
 
 var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
 	brgEnv := Getenv("BRG", "B")
-	if brgEnv == "" || brgEnv == "0"{
+	if brgEnv == "" || brgEnv == "0" {
 		return nil, nil
 	}
 
