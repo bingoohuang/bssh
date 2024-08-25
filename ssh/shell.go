@@ -18,6 +18,7 @@ import (
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/gossh/pkg/gossh"
 	"github.com/bingoohuang/gossh/pkg/hostparse"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
@@ -268,7 +269,7 @@ func (r *Run) getLogDirPath(server string) (dir string, dateFound, hostnameFound
 	logConf := r.Conf.Log
 
 	// expansion variable
-	dir = common.ExpandHomeDir(logConf.Dir)
+	dir = ss.ExpandHome(logConf.Dir)
 	dir, dateFound = Replace(dir, "<Date>", time.Now().Format("20060102"), 1)
 	dir, hostnameFound = Replace(dir, "<ServerName>", server, 1)
 

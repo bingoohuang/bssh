@@ -14,8 +14,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/c-bata/go-prompt"
 )
 
@@ -53,7 +53,7 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 
 		// switch suggest
 		switch {
-		case num <= 1 && !common.Contains([]string{" ", "|"}, char): // if command
+		case num <= 1 && !ss.AnyOf(char, " ", "|"): // if command
 			// build-in command suggest
 			c := []prompt.Suggest{
 				{Text: "exit", Description: "exit bssh shell"},
@@ -77,9 +77,9 @@ func (ps *pShell) Completer(t prompt.Document) []prompt.Suggest {
 
 		default:
 			switch {
-			case common.Contains([]string{"/"}, char): // char is slach or
+			case ss.AnyOf(char, "/"): // char is slach or
 				ps.PathComplete = ps.GetPathComplete(!checkLocalCommand(c), t.GetWordBeforeCursor())
-			case common.Contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == 1:
+			case ss.AnyOf(char, " ") && strings.Count(t.CurrentLineBeforeCursor(), " ") == 1:
 				ps.PathComplete = ps.GetPathComplete(!checkLocalCommand(c), t.GetWordBeforeCursor())
 			}
 

@@ -14,6 +14,7 @@ import (
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
@@ -162,7 +163,7 @@ func (r *RunSftp) doGet(exit chan bool, client *Connect, server, source, targetd
 }
 
 func (r *RunSftp) parseTarget(c *cli.Context) (string, error) {
-	target := common.ExpandHomeDir(c.Args()[1])
+	target := ss.ExpandHome(c.Args()[1])
 
 	// get target directory abs
 	target, err := filepath.Abs(target)

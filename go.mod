@@ -17,16 +17,14 @@ require (
 	github.com/bingoohuang/filestash v0.0.0-20240613081414-e66bed70f730
 	github.com/bingoohuang/gossh v0.0.0-20240823091616-a782afb624f4
 	github.com/bingoohuang/linuxdash v0.0.0-20210726093226-eb284e2777e1
-	github.com/bingoohuang/ngg/gnet v0.0.0-20240823084034-023381ee0dec
-	github.com/bingoohuang/ngg/rt v0.0.0-20240823035053-0eafc8675645
-	github.com/bingoohuang/ngg/ss v0.0.0-20240823084034-023381ee0dec
-	github.com/bingoohuang/ngg/unit v0.0.0-20240823035053-0eafc8675645
-	github.com/bingoohuang/ngg/ver v0.0.0-20240823084034-023381ee0dec
+	github.com/bingoohuang/ngg/gnet v0.0.0-20240825013148-36f0caa5aee1
+	github.com/bingoohuang/ngg/ss v0.0.0-20240825010828-3f8fb808ad53
+	github.com/bingoohuang/ngg/ver v0.0.0-20240825013148-36f0caa5aee1
 	github.com/blacknon/textcol v0.0.1
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/charmbracelet/bubbles v0.19.0
 	github.com/charmbracelet/bubbletea v0.27.1
-	github.com/charmbracelet/gum v0.14.3
+	github.com/charmbracelet/gum v0.14.4
 	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/cheggaaa/pb/v3 v3.1.5
 	github.com/dustin/go-humanize v1.0.1
@@ -109,11 +107,11 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
-	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/muesli/termenv v0.15.3-0.20240618155329-98d742f6907a // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pbnjay/pixfont v0.0.0-20200714042608-33b744692567 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -135,17 +133,17 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.mongodb.org/mongo-driver v1.16.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0 // indirect
-	go.opentelemetry.io/otel v1.28.0 // indirect
-	go.opentelemetry.io/otel/metric v1.28.0 // indirect
-	go.opentelemetry.io/otel/trace v1.28.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0 // indirect
+	go.opentelemetry.io/otel v1.29.0 // indirect
+	go.opentelemetry.io/otel/metric v1.29.0 // indirect
+	go.opentelemetry.io/otel/trace v1.29.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 // indirect
 	golang.org/x/oauth2 v0.22.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	google.golang.org/api v0.194.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240822170219-fc7c04adadcd // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240823204242-4ba0660f739c // indirect
 	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

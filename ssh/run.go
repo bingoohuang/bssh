@@ -2,14 +2,14 @@ package ssh
 
 import (
 	"fmt"
-	"github.com/bingoohuang/ngg/ss"
 	"os"
 	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
 
-	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/ngg/ss"
+
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
@@ -279,14 +279,14 @@ func (r *Run) registerAutoEncryptPwd(oldPwd string) {
 }
 
 func readConfContent(confPath string) (string, error) {
-	confPath = common.ExpandHomeDir(confPath)
+	confPath = ss.ExpandHome(confPath)
 	bytes, err := os.ReadFile(confPath)
 
 	return string(bytes), err
 }
 
 func writeConfContent(confPath, content string) error {
-	confPath = common.ExpandHomeDir(confPath)
+	confPath = ss.ExpandHome(confPath)
 	stat, err := os.Stat(confPath)
 	if err != nil {
 		return err

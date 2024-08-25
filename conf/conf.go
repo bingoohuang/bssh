@@ -6,7 +6,6 @@ import (
 	_ "embed"
 	"encoding/hex"
 	"fmt"
-	"github.com/bingoohuang/ngg/ss"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -14,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bingoohuang/ngg/ss"
 
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/bssh/common"
@@ -199,7 +200,7 @@ type OpenSSHConfig struct {
 
 // ReadConf load configuration file and return Config structure.
 func ReadConf(confPath string) (config Config) {
-	confPath = common.ExpandHomeDir(confPath)
+	confPath = ss.ExpandHome(confPath)
 	confPath = checkConfPath(confPath)
 
 	config.Server = map[string]ServerConfig{}
@@ -312,7 +313,7 @@ func (cf *Config) appendIncludePaths() {
 		key := hex.EncodeToString(hasher.Sum(nil))
 
 		// append config.Include[key]
-		cf.Include[key] = IncludeConfig{common.ExpandHomeDir(includePath)}
+		cf.Include[key] = IncludeConfig{ss.ExpandHome(includePath)}
 	}
 }
 
@@ -325,7 +326,7 @@ func (cf *Config) readIncludeFiles() {
 		var includeConf Config
 
 		// user path
-		path := common.ExpandHomeDir(v.Path)
+		path := ss.ExpandHome(v.Path)
 
 		// Read include config file
 		_, err := toml.DecodeFile(path, &includeConf)

@@ -12,8 +12,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/c-bata/go-prompt"
 	"github.com/c-bata/go-prompt/completer"
 	"github.com/mattn/go-shellwords"
@@ -176,7 +176,7 @@ func (r *RunSftp) getCursorLeft(t prompt.Document) (string, string) {
 
 func (r *RunSftp) cmdMkdir(char string, t prompt.Document) []prompt.Suggest {
 	switch {
-	case common.Contains([]string{"-"}, char):
+	case ss.AnyOf(char, "-"):
 		suggest := []prompt.Suggest{
 			{Text: "-p", Description: "no error if existing, make parent directories as needed"},
 		}
@@ -190,7 +190,7 @@ func (r *RunSftp) cmdMkdir(char string, t prompt.Document) []prompt.Suggest {
 
 func (r *RunSftp) cmdLmkdir(char string, t prompt.Document) []prompt.Suggest {
 	switch {
-	case common.Contains([]string{"-"}, char):
+	case ss.AnyOf(char, "-"):
 		suggest := []prompt.Suggest{
 			{Text: "-p", Description: "no error if existing, make parent directories as needed"},
 		}
@@ -206,7 +206,7 @@ func (r *RunSftp) cmdLmkdir(char string, t prompt.Document) []prompt.Suggest {
 func (r *RunSftp) cmdLs(char string, t prompt.Document) []prompt.Suggest {
 	// switch options or path
 	switch {
-	case common.Contains([]string{"-"}, char):
+	case ss.AnyOf(char, "-"):
 		suggest := []prompt.Suggest{
 			{Text: "-1", Description: "list one file per line"},
 			{Text: "-a", Description: "do not ignore entries starting with"},
@@ -229,7 +229,7 @@ func (r *RunSftp) cmdLs(char string, t prompt.Document) []prompt.Suggest {
 func (r *RunSftp) cmdLls(char string, t prompt.Document) []prompt.Suggest {
 	// switch options or path
 	switch {
-	case common.Contains([]string{"-"}, char):
+	case ss.AnyOf(char, "-"):
 		suggest := []prompt.Suggest{
 			{Text: "-1", Description: "list one file per line"},
 			{Text: "-a", Description: "do not ignore entries starting with"},
@@ -319,18 +319,18 @@ func (r *RunSftp) PathComplete(remote bool, num int, t prompt.Document) []prompt
 
 	if remote {
 		switch {
-		case common.Contains([]string{"/"}, char): // char is slash or
+		case ss.AnyOf(char, "/"): // char is slash or
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
-		case common.Contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
+		case ss.AnyOf(char, " ") && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetRemoteComplete(t.GetWordBeforeCursor())
 		}
 
 		suggest = r.RemoteComplete
 	} else {
 		switch {
-		case common.Contains([]string{"/"}, char): // char is slash or
+		case ss.AnyOf(char, "/"): // char is slash or
 			r.GetLocalComplete(t.GetWordBeforeCursor())
-		case common.Contains([]string{" "}, char) && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
+		case ss.AnyOf(char, " ") && strings.Count(t.CurrentLineBeforeCursor(), " ") == num:
 			r.GetLocalComplete(t.GetWordBeforeCursor())
 		}
 
@@ -427,7 +427,7 @@ func (r *RunSftp) prepareRemotePath(path string, client *Connect) (string, error
 
 // GetLocalComplete ...
 func (r *RunSftp) GetLocalComplete(path string) {
-	path = common.ExpandHomeDir(path)
+	path = ss.ExpandHome(path)
 	stat, err := os.Lstat(path)
 	if err != nil {
 		return

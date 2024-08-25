@@ -17,6 +17,7 @@ import (
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/output"
 	sshl "github.com/bingoohuang/bssh/ssh"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/pkg/sftp"
 	"github.com/vbauerster/mpb"
 	"golang.org/x/crypto/ssh"
@@ -362,7 +363,7 @@ func (cp *Scp) pullPath(client *Connect) {
 	ow := client.Output.NewWriter()
 
 	// basedir
-	baseDir := common.ExpandHomeDir(cp.To.Path[0])
+	baseDir := ss.ExpandHome(cp.To.Path[0])
 
 	// if multi pull, servername add baseDir
 	if len(cp.From.Server) > 1 {

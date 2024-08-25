@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/output"
+	"github.com/bingoohuang/ngg/ss"
 )
 
 type pShellHistory struct {
@@ -74,7 +74,7 @@ func (ps *pShell) pShellHistoryPrint(psh *pShellHistory, server string, r io.Rea
 
 // GetHistoryFromFile return []History from historyfile.
 func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
-	histfile := common.ExpandHomeDir(ps.HistoryFile)
+	histfile := ss.ExpandHome(ps.HistoryFile)
 
 	// Open history file
 	file, err := os.OpenFile(histfile, os.O_RDONLY, 0o600)
@@ -111,7 +111,7 @@ func (ps *pShell) GetHistoryFromFile() (data []pShellHistory, err error) {
 //	YYYY-mm-dd_HH:MM:SS command...
 //	...
 func (ps *pShell) PutHistoryFile(cmd string) (err error) {
-	histfile := common.ExpandHomeDir(ps.HistoryFile)
+	histfile := ss.ExpandHome(ps.HistoryFile)
 
 	// Open history file
 	file, err := os.OpenFile(histfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o600)

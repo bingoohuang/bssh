@@ -15,6 +15,7 @@ import (
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/urfave/cli"
 	"github.com/vbauerster/mpb"
 )
@@ -49,7 +50,7 @@ func (r *RunSftp) putAction(c *cli.Context) error {
 	r.Progress = mpb.New(mpb.WithWaitGroup(r.ProgressWG))
 
 	// set path
-	source := common.ExpandHomeDir(c.Args()[0])
+	source := ss.ExpandHome(c.Args()[0])
 	target := c.Args()[1]
 
 	data, err := common.WalkDir(source)
