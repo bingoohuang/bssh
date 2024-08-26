@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/urfave/cli"
 	"golang.org/x/term"
 )
@@ -117,7 +118,7 @@ func MapToStruct(mapVal map[string]interface{}, val interface{}) (ok bool) {
 // GetFullPath returns a fullpath of path.
 // Expands `~` to user directory ($HOME environment variable).
 func GetFullPath(path string) (fullPath string) {
-	fullPath = ExpandHomeDir(path)
+	fullPath = ss.ExpandHome(path)
 	fullPath, _ = filepath.Abs(fullPath)
 
 	return fullPath

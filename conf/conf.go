@@ -14,12 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bingoohuang/ngg/ss"
-
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/bssh/common"
-	"github.com/bingoohuang/bssh/gum"
 	"github.com/bingoohuang/gossh/pkg/hostparse"
+	"github.com/bingoohuang/ngg/gum"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
 )
@@ -654,11 +653,8 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 		}
 	}
 
-	gumInput := &gum.InputOptions{
-		Prompt:      "新增临时主机信息，加点注释说明用途呗: ",
-		Placeholder: "e.g. 测试用",
-	}
-	if note, _ := gumInput.Run(); note != "" {
+	note, _ := gum.Input("新增临时主机信息，加点注释说明用途呗: ", "e.g. 测试用")
+	if note != "" {
 		tempHost += " # " + note
 	}
 
