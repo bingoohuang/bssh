@@ -16,7 +16,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/bssh/common"
-	"github.com/bingoohuang/gossh/pkg/hostparse"
+	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/gum"
 	"github.com/bingoohuang/ngg/ss"
 	"github.com/jedib0t/go-pretty/table"

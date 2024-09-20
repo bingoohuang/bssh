@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bingoohuang/gossh/pkg/hostparse"
+	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/ss"
 )
 
