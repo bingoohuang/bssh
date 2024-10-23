@@ -50,6 +50,8 @@ func (l *Info) keyEvent() {
 			case termbox.KeyArrowUp:
 				if l.CursorLine > 0 {
 					l.CursorLine--
+				} else { // 掉头到最低行
+					l.CursorLine = len(l.ViewText) - headLine
 				}
 
 				l.draw()
@@ -58,6 +60,8 @@ func (l *Info) keyEvent() {
 			case termbox.KeyArrowDown:
 				if l.CursorLine < len(l.ViewText)-headLine {
 					l.CursorLine++
+				} else { // 掉头到第一行
+					l.CursorLine = 0
 				}
 
 				l.draw()
