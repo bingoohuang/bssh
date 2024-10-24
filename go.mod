@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.23.1
 
 replace (
-	github.com/ThalesIgnite/crypto11 v1.2.5 => github.com/blacknon/crypto11 v1.2.6
+	github.com/ThalesIgnite/crypto11 v1.2.5 => github.com/blacknon/crypto11 v1.2.7
 	//golang.org/x/crypto => /Volumes/e2t/Github/crypto
 
 	golang.org/x/crypto => github.com/goldstd/crypto v0.0.0-20240620011023-5817ff2c8f02

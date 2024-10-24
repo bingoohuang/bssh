@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,6 +60,11 @@ func (r *Run) shell() (err error) {
 		return err
 	}
 
+	if yes, _ := ss.GetenvBool("STASH", false); yes {
+		if config.WebPort <= 0 {
+			config.WebPort = FreePort(8333)
+		}
+	}
 	if config.WebPort > 0 {
 		r.webPort, err = stash.InitFileStash(config.WebPort, connect, execCmd, SftpUpload)
 		if err != nil {
@@ -122,6 +128,17 @@ func (r *Run) shell() (err error) {
 	}
 
 	return err
+}
+
+func FreePort(defaultPort int) int {
+	l, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return defaultPort
+	}
+
+	p := l.Addr().(*net.TCPAddr).Port
+	l.Close()
+	return p
 }
 
 func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
