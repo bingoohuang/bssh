@@ -172,6 +172,8 @@ type ServerConfig struct {
 	WebPort    int    `toml:"web_port"` // <= 0 disable the web port
 	ID         string `toml:"id"`
 
+	PassPbeEncrypted bool
+
 	Raw string // to register the raw template config, like `user:pass@host:port`
 
 	Host *hostparse.Host `toml:"-"` // hostparse.Host
@@ -226,9 +228,8 @@ func ReadConf(confPath string) (config Config) {
 			if sc.ID == "" {
 				sc.ID = generateKey(len(tmpls), len(config.Hosts), i, j)
 			}
-			if strings.HasPrefix(sc.Pass, `{PBE}`) {
-				sc.ID += "*"
-			}
+
+			sc.PassPbeEncrypted = strings.HasPrefix(sc.Pass, `{PBE}`)
 
 			if _, ok := config.Server[sc.ID]; ok {
 				sc.ID += "-" + sc.User

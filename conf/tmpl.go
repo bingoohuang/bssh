@@ -20,9 +20,8 @@ func (cf *Config) tmplServers(tmplConfigs []tmplConfig) {
 			sc := tc.c
 			createServerConfigFromHost(t, &sc)
 			key := tc.createKey(t.ID, i)
-			if strings.HasPrefix(sc.Pass, `{PBE}`) {
-				key += "*"
-			}
+			sc.PassPbeEncrypted = strings.HasPrefix(sc.Pass, `{PBE}`)
+
 			cf.Server[key] = sc
 		}
 	}

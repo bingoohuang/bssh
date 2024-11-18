@@ -83,10 +83,6 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 func findServer(servers map[string]conf.ServerConfig, name string) (conf.ServerConfig, string) {
 	c, ok := servers[name]
 	if !ok {
-		name += "*"
-		c, ok = servers[name]
-	}
-	if !ok {
 		log.Fatalf("fail to find server : %s", name)
 	}
 
