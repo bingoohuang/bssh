@@ -8,11 +8,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bingoohuang/ngg/ss"
-
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/term"
@@ -358,6 +357,11 @@ func (r *Run) autoEncryptPwd() {
 func (r *Run) createAuthMethodMapForServer(server string) {
 	// get server config
 	config := r.Conf.Server[server]
+
+	if config.Proxy != "" {
+		_, name := findServer(r.Conf.Server, config.Proxy)
+		r.createAuthMethodMapForServer(name)
+	}
 
 	// Password
 	r.registerAuthMapPassword(server, config.Pass, config.Raw)

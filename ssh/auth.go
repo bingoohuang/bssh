@@ -1,13 +1,13 @@
 package ssh
 
 import (
-	"github.com/bingoohuang/ngg/ss"
 	"os/exec"
 	"strings"
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
+	"github.com/bingoohuang/ngg/ss"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/crypto/ssh"
 )

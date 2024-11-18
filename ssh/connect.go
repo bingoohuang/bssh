@@ -2,13 +2,14 @@ package ssh
 
 import (
 	"fmt"
-	"github.com/bingoohuang/ngg/gnet"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
+	"github.com/bingoohuang/ngg/gnet"
 	"golang.org/x/net/proxy"
 )
 
@@ -41,9 +42,9 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 		case misc.Command:
 			dialer, err = (&sshlib.Proxy{Type: p.Type, Command: p.Name}).CreateProxyDialer()
 		default:
-			c := config.Server[p.Name]
+			c, name := findServer(config.Server, p.Name)
 			pxy := &sshlib.Connect{ProxyDialer: dialer}
-			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[p.Name])
+			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[name])
 			if err != nil {
 				return connect, err
 			}
@@ -77,6 +78,19 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 	}
 
 	return connect, err
+}
+
+func findServer(servers map[string]conf.ServerConfig, name string) (conf.ServerConfig, string) {
+	c, ok := servers[name]
+	if !ok {
+		name += "*"
+		c, ok = servers[name]
+	}
+	if !ok {
+		log.Fatalf("fail to find server : %s", name)
+	}
+
+	return c, name
 }
 
 // proxyRouteData is proxy struct.
