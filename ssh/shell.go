@@ -17,7 +17,6 @@ import (
 	"github.com/bingoohuang/bssh/internal/stash"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
-	"github.com/bingoohuang/ngg/gossh/pkg/gossh"
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/ss"
 	"github.com/pkg/sftp"
@@ -123,7 +122,7 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			err = connect.ShellInitial(session, gossh.ConvertKeys(config.InitialCmd), r.webPort)
+			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd), r.webPort)
 		}
 	}
 

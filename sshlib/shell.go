@@ -40,7 +40,9 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 	go c.SendKeepAlive(session)
 	for _, initialCmd := range initialInput {
 		time.Sleep(100 * time.Millisecond)
-		_, _ = pipeToStdin.Write(initialCmd)
+		if len(initialCmd) > 0 {
+			_, _ = pipeToStdin.Write(initialCmd)
+		}
 	}
 
 	return session.Wait()
