@@ -19,11 +19,12 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 	l.SetTitle([]string{"ServerName", "Connect Information", "Note"})
 	l.RowFn = func(name string) string {
 		s := cf.Server[name]
+		note := s.Note
 		if s.PassPbeEncrypted {
-			name += "*"
+			note = "*" + note
 		}
 
-		return name + "\t" + s.User + "@" + s.Addr + ss.If(s.Port != "", ":"+s.Port, "") + "\t" + s.Note
+		return name + "\t" + s.User + "@" + s.Addr + ss.If(s.Port != "", ":"+s.Port, "") + "\t" + note
 	}
 	l.MultiFlag = isMulti
 
