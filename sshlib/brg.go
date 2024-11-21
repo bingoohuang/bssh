@@ -14,7 +14,7 @@ import (
 	"github.com/bingoohuang/ngg/ss"
 )
 
-func CreateTargetInfo(uri string) (targetInfo []string, newUri string) {
+func CreateTargetInfo(uri string, useBrg bool) (targetInfo []string, newUri string) {
 	host, _, _ := net.SplitHostPort(uri)
 	if ss.AnyOf(host, "127.0.0.1", "localhost") {
 		return nil, uri
@@ -25,7 +25,7 @@ func CreateTargetInfo(uri string) (targetInfo []string, newUri string) {
 		proxy = " proxy=" + proxy
 	}
 
-	if len(brg) > 0 {
+	if useBrg && len(brg) > 0 {
 		for _, p := range brg[1:] {
 			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", p, proxy))
 		}

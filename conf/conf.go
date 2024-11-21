@@ -177,6 +177,43 @@ type ServerConfig struct {
 	Raw string // to register the raw template config, like `user:pass@host:port`
 
 	Host *hostparse.Host `toml:"-"` // hostparse.Host
+
+	Brg DefaultTrue `toml:"brg"` // 是否关闭 BRG 代理
+}
+
+type DefaultTrue struct {
+	Value *bool
+}
+
+func (ds *DefaultTrue) Get() bool {
+	if ds.Value != nil {
+		return *ds.Value
+	}
+	return true
+}
+
+func (ds *DefaultTrue) Set(b bool) {
+	ds.Value = &b
+}
+
+func (ds *DefaultTrue) UnmarshalTOML(data any) error {
+	if data == nil {
+		return nil
+	}
+
+	switch t := data.(type) {
+	case int64:
+		if t != 0 && t != 1 {
+			return fmt.Errorf("shoule be 0 or 1")
+		}
+		ds.Set(t == 1)
+	case bool:
+		ds.Set(t)
+	default:
+		return fmt.Errorf("invalid type %T, should be 0 or 1", t)
+	}
+
+	return nil
 }
 
 // ProxyConfig struct that stores Proxy server settings connected via http and socks5.

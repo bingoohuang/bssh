@@ -98,7 +98,7 @@ func (c *Connect) Exit() {
 }
 
 // CreateClient set c.Client.
-func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod) (err error) {
+func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMethod, useBrg bool) (err error) {
 	uri := net.JoinHostPort(host, port)
 
 	timeout := 20
@@ -147,7 +147,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		c.ProxyDialer = proxy.Direct
 	}
 
-	targetInfo, uri := CreateTargetInfo(uri)
+	targetInfo, uri := CreateTargetInfo(uri, useBrg)
 
 	// Dial to host:port
 	netConn, err := c.ProxyDialer.Dial("tcp", uri)
