@@ -61,6 +61,12 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 		c.ID = v[0]
 	}
 
+	if c.ID == "" {
+		if v := t.Props["auto_id"]; len(v) > 0 && c.ID == "" {
+			c.ID = v[0]
+		}
+	}
+
 	if v := t.Props["key"]; len(v) > 0 && c.Key == "" {
 		c.Key = v[0]
 	}

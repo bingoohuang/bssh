@@ -20,6 +20,7 @@ import (
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/ss"
+	"github.com/bingoohuang/ngg/tsid"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
@@ -31,7 +32,7 @@ func (r *Run) shell() (err error) {
 	config, ok := r.Conf.Server[server]
 	isTempHost := !ok
 	if isTempHost {
-		config, _ = r.parseDirectServer(server)
+		config = r.parseDirectServer(server)
 	}
 
 	// check count AuthMethod
@@ -212,19 +213,23 @@ func SftpUpload(client *sftp.Client, remote string, data []byte) error {
 	return nil
 }
 
-func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig, isDirectServer bool) {
+func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig) {
 	sc, ok := hostparse.ParseDirectServer(server)
 	if ok {
-		r.Conf.Server[server] = conf.ServerConfig{
+		autoID := "host-" + tsid.Fast().ToString()
+		r.Conf.Server[autoID] = conf.ServerConfig{
 			User: sc.User,
 			Pass: sc.Pass,
 			Addr: sc.Addr,
 			Port: sc.Port,
+
+			ID:           autoID,
+			DirectServer: true,
 		}
-		r.registerAuthMapPassword(server, sc.Pass, "")
+		r.registerAuthMapPassword(autoID, sc.Pass, "")
 	}
 
-	return r.Conf.Server[server], ok
+	return r.Conf.Server[server]
 }
 
 func (r *Run) sshAgent(config *conf.ServerConfig, connect *sshlib.Connect, session *ssh.Session) {

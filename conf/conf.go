@@ -21,6 +21,7 @@ import (
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/gum"
 	"github.com/bingoohuang/ngg/ss"
+	"github.com/bingoohuang/ngg/tsid"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
 )
@@ -188,6 +189,8 @@ type ServerConfig struct {
 	Host *hostparse.Host `toml:"-"` // hostparse.Host
 
 	Brg DefaultTrue `toml:"brg"` // 是否关闭 BRG 代理
+
+	DirectServer bool `toml:"-"`
 }
 
 type DefaultTrue struct {
@@ -285,20 +288,19 @@ func ReadConf(confPath string) (config Config) {
 	// reduce common setting (in .bssh.toml servers)
 	config.parseConfigServers(config.Server, config.Common)
 
-	for i, server := range config.Hosts {
+	for _, server := range config.Hosts {
 		tmpls := hostparse.Parse(server)
-		for j, tmpl := range tmpls {
+		for _, tmpl := range tmpls {
 			sc := ServerConfig{}
 			createServerConfigFromHost(tmpl, &sc)
-
 			if sc.ID == "" {
-				sc.ID = generateKey(len(tmpls), len(config.Hosts), i, j)
+				log.Fatalf("server ID is empty!")
 			}
 
 			sc.PassPbeEncrypted = strings.HasPrefix(sc.Pass, `{PBE}`)
 
 			if _, ok := config.Server[sc.ID]; ok {
-				sc.ID += "-" + sc.User
+				log.Fatalf("server ID %q is duplicate", sc.ID)
 			}
 			config.Server[sc.ID] = sc
 		}
@@ -346,18 +348,6 @@ func checkConfPath(confPath string) string {
 
 	os.Exit(0)
 	return ""
-}
-
-func generateKey(tmplsNum, hostsNum, i int, j int) string {
-	if tmplsNum > 1 {
-		return fmt.Sprintf("host-%s-%s", pad(i+1, hostsNum), pad(j+1, tmplsNum))
-	}
-
-	return fmt.Sprintf("host-%s", pad(i+1, hostsNum))
-}
-
-func pad(i int, size int) string {
-	return fmt.Sprintf(fmt.Sprintf("%%0%dd", len(strconv.Itoa(size))), i)
 }
 
 func (cf *Config) appendIncludePaths() {
@@ -719,6 +709,7 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 		}
 	}
 
+	tempHost += " auto_id=" + "host-" + tsid.Fast().ToString()
 	note, _ := gum.Input("新增临时主机信息，加点注释说明用途呗: ", "e.g. 测试用")
 	if note != "" {
 		tempHost += " # " + note
