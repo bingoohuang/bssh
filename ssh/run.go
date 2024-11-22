@@ -413,11 +413,11 @@ func (r *Run) createAuthMethodMapForServer(server string) {
 	}
 
 	// PKCS11
-	if config.PKCS11Use {
-		if err := r.registerAuthMapPKCS11(server, config.PKCS11Provider, config.PKCS11PIN); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-	}
+	//if config.PKCS11Use {
+	//	if err := r.registerAuthMapPKCS11(server, config.PKCS11Provider, config.PKCS11PIN); err != nil {
+	//		fmt.Fprintln(os.Stderr, err)
+	//	}
+	//}
 }
 
 // runCmdLocal exec command local machine.
