@@ -126,7 +126,7 @@ func (l *Info) SetTitle(titleColumns []string) {
 func (l *Info) getText() {
 	buffer := &bytes.Buffer{}
 	tabWriterBuffer := new(tabwriter.Writer)
-	tabWriterBuffer.Init(buffer, 0, 4, 8, ' ', 0)
+	tabWriterBuffer.Init(buffer, 0, 2, 2, ' ', 0)
 	fmt.Fprintln(tabWriterBuffer, l.Title)
 
 	// Create list table

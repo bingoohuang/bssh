@@ -136,7 +136,7 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 	if len(sc.KeyExchanges) == 0 {
 		sc.KeyExchanges = ssh.DefinedKexAlgos()
 	}
-	if verbose := os.Getenv("SSH_VERBOSE"); verbose == "1" {
+	if verbose := os.Getenv("VERBOSE"); verbose == "1" {
 		sc.AlgorithmsCallback = func(algorithms ssh.Algorithms) {
 			log.Printf("algorithms: %s", ss.Json(algorithms))
 		}

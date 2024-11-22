@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/bingoohuang/ngg/ss"
+	"github.com/bingoohuang/ngg/tsid"
 	"github.com/cheggaaa/pb/v3"
-	"github.com/segmentio/ksuid"
 )
 
 func (i *interruptReader) dl(file string) {
@@ -89,8 +89,8 @@ func (r *PbReader) Read(p []byte) (n int, err error) {
 }
 
 func (i *interruptReader) dlPart(file string, skip int, pw *io.PipeWriter) bool {
-	rsp := i.executeCmd(fmt.Sprintf(
-		"dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", file, 102400, skip))
+	rsp, _ := i.executeCmd(fmt.Sprintf(
+		"dd if=%s bs=%d count=1 skip=%d 2>/dev/null | base64 -w 0 && echo", file, 102400, skip), 3*time.Second)
 	ok := rsp == ""
 	if ok {
 		pw.Close()
@@ -102,12 +102,12 @@ func (i *interruptReader) dlPart(file string, skip int, pw *io.PipeWriter) bool 
 }
 
 func (i *interruptReader) md5sum(file string) string {
-	rsp := i.executeCmd(fmt.Sprintf("md5sum %s", file))
+	rsp, _ := i.executeCmd(fmt.Sprintf("md5sum %s", file), 3*time.Second)
 	return field0(rsp)
 }
 
 func (i *interruptReader) lsSize(file string) (size int64, err error) {
-	rsp := i.executeCmd(fmt.Sprintf("ls -l %s 2>&1", file))
+	rsp, _ := i.executeCmd(fmt.Sprintf("ls -l %s 2>&1", file), 3*time.Second)
 	f := strings.Fields(rsp)
 	if len(f) >= 4 {
 		size, _ = ss.Parse[int64](f[4])
@@ -120,14 +120,19 @@ func (i *interruptReader) lsSize(file string) (size int64, err error) {
 	return 0, errors.New(rsp)
 }
 
-func (i *interruptReader) executeCmd(cmd string) string {
-	tag := ksuid.New().String()
+func (i *interruptReader) executeCmd(cmd string, timeout time.Duration) (string, error) {
+	tag := tsid.Fast().ToString()
 	i.directWriter.Write([]byte(fmt.Sprintf("echo open:%s; %s; echo close:%s\r", tag, cmd, tag)))
 	i.notifyC <- NotifyCmd{
 		Type:  NotifyTypeTag,
 		Value: tag,
 	}
-	return <-i.notifyRspC
+	select {
+	case <-time.After(timeout):
+		return "", errors.New("timeout")
+	case rsp := <-i.notifyRspC:
+		return rsp, nil
+	}
 }
 
 func field0(s string) string {

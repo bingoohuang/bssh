@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -15,37 +16,39 @@ import (
 	"golang.org/x/term"
 )
 
-func (c *Connect) interruptInput(webPort int) (*io.PipeReader, *io.PipeWriter, *io.PipeWriter) {
+func (c *Connect) interruptInput(webPort int, hostInfoScript string) (stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
 	r1, w1 := io.Pipe()
 	r2, w2 := io.Pipe()
 
 	notifyC := make(chan NotifyCmd)
 	notifyRspC := make(chan string)
+
+	iw := newInterruptWriter(r2, notifyC, notifyRspC)
 	go func() {
-		r := newInterruptWriter(r2, notifyC, notifyRspC)
-		if _, err := io.Copy(os.Stdout, r); err != nil && errors.Is(err, io.EOF) {
+		if _, err := io.Copy(os.Stdout, iw); err != nil && errors.Is(err, io.EOF) {
 			return
 		}
 	}()
 
+	ir = newInterruptReader(webPort, notifyC, notifyRspC, w1, c, hostInfoScript)
 	go func() {
-		r := newInterruptReader(webPort, notifyC, notifyRspC, w1, c)
-		if _, err := io.Copy(w1, r); err != nil && errors.Is(err, io.EOF) {
+		if _, err := io.Copy(w1, ir); err != nil && errors.Is(err, io.EOF) {
 			return
 		}
 	}()
 
-	return r1, w2, w1
+	return r1, w2, w1, ir
 }
 
-func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string, directWriter *io.PipeWriter, connect *Connect) *interruptReader {
+func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string, directWriter *io.PipeWriter, connect *Connect, hostInfoScript string) *interruptReader {
 	return &interruptReader{
-		r:            GetStdin(),
-		port:         port,
-		directWriter: directWriter,
-		notifyC:      notifyC,
-		notifyRspC:   notifyRspC,
-		connect:      connect,
+		r:              GetStdin(),
+		port:           port,
+		directWriter:   directWriter,
+		notifyC:        notifyC,
+		notifyRspC:     notifyRspC,
+		connect:        connect,
+		hostInfoScript: hostInfoScript,
 	}
 }
 
@@ -55,6 +58,7 @@ type interruptWriter struct {
 	notifyTag  string
 	buf        bytes.Buffer
 	notifyRspC chan string
+	notifyTime time.Time
 }
 
 func (i *interruptWriter) Read(p []byte) (n int, err error) {
@@ -63,7 +67,7 @@ func (i *interruptWriter) Read(p []byte) (n int, err error) {
 		return 0, err
 	}
 
-	if i.notifyTag != "" {
+	if i.notifyTag != "" && time.Since(i.notifyTime) < 15*time.Second {
 		i.buf.Write(p[:n])
 		if bytes.Contains(i.buf.Bytes(), []byte("close:"+i.notifyTag+"\r\n")) {
 			rsp, closeFound := clearTag(i.notifyTag, i.buf.Bytes())
@@ -79,6 +83,7 @@ func (i *interruptWriter) Read(p []byte) (n int, err error) {
 	select {
 	case notify := <-i.notifyC:
 		i.notifyTag = notify.Value
+		i.notifyTime = time.Now()
 		i.buf.Reset()
 		i.buf.Write(p[:n])
 		return 0, err
@@ -134,6 +139,7 @@ type interruptReader struct {
 
 	LastKeyCtrK     bool
 	LastKeyCtrKTime time.Time
+	hostInfoScript  string
 }
 
 func (i *interruptReader) Read(p []byte) (n int, err error) {
@@ -186,8 +192,20 @@ Next:
 			"2) %web          : to open the file explorer in browser\r\n"+
 			"3) %up localfile : to upload the local file to the remote\r\n"+
 			"4) %dl remotefile: to download the remote file to the local\r\n",
-			"5) %exit:          to exit the current bssh connection\r\n",
+			"5) %hostinfo:    : to show host info\r\n",
+			"6) %exit         : to exit the current bssh connection\r\n",
 		)
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%hostinfo") {
+		if i.hostInfoScript == "" {
+			log.Printf("hostInfoScript is empty")
+		} else {
+			result, err := i.executeCmd(i.hostInfoScript, 15*time.Second)
+			if err != nil {
+				log.Printf("host info error: %v", err)
+			} else {
+				fmt.Printf("%s\n", result)
+			}
+		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%dash") {
 		if i.port > 0 {
 			go util.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))

@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/bingoohuang/ngg/tsid"
 	"github.com/cheggaaa/pb/v3"
-	"github.com/segmentio/ksuid"
 )
 
 func (i *interruptReader) up(file string) {
@@ -30,7 +30,7 @@ func (i *interruptReader) up(file string) {
 	}
 	defer f.Close()
 
-	prefix := fmt.Sprintf("/tmp/%s.%s", ksuid.New(), filepath.Base(file))
+	prefix := fmt.Sprintf("/tmp/%s.%s", tsid.Fast().ToString(), filepath.Base(file))
 	os.Stdout.Write([]byte(fmt.Sprintf("start to upload local %s to remote %s\n",
 		file, prefix)))
 
@@ -57,7 +57,7 @@ func (i *interruptReader) up(file string) {
 		count++
 		tmpfile := fmt.Sprintf("%s.%d", prefix, idx)
 		content := base64.StdEncoding.EncodeToString(bs)
-		t := ksuid.New().String()
+		t := tsid.Fast().ToString()
 		cmd := fmt.Sprintf("echo open:%s; echo %s | base64 -d > %s ; md5sum %s; echo close:%s\r",
 			t, content, tmpfile, tmpfile, t)
 		i.directWriter.Write([]byte(cmd))
@@ -73,7 +73,7 @@ func (i *interruptReader) up(file string) {
 
 	bar.Finish()
 
-	t := ksuid.New().String()
+	t := tsid.Fast().ToString()
 	cmd := fmt.Sprintf("echo open:%s; cat %s.{1..%d} > %s; rm -fr %s.{1..%d}; echo close:%s\r",
 		t, prefix, count, prefix, prefix, count, t)
 	i.directWriter.Write([]byte(cmd))

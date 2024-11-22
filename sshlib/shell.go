@@ -8,25 +8,26 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"go.uber.org/atomic"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // ShellInitial connect login shell over ssh.
-func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int) (err error) {
+func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int, hostInfoAutoEnabled bool, hostInfoScript string, hostInfoUpdater func(hostInfo string)) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
+	state, err := term.MakeRaw(fd)
 	if err != nil {
 		return err
 	}
-	defer terminal.Restore(fd, state)
+	defer term.Restore(fd, state)
 
 	// setup
-	pipeToStdin, err := c.setupShell(session, webPort)
+	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript)
 	if err != nil {
 		return err
 	}
@@ -45,6 +46,16 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 		}
 	}
 
+	if hostInfoAutoEnabled {
+		hostInfo, _ := ir.executeCmd(hostInfoScript, 15*time.Second)
+		hostInfo = strings.ReplaceAll(hostInfo, "\r\n", "")
+		if hostInfo != "" {
+			log.Printf("%s", hostInfo)
+			hostInfoUpdater(hostInfo)
+		}
+		pipeToStdin.Write([]byte("\r"))
+	}
+
 	return session.Wait()
 }
 
@@ -52,14 +63,14 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 func (c *Connect) Shell(session *ssh.Session) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
+	state, err := term.MakeRaw(fd)
 	if err != nil {
 		return err
 	}
-	defer terminal.Restore(fd, state)
+	defer term.Restore(fd, state)
 
 	// setup
-	if _, err := c.setupShell(session, 0); err != nil {
+	if _, _, err := c.setupShell(session, 0, ""); err != nil {
 		return err
 	}
 
@@ -79,14 +90,14 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
+	state, err := term.MakeRaw(fd)
 	if err != nil {
 		return
 	}
-	defer terminal.Restore(fd, state)
+	defer term.Restore(fd, state)
 
 	// setup
-	if _, err := c.setupShell(session, 0); err != nil {
+	if _, _, err := c.setupShell(session, 0, ""); err != nil {
 		return err
 	}
 
@@ -101,8 +112,70 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	return session.Wait()
 }
 
-func (c *Connect) setupShell(session *ssh.Session, webPort int) (pipeToStdin *io.PipeWriter, err error) {
-	session.Stdin, session.Stdout, pipeToStdin = c.interruptInput(webPort)
+//type CatchWriter struct {
+//	w io.Writer
+//
+//	lock     sync.RWMutex
+//	catching bool
+//	resp     string
+//}
+//
+//func newCatchWriter(w io.Writer) *CatchWriter {
+//	return &CatchWriter{
+//		w: w,
+//	}
+//}
+//
+//func (t *CatchWriter) StartCatch() {
+//	t.lock.Lock()
+//	defer t.lock.Unlock()
+//
+//	t.resp = ""
+//	t.catching = true
+//}
+//
+//func (t *CatchWriter) StopCatch(startTag, endTag string) string {
+//	for i := 0; i < 3; i++ {
+//		time.Sleep(200 * time.Millisecond)
+//		resp, ok := func() (string, bool) {
+//			t.lock.Lock()
+//			defer t.lock.Unlock()
+//
+//			if strings.Count(t.resp, startTag) < 2 || strings.Count(t.resp, endTag) < 2 {
+//				return "", false
+//			}
+//
+//			startPos := strings.LastIndex(t.resp, startTag)
+//			endPos := strings.LastIndex(t.resp, endTag)
+//			t.catching = false
+//			return t.resp[startPos+len(startTag) : endPos], true
+//		}()
+//		if ok {
+//			return resp
+//		}
+//	}
+//
+//	t.lock.Lock()
+//	defer t.lock.Unlock()
+//	t.catching = false
+//
+//	return ""
+//}
+//
+//func (t *CatchWriter) Write(p []byte) (n int, err error) {
+//	n, err = t.w.Write(p)
+//
+//	t.lock.RLock()
+//	if t.catching {
+//		t.resp += string(p[:n])
+//	}
+//	t.lock.RUnlock()
+//
+//	return
+//}
+
+func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string) (pipeToStdin *io.PipeWriter, ir *interruptReader, err error) {
+	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript)
 	session.Stderr = os.Stderr
 
 	if c.logging {
@@ -115,7 +188,7 @@ func (c *Connect) setupShell(session *ssh.Session, webPort int) (pipeToStdin *io
 
 	// Request tty
 	if err := RequestTty(session); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// x11 forwarding

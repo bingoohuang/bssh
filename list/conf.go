@@ -3,6 +3,7 @@ package list
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/ngg/ss"
@@ -16,7 +17,11 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 	l := new(Info)
 	l.Prompt = prompt
 	l.NameList = cf.FilterNamesByGroup(group, names)
-	l.SetTitle([]string{"ServerName", "Connect Information", "Note"})
+	if cf.HostInfoEnabled.Get() {
+		l.SetTitle([]string{"ServerName", "Connect Info # Note", "Host Info"})
+	} else {
+		l.SetTitle([]string{"ServerName", "Connect Info # Note"})
+	}
 	l.RowFn = func(name string) string {
 		s := cf.Server[name]
 		note := s.Note
@@ -24,7 +29,15 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 			note = "*" + note
 		}
 
-		return name + "\t" + s.User + "@" + s.Addr + ss.If(s.Port != "", ":"+s.Port, "") + "\t" + note
+		hostInfo := cf.HostInfo[name]
+		row := name +
+			"\t" + s.User + "@" + s.Addr + ss.If(s.Port != "", ":"+s.Port, "") +
+			" # " + strings.TrimSpace(note)
+		if cf.HostInfoEnabled.Get() {
+			row += "\t" + strings.TrimSpace(hostInfo)
+		}
+
+		return row
 	}
 	l.MultiFlag = isMulti
 

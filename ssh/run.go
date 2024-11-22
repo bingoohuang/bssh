@@ -422,7 +422,8 @@ func (r *Run) createAuthMethodMapForServer(server string) {
 
 // runCmdLocal exec command local machine.
 // Mainly used in r.shell().
-func execLocalCommand(cmd string) {
+func execLocalCommand(cmd string) string {
 	out, _ := exec.Command("sh", "-c", cmd).CombinedOutput()
 	fmt.Print(string(out))
+	return string(out)
 }

@@ -5,7 +5,9 @@ import (
 	"crypto/md5" // nolint
 	_ "embed"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -33,6 +35,13 @@ type Config struct {
 	Common   ServerConfig
 	Server   map[string]ServerConfig
 	Proxy    map[string]ProxyConfig
+
+	HostInfoEnabled    DefaultTrue
+	HostInfoScriptFile string
+
+	ConfPath         string            `toml:"-"`
+	HostInfo         map[string]string `toml:"-"`
+	HostInfoJsonFile string            `toml:"-"`
 
 	SSHConfig map[string]OpenSSHConfig
 
@@ -241,13 +250,33 @@ func ReadConf(confPath string) (config Config) {
 	confPath = ss.ExpandHome(confPath)
 	confPath = checkConfPath(confPath)
 
+	config.ConfPath = confPath
 	config.Server = map[string]ServerConfig{}
 	config.SSHConfig = map[string]OpenSSHConfig{}
+
+	config.HostInfo = map[string]string{}
 
 	// Read config file
 	if _, err := toml.DecodeFile(confPath, &config); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	if config.HostInfoEnabled.Get() {
+		tempHostsFile := strings.TrimSuffix(confPath, ".toml") + ".json"
+		hostInfoJsonFile := ss.ExpandHome(tempHostsFile)
+		config.HostInfoJsonFile = hostInfoJsonFile
+
+		hostInfoJson, err := os.ReadFile(hostInfoJsonFile)
+		if err != nil {
+			log.Printf("read %s error: %v", hostInfoJsonFile, err)
+		} else {
+			if len(hostInfoJson) > 0 {
+				if err := json.Unmarshal(hostInfoJson, &config.HostInfo); err != nil {
+					log.Printf("unmarshal %s error: %v", hostInfoJsonFile, err)
+				}
+			}
+		}
 	}
 
 	viper.Set(ss.PbePwd, ss.Or(config.Extra.Passphrase, config.Passphrase))
@@ -648,9 +677,8 @@ func (cf *Config) loadTempHosts(confPath string) {
 		cf.tempHosts[hostLine] = true
 	}
 
-	for k := range cf.tempHosts {
-		cf.Hosts = append(cf.Hosts, k)
-	}
+	keys := ss.MapKeysSorted(cf.tempHosts)
+	cf.Hosts = append(cf.Hosts, keys...)
 }
 
 var re = regexp.MustCompile(`\{PBE}.*?@`)
