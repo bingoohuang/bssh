@@ -26,6 +26,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+type HostInfo struct {
+	Info   string `json:"info"`
+	Update string `json:"update,omitempty"`
+}
+
 // Config is Struct that stores the entire configuration file.
 type Config struct {
 	Extra    ExtraConfig
@@ -40,9 +45,9 @@ type Config struct {
 	HostInfoEnabled    DefaultTrue
 	HostInfoScriptFile string
 
-	ConfPath         string            `toml:"-"`
-	HostInfo         map[string]string `toml:"-"`
-	HostInfoJsonFile string            `toml:"-"`
+	ConfPath         string              `toml:"-"`
+	HostInfo         map[string]HostInfo `toml:"-"`
+	HostInfoJsonFile string              `toml:"-"`
 
 	SSHConfig map[string]OpenSSHConfig
 
@@ -268,7 +273,7 @@ func ReadConf(confPath string) (config Config) {
 	config.Server = map[string]ServerConfig{}
 	config.SSHConfig = map[string]OpenSSHConfig{}
 
-	config.HostInfo = map[string]string{}
+	config.HostInfo = map[string]HostInfo{}
 
 	// Read config file
 	if _, err := toml.DecodeFile(confPath, &config); err != nil {

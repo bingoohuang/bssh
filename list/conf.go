@@ -34,7 +34,7 @@ func ShowServersView(cf *conf.Config, prompt string, names []string, isMulti boo
 			"\t" + s.User + "@" + s.Addr + ss.If(s.Port != "", ":"+s.Port, "") +
 			" # " + strings.TrimSpace(note)
 		if cf.HostInfoEnabled.Get() {
-			row += "\t" + strings.TrimSpace(hostInfo)
+			row += "\t" + strings.TrimSpace(hostInfo.Info)
 		}
 
 		return row

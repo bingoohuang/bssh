@@ -42,14 +42,29 @@ func (t *InitialPromptReadyChecker) Wait(timeout time.Duration) bool {
 }
 
 func (t *InitialPromptReadyChecker) Read(p []byte) {
-	if !t.InitialPromptReady.Load() && bytes.HasSuffix(p, []byte("# ")) || bytes.HasSuffix(p, []byte("$ ")) {
+	ready := t.InitialPromptReady.Load()
+	if !ready && BytesHasSuffix(p, "# ", "$ ") {
 		t.InitialPromptReady.Store(true)
+		TrySend(t.NotifyCh, struct{}{})
+	}
+}
 
-		select {
-		case t.NotifyCh <- struct{}{}:
-		default:
+func TrySend[T any](ch chan T, t T) bool {
+	select {
+	case ch <- t:
+		return true
+	default:
+		return false
+	}
+}
+
+func BytesHasSuffix(p []byte, suffixes ...string) bool {
+	for _, suffix := range suffixes {
+		if bytes.HasSuffix(p, []byte(suffix)) {
+			return true
 		}
 	}
+	return false
 }
 
 // ShellInitial connect login shell over ssh.
@@ -82,8 +97,8 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 	if initialCmdSleep == 0 {
 		initialCmdSleep = 250 * time.Millisecond
 	}
-	checker.Wait(initialCmdSleep)
 
+	checker.Wait(initialCmdSleep)
 	if len(initialInput) > 0 {
 		for i, initialCmd := range initialInput {
 			if i > 0 {
@@ -95,7 +110,8 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 		}
 	}
 
-	if hostInfoAutoEnabled {
+	waited := checker.Wait(2 * time.Second)
+	if waited && hostInfoAutoEnabled {
 		hostInfo, _ := ir.executeCmd(hostInfoScript, 15*time.Second)
 		hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
 		if hostInfo != "" {

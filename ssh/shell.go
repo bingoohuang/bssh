@@ -145,11 +145,14 @@ func (r *Run) shell() (err error) {
 			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd), config.InitialCmdSleep.Duration,
 				r.webPort, hostInfoAutoEnabled, hostInfoScript,
 				func(hostInfo string) {
-					if r.Conf.HostInfo[server] == hostInfo {
+					if r.Conf.HostInfo[server].Info == hostInfo {
 						return
 					}
 
-					r.Conf.HostInfo[server] = hostInfo
+					r.Conf.HostInfo[server] = conf.HostInfo{
+						Info:   hostInfo,
+						Update: time.Now().Format("2006-01-02 15:04:05"),
+					}
 					hostInfoJson, _ := json.Marshal(r.Conf.HostInfo)
 					if len(hostInfoJson) > 0 {
 						if err := os.WriteFile(r.Conf.HostInfoJsonFile, hostInfoJson, os.ModePerm); err != nil {
@@ -164,14 +167,15 @@ func (r *Run) shell() (err error) {
 }
 
 const defaultHostInfoScript = `uname -m; ` +
-	`echo -n ", "; grep -c ^processor /proc/cpuinfo;` +
-	`echo -n "C, "; free -h | awk '/^Mem:/ {print $7}';` +
+	`echo -n " "; grep -c ^processor /proc/cpuinfo;` +
+	`echo -n "C "; free -h | awk '/^Mem:/ {print $7}';` +
 	`echo -n "/"; free -h | awk '/^Mem:/ {print $2}';` +
-	`echo -n ", "; df -h --total / | grep total | awk '{print $4}';` +
+	`echo -n " "; df -h --total / | grep total | awk '{print $4}';` +
 	`echo -n "/"; df -h --total / | grep total | awk '{print $2}';` +
-	`echo -n ", "; lscpu | grep -E "型号名称" | awk -F '：' '{print $2}' | sed 's/^\s*//';` +
-	`lscpu | grep -E "^Model name" | awk -F ':' '{print $2}' | sed 's/^\s*//';` +
-	`echo -n ", "; cat /etc/os-release | grep ^PRETTY_NAME= | cut -d '"' -f2;`
+	`echo -n " "; lscpu | grep -E "型号名称" | awk -F '：' '{print $2}' | sed 's/^\s*//' | sed -E 's/[[:space:]]+/_/g';` +
+	`lscpu | grep -E "^Model name" | awk -F ':' '{print $2}' | sed 's/^\s*//' | sed -E 's/[[:space:]]+/_/g'; ` +
+	`echo -n " "; cat /etc/os-release | grep ^PRETTY_NAME= | cut -d '"' -f2 | sed -E 's/[[:space:]]+/_/g';` +
+	`echo -n " "; hostname -I | awk '{print $1};'`
 
 func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
 	session, err := connect.CreateSession()
