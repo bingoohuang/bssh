@@ -116,7 +116,7 @@ func (r *Run) shell() (err error) {
 		logConf := r.Conf.Log
 		if logConf.Enable {
 			logPath := r.getLogPath(server)
-			log.Printf("logging to %s", logPath)
+			fmt.Printf("logging to %s\n", logPath)
 			connect.SetLog(logPath, logConf.Timestamp)
 		}
 
@@ -136,15 +136,14 @@ func (r *Run) shell() (err error) {
 				if err != nil {
 					log.Fatalf("read %q error: %v", scriptFile, err)
 				}
+				hostInfoScript = string(script)
 
-				hostInfoScript = strings.TrimRight(strings.TrimSpace(string(script)), ";")
-
-				// 使用正则表达式替换回车和换行符为空格
-				re := regexp.MustCompile(`[\r\n]+`)
-				hostInfoScript = re.ReplaceAllString(hostInfoScript, " ")
 			}
+			hostInfoScript = strings.TrimRight(strings.TrimSpace(hostInfoScript), ";")
+			hostInfoScript = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfoScript, "")
 
-			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd), r.webPort, hostInfoAutoEnabled, hostInfoScript,
+			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd), config.InitialCmdSleep.Duration,
+				r.webPort, hostInfoAutoEnabled, hostInfoScript,
 				func(hostInfo string) {
 					if r.Conf.HostInfo[server] == hostInfo {
 						return
@@ -164,17 +163,15 @@ func (r *Run) shell() (err error) {
 	return err
 }
 
-const defaultHostInfoScript = `echo -n "CPU: "; uname -m | tr -d '\n'; ` +
-	`echo -n "/"; lscpu | grep -E "型号名称" | awk -F '：' '{print $2}' | sed 's/^\s*//' ;` +
-	`lscpu | grep -E "Model name" | awk -F ':' '{print $2}' | sed 's/^\s*//'  ;` +
-	`echo -n " 核数: "; grep -c ^processor /proc/cpuinfo ;` +
-	`echo -n " 内存: "; free -h | awk '/^Mem:/ {print $7}' | tr -d '\n';` +
-	`echo -n "/"; free -h | awk '/^Mem:/ {print $2}' ;` +
-	`echo -n " 系统: "; cat /etc/os-release | grep ^PRETTY_NAME= | cut -d '"' -f2 ; ` +
-	`echo -n " 内核: "; uname -r ; ` +
-	`echo -n " 根盘: "; df -h --total / | grep total | awk '{print $4}' | tr -d '\n' ; ` +
+const defaultHostInfoScript = `uname -m; ` +
+	`echo -n ", "; grep -c ^processor /proc/cpuinfo;` +
+	`echo -n "C, "; free -h | awk '/^Mem:/ {print $7}';` +
+	`echo -n "/"; free -h | awk '/^Mem:/ {print $2}';` +
+	`echo -n ", "; df -h --total / | grep total | awk '{print $4}';` +
 	`echo -n "/"; df -h --total / | grep total | awk '{print $2}';` +
-	`echo -n " 时间: "; date "+%Y-%m-%d %H:%M:%S"`
+	`echo -n ", "; lscpu | grep -E "型号名称" | awk -F '：' '{print $2}' | sed 's/^\s*//';` +
+	`lscpu | grep -E "^Model name" | awk -F ':' '{print $2}' | sed 's/^\s*//';` +
+	`echo -n ", "; cat /etc/os-release | grep ^PRETTY_NAME= | cut -d '"' -f2;`
 
 func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
 	session, err := connect.CreateSession()

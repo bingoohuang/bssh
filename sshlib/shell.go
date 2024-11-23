@@ -5,10 +5,12 @@
 package sshlib
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
-	"strings"
+	"regexp"
 	"time"
 
 	"go.uber.org/atomic"
@@ -16,8 +18,44 @@ import (
 	"golang.org/x/term"
 )
 
+func NewInitialPromptReadyChecker() *InitialPromptReadyChecker {
+	return &InitialPromptReadyChecker{
+		NotifyCh: make(chan struct{}),
+	}
+}
+
+type InitialPromptReadyChecker struct {
+	InitialPromptReady atomic.Bool
+	NotifyCh           chan struct{}
+}
+
+func (t *InitialPromptReadyChecker) Wait(timeout time.Duration) bool {
+	if t.InitialPromptReady.Load() {
+		return true
+	}
+	select {
+	case <-t.NotifyCh:
+		return true
+	case <-time.After(timeout):
+		return t.InitialPromptReady.Load()
+	}
+}
+
+func (t *InitialPromptReadyChecker) Read(p []byte) {
+	if !t.InitialPromptReady.Load() && bytes.HasSuffix(p, []byte("# ")) || bytes.HasSuffix(p, []byte("$ ")) {
+		t.InitialPromptReady.Store(true)
+
+		select {
+		case t.NotifyCh <- struct{}{}:
+		default:
+		}
+	}
+}
+
 // ShellInitial connect login shell over ssh.
-func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webPort int, hostInfoAutoEnabled bool, hostInfoScript string, hostInfoUpdater func(hostInfo string)) (err error) {
+func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
+	initialCmdSleep time.Duration, webPort int, hostInfoAutoEnabled bool,
+	hostInfoScript string, hostInfoUpdater func(hostInfo string)) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
 	state, err := term.MakeRaw(fd)
@@ -27,7 +65,8 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 	defer term.Restore(fd, state)
 
 	// setup
-	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript)
+	checker := NewInitialPromptReadyChecker()
+	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript, checker.Read)
 	if err != nil {
 		return err
 	}
@@ -39,18 +78,28 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte, webP
 
 	// keep alive packet
 	go c.SendKeepAlive(session)
-	for _, initialCmd := range initialInput {
-		time.Sleep(100 * time.Millisecond)
-		if len(initialCmd) > 0 {
-			_, _ = pipeToStdin.Write(initialCmd)
+
+	if initialCmdSleep == 0 {
+		initialCmdSleep = 250 * time.Millisecond
+	}
+	checker.Wait(initialCmdSleep)
+
+	if len(initialInput) > 0 {
+		for i, initialCmd := range initialInput {
+			if i > 0 {
+				time.Sleep(initialCmdSleep)
+			}
+			if len(initialCmd) > 0 {
+				_, _ = pipeToStdin.Write(initialCmd)
+			}
 		}
 	}
 
 	if hostInfoAutoEnabled {
 		hostInfo, _ := ir.executeCmd(hostInfoScript, 15*time.Second)
-		hostInfo = strings.ReplaceAll(hostInfo, "\r\n", "")
+		hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
 		if hostInfo != "" {
-			log.Printf("%s", hostInfo)
+			fmt.Printf("主机信息: %s\n", hostInfo)
 			hostInfoUpdater(hostInfo)
 		}
 		pipeToStdin.Write([]byte("\r"))
@@ -70,7 +119,7 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	if _, _, err := c.setupShell(session, 0, ""); err != nil {
+	if _, _, err := c.setupShell(session, 0, "", nil); err != nil {
 		return err
 	}
 
@@ -97,7 +146,7 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	if _, _, err := c.setupShell(session, 0, ""); err != nil {
+	if _, _, err := c.setupShell(session, 0, "", nil); err != nil {
 		return err
 	}
 
@@ -174,18 +223,16 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 //	return
 //}
 
-func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string) (pipeToStdin *io.PipeWriter, ir *interruptReader, err error) {
-	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript)
+func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string, shellReader func(p []byte)) (
+	pipeToStdin *io.PipeWriter, ir *interruptReader, err error) {
+	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript, shellReader)
 	session.Stderr = os.Stderr
 
 	if c.logging {
-		err = c.logger(session)
-		if err != nil {
+		if err := c.logger(session); err != nil {
 			log.Println(err)
 		}
 	}
-	err = nil
-
 	// Request tty
 	if err := RequestTty(session); err != nil {
 		return nil, nil, err

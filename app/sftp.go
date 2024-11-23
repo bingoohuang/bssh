@@ -47,7 +47,7 @@ func Lsftp() (app *cli.App) {
 	app.Copyright = misc.Copyright
 	app.Version = ver.Version()
 
-	envHosts := cli.StringSlice(strings.Split(os.Getenv("BSSH_HOST"), ","))
+	envHosts := cli.StringSlice(strings.Split(os.Getenv("HOST"), ","))
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},
 		cli.StringFlag{

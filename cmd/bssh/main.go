@@ -19,7 +19,7 @@ import (
 func main() {
 	flagSet := pflag.NewFlagSet(os.Args[0], pflag.ContinueOnError)
 	flagSet.SetInterspersed(false)
-	flagSet.StringSliceP("host", "H", strings.Split(os.Getenv("BSSH_HOST"), ","), "connect server names")
+	flagSet.StringSliceP("host", "H", strings.Split(os.Getenv("HOST"), ","), "connect server names")
 	flagSet.StringP("cnf", "c", ss.ExpandHome("~/.bssh.toml"), " config file path")
 	_ = flagSet.Parse(os.Args[1:])
 

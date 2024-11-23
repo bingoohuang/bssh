@@ -178,9 +178,10 @@ type ServerConfig struct {
 	ServerAliveCountMax      int `toml:"alive_max"`
 	ServerAliveCountInterval int `toml:"alive_interval"`
 
-	InitialCmd string `toml:"initial_cmd"`
-	WebPort    int    `toml:"web_port"` // <= 0 disable the web port
-	ID         string `toml:"id"`
+	InitialCmd      string       `toml:"initial_cmd"`
+	InitialCmdSleep TomlDuration `toml:"initial_cmd_sleep"`
+	WebPort         int          `toml:"web_port"` // <= 0 disable the web port
+	ID              string       `toml:"id"`
 
 	PassPbeEncrypted bool
 
@@ -191,6 +192,16 @@ type ServerConfig struct {
 	Brg DefaultTrue `toml:"brg"` // 是否关闭 BRG 代理
 
 	DirectServer bool `toml:"-"`
+}
+
+type TomlDuration struct {
+	time.Duration
+}
+
+func (d *TomlDuration) UnmarshalText(text []byte) error {
+	var err error
+	d.Duration, err = time.ParseDuration(string(text))
+	return err
 }
 
 type DefaultTrue struct {

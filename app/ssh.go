@@ -71,7 +71,7 @@ func Lssh() (app *cli.App) {
 	// TDXX(blacknon): コマンドオプションの指定方法(特にポートフォワーディング)をOpenSSHに合わせる
 
 	// Set options
-	envHosts := cli.StringSlice(strings.Split(os.Getenv("BSSH_HOST"), ","))
+	envHosts := cli.StringSlice(strings.Split(os.Getenv("HOST"), ","))
 	app.Flags = []cli.Flag{
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},

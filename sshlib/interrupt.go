@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -16,14 +17,14 @@ import (
 	"golang.org/x/term"
 )
 
-func (c *Connect) interruptInput(webPort int, hostInfoScript string) (stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
+func (c *Connect) interruptInput(webPort int, hostInfoScript string, shellReader func(p []byte)) (stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
 	r1, w1 := io.Pipe()
 	r2, w2 := io.Pipe()
 
 	notifyC := make(chan NotifyCmd)
 	notifyRspC := make(chan string)
 
-	iw := newInterruptWriter(r2, notifyC, notifyRspC)
+	iw := newInterruptWriter(r2, notifyC, notifyRspC, shellReader)
 	go func() {
 		if _, err := io.Copy(os.Stdout, iw); err != nil && errors.Is(err, io.EOF) {
 			return
@@ -40,7 +41,8 @@ func (c *Connect) interruptInput(webPort int, hostInfoScript string) (stdin *io.
 	return r1, w2, w1, ir
 }
 
-func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string, directWriter *io.PipeWriter, connect *Connect, hostInfoScript string) *interruptReader {
+func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string,
+	directWriter *io.PipeWriter, connect *Connect, hostInfoScript string) *interruptReader {
 	return &interruptReader{
 		r:              GetStdin(),
 		port:           port,
@@ -52,19 +54,33 @@ func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string
 	}
 }
 
+func newInterruptWriter(r io.Reader, notifyC chan NotifyCmd, notifyRspC chan string, shellReader func(p []byte)) io.Reader {
+	return &interruptWriter{
+		r:           r,
+		notifyC:     notifyC,
+		notifyRspC:  notifyRspC,
+		shellReader: shellReader,
+	}
+}
+
 type interruptWriter struct {
-	r          io.Reader
-	notifyC    chan NotifyCmd
-	notifyTag  string
-	buf        bytes.Buffer
-	notifyRspC chan string
-	notifyTime time.Time
+	r           io.Reader
+	notifyC     chan NotifyCmd
+	notifyTag   string
+	buf         bytes.Buffer
+	notifyRspC  chan string
+	notifyTime  time.Time
+	shellReader func(p []byte)
 }
 
 func (i *interruptWriter) Read(p []byte) (n int, err error) {
 	n, err = i.r.Read(p)
 	if n == 0 {
 		return 0, err
+	}
+
+	if i.shellReader != nil {
+		i.shellReader(p[:n])
 	}
 
 	if i.notifyTag != "" && time.Since(i.notifyTime) < 15*time.Second {
@@ -108,14 +124,6 @@ func clearTag(tag string, b []byte) (string, bool) {
 
 	s := string(b[openPos+len(openTag) : openPos+closePos])
 	return strings.TrimSpace(s), true
-}
-
-func newInterruptWriter(r io.Reader, notifyC chan NotifyCmd, notifyRspC chan string) io.Reader {
-	return &interruptWriter{
-		r:          r,
-		notifyC:    notifyC,
-		notifyRspC: notifyRspC,
-	}
 }
 
 type NotifyType int
@@ -199,11 +207,12 @@ Next:
 		if i.hostInfoScript == "" {
 			log.Printf("hostInfoScript is empty")
 		} else {
-			result, err := i.executeCmd(i.hostInfoScript, 15*time.Second)
+			hostInfo, err := i.executeCmd(i.hostInfoScript, 15*time.Second)
 			if err != nil {
 				log.Printf("host info error: %v", err)
 			} else {
-				fmt.Printf("%s\n", result)
+				hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
+				fmt.Printf("主机信息: %s\n", hostInfo)
 			}
 		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%dash") {
