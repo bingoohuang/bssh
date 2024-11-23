@@ -15,7 +15,7 @@ dirpath = "~/.bssh.log"
 [extra]
 Passphrase = "6425B5BD-4C88-4C5D-AF75-E22E357821BC"
 DisableGrouping = true
-DisableAutoEncryptPwd = true
+AutoEncryptPwd = 0
 
 [server.example1]
 addr = "192.168.100.101"

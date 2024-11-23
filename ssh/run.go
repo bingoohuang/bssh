@@ -266,7 +266,7 @@ func (r *Run) printProxy(server string) {
 }
 
 func (r *Run) registerAutoEncryptPwd(oldPwd string) {
-	if oldPwd == "na" || r.Conf.IsDisableAutoEncryptPwd() || strings.HasPrefix(oldPwd, `{PBE}`) {
+	if oldPwd == "na" || !r.Conf.IsAutoEncryptPwd() || strings.HasPrefix(oldPwd, `{PBE}`) {
 		return
 	}
 
@@ -315,7 +315,7 @@ func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
 }
 
 func (r *Run) autoEncryptPwd() {
-	if r.Conf.IsDisableAutoEncryptPwd() || len(r.decodedPasswordMap) == 0 {
+	if !r.Conf.IsAutoEncryptPwd() || len(r.decodedPasswordMap) == 0 {
 		return
 	}
 

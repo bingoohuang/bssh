@@ -48,12 +48,12 @@ type Config struct {
 
 	grouping map[string]map[string]ServerConfig
 
-	// DisableAutoEncryptPwd disable auto PBE passwords in config file.
-	DisableAutoEncryptPwd bool
-	Passphrase            string
-	Hosts                 []string
-	tempHostsFile         string
-	tempHosts             map[string]bool
+	// AutoEncryptPwd disable auto PBE passwords in config file.
+	AutoEncryptPwd DefaultTrue
+	Passphrase     string
+	Hosts          []string
+	tempHostsFile  string
+	tempHosts      map[string]bool
 }
 
 // ExtraConfig store extra configs.
@@ -62,8 +62,8 @@ type ExtraConfig struct {
 	Passphrase string
 	// DisableGrouping disable server names grouping
 	DisableGrouping bool
-	// DisableAutoEncryptPwd disable auto PBE passwords in config file.
-	DisableAutoEncryptPwd bool
+	// AutoEncryptPwd disable auto PBE passwords in config file.
+	AutoEncryptPwd DefaultTrue
 }
 
 // LogConfig store the contents about the terminal log.
@@ -654,8 +654,8 @@ func (cf *Config) GetNameSortedList() (nameList []string) {
 	return nameList
 }
 
-func (cf *Config) IsDisableAutoEncryptPwd() bool {
-	return cf.Extra.DisableAutoEncryptPwd || cf.DisableAutoEncryptPwd
+func (cf *Config) IsAutoEncryptPwd() bool {
+	return cf.Extra.AutoEncryptPwd.Get() || cf.AutoEncryptPwd.Get()
 }
 
 func (cf *Config) loadTempHosts(confPath string) {

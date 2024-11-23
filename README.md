@@ -25,7 +25,7 @@ command to read a prepared list in advance and connect ssh/scp/sftp the selected
 * Supported ssh-agent.
 * Supported Port forward, x11 forward.
 * Can use bashrc of local machine at ssh connection destination.
-* Auto encrypt clear password in the config file. (can be disabled by DisableAutoEncryptPwd=true, see [example](example/democonf.toml))
+* Auto encrypt clear password in the config file. (can be disabled by AutoEncryptPwd=0, see [example](example/democonf.toml))
 * Scp ratelimit (export RATELIMIT="100KB") 
 
 ## compile
