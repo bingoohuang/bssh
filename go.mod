@@ -27,7 +27,9 @@ require (
 	github.com/bingoohuang/ngg/tsid v0.0.0-20241121125336-f98774ea0333
 	github.com/bingoohuang/ngg/ver v0.0.0-20241121125336-f98774ea0333
 	github.com/blacknon/textcol v0.0.1
+	github.com/bytedance/gopkg v0.1.1
 	github.com/c-bata/go-prompt v0.2.6
+	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/cheggaaa/pb/v3 v3.1.5
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gorilla/mux v1.8.1

@@ -22,6 +22,7 @@ import (
 	"github.com/bingoohuang/ngg/gum"
 	"github.com/bingoohuang/ngg/ss"
 	"github.com/bingoohuang/ngg/tsid"
+	"github.com/cespare/xxhash/v2"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
 )
@@ -286,13 +287,15 @@ func ReadConf(confPath string) (config Config) {
 		hostInfoJsonFile := ss.ExpandHome(tempHostsFile)
 		config.HostInfoJsonFile = hostInfoJsonFile
 
-		hostInfoJson, err := os.ReadFile(hostInfoJsonFile)
-		if err != nil {
-			log.Printf("read %s error: %v", hostInfoJsonFile, err)
-		} else {
-			if len(hostInfoJson) > 0 {
-				if err := json.Unmarshal(hostInfoJson, &config.HostInfo); err != nil {
-					log.Printf("unmarshal %s error: %v", hostInfoJsonFile, err)
+		if _, err := os.Stat(hostInfoJsonFile); err == nil {
+			hostInfoJson, err := os.ReadFile(hostInfoJsonFile)
+			if err != nil {
+				log.Printf("read %s error: %v", hostInfoJsonFile, err)
+			} else {
+				if len(hostInfoJson) > 0 {
+					if err := json.Unmarshal(hostInfoJson, &config.HostInfo); err != nil {
+						log.Printf("unmarshal %s error: %v", hostInfoJsonFile, err)
+					}
 				}
 			}
 		}
@@ -310,7 +313,13 @@ func ReadConf(confPath string) (config Config) {
 			sc := ServerConfig{}
 			createServerConfigFromHost(tmpl, &sc)
 			if sc.ID == "" {
-				log.Fatalf("server ID is empty!")
+				if serverConfigJSON, err := json.Marshal(sc); err == nil {
+					x := xxhash.New()
+					x.Write(serverConfigJSON)
+					sc.ID = fmt.Sprintf("xx-%d", x.Sum64())
+				} else {
+					log.Fatalf("json marshal error: %v", err)
+				}
 			}
 
 			sc.PassPbeEncrypted = strings.HasPrefix(sc.Pass, `{PBE}`)
