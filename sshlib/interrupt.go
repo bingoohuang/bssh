@@ -17,7 +17,7 @@ import (
 	"golang.org/x/term"
 )
 
-func (c *Connect) interruptInput(webPort int, hostInfoScript string, shellReader func(p []byte)) (stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
+func (c *Connect) interruptInput(webPort int, hostInfoScript string, hostInfoUpdater func(hostInfo string), shellReader func(p []byte)) (stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
 	r1, w1 := io.Pipe()
 	r2, w2 := io.Pipe()
 
@@ -31,7 +31,7 @@ func (c *Connect) interruptInput(webPort int, hostInfoScript string, shellReader
 		}
 	}()
 
-	ir = newInterruptReader(webPort, notifyC, notifyRspC, w1, c, hostInfoScript)
+	ir = newInterruptReader(webPort, notifyC, notifyRspC, w1, c, hostInfoScript, hostInfoUpdater)
 	go func() {
 		if _, err := io.Copy(w1, ir); err != nil && errors.Is(err, io.EOF) {
 			return
@@ -42,15 +42,16 @@ func (c *Connect) interruptInput(webPort int, hostInfoScript string, shellReader
 }
 
 func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string,
-	directWriter *io.PipeWriter, connect *Connect, hostInfoScript string) *interruptReader {
+	directWriter *io.PipeWriter, connect *Connect, hostInfoScript string, hostInfoUpdater func(hostInfo string)) *interruptReader {
 	return &interruptReader{
-		r:              GetStdin(),
-		port:           port,
-		directWriter:   directWriter,
-		notifyC:        notifyC,
-		notifyRspC:     notifyRspC,
-		connect:        connect,
-		hostInfoScript: hostInfoScript,
+		r:               GetStdin(),
+		port:            port,
+		directWriter:    directWriter,
+		notifyC:         notifyC,
+		notifyRspC:      notifyRspC,
+		connect:         connect,
+		hostInfoScript:  hostInfoScript,
+		hostInfoUpdater: hostInfoUpdater,
 	}
 }
 
@@ -148,6 +149,7 @@ type interruptReader struct {
 	LastKeyCtrK     bool
 	LastKeyCtrKTime time.Time
 	hostInfoScript  string
+	hostInfoUpdater func(hostInfo string)
 }
 
 func (i *interruptReader) Read(p []byte) (n int, err error) {
@@ -193,17 +195,17 @@ Next:
 
 	cmd := ss.If(len(cmdFields) > 0, strings.ToLower(cmdFields[0]), "")
 
-	if len(cmdFields) == 1 && ss.AnyOf(cmd, "%?") {
+	if len(cmdFields) == 1 && ss.AnyOf(cmd, ".?") {
 		fmt.Print("Available commands:\r\n"+
-			"0) %?            : to show help info\r\n"+
-			"1) %dash         : to open the info page in browser\r\n"+
-			"2) %web          : to open the file explorer in browser\r\n"+
-			"3) %up localfile : to upload the local file to the remote\r\n"+
-			"4) %dl remotefile: to download the remote file to the local\r\n",
-			"5) %hostinfo:    : to show host info\r\n",
-			"6) %exit         : to exit the current bssh connection\r\n",
+			"0) .?            : to show help info\r\n"+
+			"1) .dash         : to open the info page in browser\r\n"+
+			"2) .web          : to open the file explorer in browser\r\n"+
+			"3) .up localfile : to upload the local file to the remote\r\n"+
+			"4) .dl remotefile: to download the remote file to the local\r\n",
+			"5) .hostinfo:    : to show host info\r\n",
+			"6) .exit         : to exit the current bssh connection\r\n",
 		)
-	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%hostinfo") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, ".hostinfo") {
 		if i.hostInfoScript == "" {
 			log.Printf("hostInfoScript is empty")
 		} else {
@@ -213,25 +215,28 @@ Next:
 			} else {
 				hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
 				fmt.Printf("主机信息: %s\n", hostInfo)
+				if i.hostInfoUpdater != nil {
+					i.hostInfoUpdater(hostInfo)
+				}
 			}
 		}
-	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%dash") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, ".dash") {
 		if i.port > 0 {
 			go util.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%d/dash", i.port))
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
-	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%web") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, ".web") {
 		if i.port > 0 {
 			i.openWebExplorer()
 		} else {
 			fmt.Print("dash is not available\r\n")
 		}
-	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, "%exit", "%quit") {
+	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, ".exit", ".quit") {
 		i.directWriter.Write([]byte("exit"))
-	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%up") {
+	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, ".up") {
 		i.up(cmdFields[1])
-	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, "%dl") {
+	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, ".dl") {
 		i.dl(cmdFields[1])
 
 		// 参考 https://github.com/M09Ic/rscp

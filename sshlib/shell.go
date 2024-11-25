@@ -6,7 +6,6 @@ package sshlib
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -81,7 +80,7 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 
 	// setup
 	checker := NewInitialPromptReadyChecker()
-	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript, checker.Read)
+	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript, hostInfoUpdater, checker.Read)
 	if err != nil {
 		return err
 	}
@@ -115,10 +114,8 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 		hostInfo, _ := ir.executeCmd(hostInfoScript, 15*time.Second)
 		hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
 		if hostInfo != "" {
-			fmt.Printf("主机信息: %s\n", hostInfo)
 			hostInfoUpdater(hostInfo)
 		}
-		pipeToStdin.Write([]byte("\r"))
 	}
 
 	return session.Wait()
@@ -135,7 +132,7 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	if _, _, err := c.setupShell(session, 0, "", nil); err != nil {
+	if _, _, err := c.setupShell(session, 0, "", nil, nil); err != nil {
 		return err
 	}
 
@@ -162,7 +159,7 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	if _, _, err := c.setupShell(session, 0, "", nil); err != nil {
+	if _, _, err := c.setupShell(session, 0, "", nil, nil); err != nil {
 		return err
 	}
 
@@ -239,9 +236,9 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 //	return
 //}
 
-func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string, shellReader func(p []byte)) (
+func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string, hostInfoUpdater func(hostInfo string), shellReader func(p []byte)) (
 	pipeToStdin *io.PipeWriter, ir *interruptReader, err error) {
-	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript, shellReader)
+	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript, hostInfoUpdater, shellReader)
 	session.Stderr = os.Stderr
 
 	if c.logging {
