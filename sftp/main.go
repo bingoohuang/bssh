@@ -94,7 +94,7 @@ func (r *RunSftp) createSftpConnect(targets []string) (result map[string]*Connec
 		server := target
 
 		go func() {
-			conn, err := r.Run.CreateSSHConnect(server)
+			conn, err := r.Run.CreateSSHConnect(nil, server)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s connect error: %s\n", server, err)
 				ch <- true

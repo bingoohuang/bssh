@@ -20,7 +20,7 @@ import (
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/ss"
-	"github.com/bingoohuang/ngg/tsid"
+	"github.com/cespare/xxhash/v2"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
@@ -30,13 +30,12 @@ import (
 func (r *Run) shell() (err error) {
 	server := r.ServerList[0]
 	config, ok := r.Conf.Server[server]
-	isTempHost := !ok
-	if isTempHost {
+	if !ok {
 		config = r.parseDirectServer(server)
 	}
 
 	// check count AuthMethod
-	if len(r.serverAuthMethodMap[server]) == 0 {
+	if len(r.serverAuthMethodMap[config.ID]) == 0 {
 		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", server)
 
 		return errors.New(msg)
@@ -56,7 +55,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	// Create sshlib.Connect (Connect Proxy loop)
-	connect, err := r.CreateSSHConnect(server)
+	connect, err := r.CreateSSHConnect(&config, server)
 	if err != nil {
 		return err
 	}
@@ -79,8 +78,8 @@ func (r *Run) shell() (err error) {
 		return err
 	}
 
-	if isTempHost {
-		r.Conf.WriteTempHosts(server, config.Pass)
+	if config.DirectServer {
+		r.Conf.WriteTempHosts(config.ID, server, config.Pass)
 	}
 
 	r.sshAgent(&config, connect, session)
@@ -214,11 +213,22 @@ func SftpUpload(client *sftp.Client, remote string, data []byte) error {
 	return nil
 }
 
-func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig) {
+func (r *Run) parseDirectServer(server string) (cs conf.ServerConfig) {
+	autoID := "xx-" + func() string {
+		x := xxhash.New()
+		x.WriteString(server)
+		return fmt.Sprintf("%d", x.Sum64())
+	}()
+
+	exists, ok := r.Conf.Server[autoID]
+	if ok {
+		r.registerAuthMapPassword(autoID, exists.Pass, "")
+		return exists
+	}
+
 	sc, ok := hostparse.ParseDirectServer(server)
 	if ok {
-		autoID := "host-" + tsid.Fast().ToString()
-		r.Conf.Server[autoID] = conf.ServerConfig{
+		serverConfig := conf.ServerConfig{
 			User: sc.User,
 			Pass: sc.Pass,
 			Addr: sc.Addr,
@@ -227,10 +237,13 @@ func (r *Run) parseDirectServer(server string) (cf conf.ServerConfig) {
 			ID:           autoID,
 			DirectServer: true,
 		}
+		r.Conf.Server[autoID] = serverConfig
 		r.registerAuthMapPassword(autoID, sc.Pass, "")
+		return serverConfig
 	}
 
-	return r.Conf.Server[server]
+	log.Fatalf("invalid direct server %q", server)
+	return cs
 }
 
 func (r *Run) sshAgent(config *conf.ServerConfig, connect *sshlib.Connect, session *ssh.Session) {

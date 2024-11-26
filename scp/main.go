@@ -471,7 +471,7 @@ func (cp *Scp) createScpConnects(targets []string) (result []*Connect) {
 			defer func() { ch <- true }()
 
 			// ssh connect
-			conn, err := cp.Run.CreateSSHConnect(server)
+			conn, err := cp.Run.CreateSSHConnect(nil, server)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "cp.Run.CreateSSHConnect %s connect error: %v\n", server, err)
 				return

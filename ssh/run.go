@@ -372,7 +372,7 @@ func (r *Run) createAuthMethodMapForServer(server string) {
 	}
 
 	// PublicKey
-	if err := r.registerAuthMapPublicKey(server, config.Key, config.KeyPass); err != nil {
+	if err := r.registerAuthMapPublicKey(config.ID, config.Key, config.KeyPass); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
 

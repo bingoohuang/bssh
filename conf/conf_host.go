@@ -111,7 +111,6 @@ func (cf *Config) ExpandHosts(c *cli.Context, options *ArgOptions) ([]string, []
 			}
 
 			expanded = append(expanded, host)
-
 		}
 	}
 

@@ -50,7 +50,7 @@ func (r *Run) SetupSSHAgent() {
 }
 
 // registerAuthMapPassword ...
-func (r *Run) registerAuthMapPassword(server, password, rawTemplLine string) {
+func (r *Run) registerAuthMapPassword(serverID, password, rawTemplLine string) {
 	if password == "" {
 		return
 	}
@@ -66,7 +66,7 @@ func (r *Run) registerAuthMapPassword(server, password, rawTemplLine string) {
 	}
 
 	// Register AuthMethod to serverAuthMethodMap from authMethodMap
-	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
+	r.serverAuthMethodMap[serverID] = append(r.serverAuthMethodMap[serverID], r.authMethodMap[authKey]...)
 }
 
 func (r *Run) decodePassword(password, rawTemplLine string) string {
@@ -95,7 +95,7 @@ func (r *Run) decodePassword(password, rawTemplLine string) string {
 	}
 }
 
-func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error) {
+func (r *Run) registerAuthMapPublicKey(serverID, key, password string) (err error) {
 	if key == "" {
 		return nil
 	}
@@ -117,7 +117,7 @@ func (r *Run) registerAuthMapPublicKey(server, key, password string) (err error)
 	}
 
 	// Register AuthMethod to serverAuthMethodMap from authMethodMap
-	r.serverAuthMethodMap[server] = append(r.serverAuthMethodMap[server], r.authMethodMap[authKey]...)
+	r.serverAuthMethodMap[serverID] = append(r.serverAuthMethodMap[serverID], r.authMethodMap[authKey]...)
 
 	return
 }

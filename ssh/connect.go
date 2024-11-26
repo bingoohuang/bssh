@@ -15,7 +15,15 @@ import (
 
 // CreateSSHConnect return *sshlib.Connect
 // this vaule in ssh.Client with proxy.
-func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err error) {
+func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (connect *sshlib.Connect, err error) {
+	if serverConfig == nil {
+		config, ok := r.Conf.Server[server]
+		if !ok {
+			config = r.parseDirectServer(server)
+		}
+		serverConfig = &config
+	}
+
 	// create proxyRoute
 	proxyRoute, err := getProxyRoute(server, r.Conf)
 	if err != nil {
@@ -57,23 +65,17 @@ func (r *Run) CreateSSHConnect(server string) (connect *sshlib.Connect, err erro
 		return nil, err
 	}
 
-	s, ok := r.Conf.Server[server] // server conf
-	isTempHost := !ok
-	if isTempHost {
-		s = r.parseDirectServer(server)
-	}
-
-	x11 := s.X11 || r.X11 // set x11
+	x11 := serverConfig.X11 || r.X11 // set x11
 
 	// connect target server
 	connect = &sshlib.Connect{
-		ProxyDialer: dialer, ForwardAgent: s.SSHAgentUse,
-		Agent: r.agent, ForwardX11: x11, TTY: r.IsTerm, ConnectTimeout: s.ConnectTimeout,
-		SendKeepAliveMax: s.ServerAliveCountMax, SendKeepAliveInterval: s.ServerAliveCountInterval,
+		ProxyDialer: dialer, ForwardAgent: serverConfig.SSHAgentUse,
+		Agent: r.agent, ForwardX11: x11, TTY: r.IsTerm, ConnectTimeout: serverConfig.ConnectTimeout,
+		SendKeepAliveMax: serverConfig.ServerAliveCountMax, SendKeepAliveInterval: serverConfig.ServerAliveCountInterval,
 	}
 
-	if err = connect.CreateClient(s.Addr, s.Port, s.User, r.serverAuthMethodMap[server], s.Brg.Get()); err != nil && isTempHost {
-		r.Conf.WriteTempHosts(server, s.Pass)
+	if err = connect.CreateClient(serverConfig.Addr, serverConfig.Port, serverConfig.User, r.serverAuthMethodMap[serverConfig.ID], serverConfig.Brg.Get()); err != nil && serverConfig.DirectServer {
+		r.Conf.WriteTempHosts(serverConfig.ID, server, serverConfig.Pass)
 	}
 
 	return connect, err

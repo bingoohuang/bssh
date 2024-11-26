@@ -107,17 +107,17 @@ func (r *Run) createConnMap() map[string]*sshlib.Connect {
 			continue
 		}
 
-		conn, err := r.CreateSSHConnect(server)
+		conn, err := r.CreateSSHConnect(&cf, server)
 		if err != nil {
 			log.Printf("Error: %s:%s\n", server, err)
 			continue
 		}
 
 		if cf.DirectServer {
-			r.Conf.WriteTempHosts(server, cf.Pass)
+			r.Conf.WriteTempHosts(cf.ID, server, cf.Pass)
 		}
 
-		connMap[server] = conn
+		connMap[cf.ID] = conn
 	}
 
 	return connMap

@@ -21,7 +21,6 @@ import (
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/gum"
 	"github.com/bingoohuang/ngg/ss"
-	"github.com/bingoohuang/ngg/tsid"
 	"github.com/cespare/xxhash/v2"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
@@ -310,6 +309,7 @@ func ReadConf(confPath string) (config Config) {
 	for _, server := range config.Hosts {
 		tmpls := hostparse.Parse(server)
 		for _, tmpl := range tmpls {
+
 			sc := ServerConfig{}
 			createServerConfigFromHost(tmpl, &sc)
 			if sc.ID == "" {
@@ -324,10 +324,9 @@ func ReadConf(confPath string) (config Config) {
 
 			sc.PassPbeEncrypted = strings.HasPrefix(sc.Pass, `{PBE}`)
 
-			if _, ok := config.Server[sc.ID]; ok {
-				log.Fatalf("server ID %q is duplicate", sc.ID)
+			if _, ok := config.Server[sc.ID]; !ok {
+				config.Server[sc.ID] = sc
 			}
-			config.Server[sc.ID] = sc
 		}
 	}
 
@@ -710,7 +709,7 @@ func removePBEStrings(input string) string {
 }
 
 // WriteTempHosts writes a new host to temporary file.
-func (cf *Config) WriteTempHosts(tempHost, pass string) {
+func (cf *Config) WriteTempHosts(serverID, tempHost, pass string) {
 	// 排除密码，查找是否已经存储过临时 hosts 文件
 	ch := strings.ReplaceAll(tempHost, pass, "")
 	for k := range cf.tempHosts {
@@ -734,7 +733,7 @@ func (cf *Config) WriteTempHosts(tempHost, pass string) {
 		}
 	}
 
-	tempHost += " auto_id=" + "host-" + tsid.Fast().ToString()
+	tempHost += " id=" + serverID
 	note, _ := gum.Input("新增临时主机信息，加点注释说明用途呗: ", "e.g. 测试用")
 	if note != "" {
 		tempHost += " # " + note

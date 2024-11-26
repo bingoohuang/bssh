@@ -154,7 +154,7 @@ func (r *Run) createPsConnects(config conf.ShellConfig) []*psConnect {
 	cons := make([]*psConnect, len(r.ServerList))
 
 	for i, server := range r.ServerList {
-		con, err := r.CreateSSHConnect(server)
+		con, err := r.CreateSSHConnect(nil, server)
 		if err != nil {
 			log.Println(err)
 			continue
