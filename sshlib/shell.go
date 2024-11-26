@@ -97,7 +97,6 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 		initialCmdSleep = 250 * time.Millisecond
 	}
 
-	checker.Wait(initialCmdSleep)
 	if len(initialInput) > 0 {
 		for i, initialCmd := range initialInput {
 			if i > 0 {
@@ -109,12 +108,14 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 		}
 	}
 
-	waited := checker.Wait(2 * time.Second)
-	if waited && hostInfoAutoEnabled {
-		hostInfo, _ := ir.executeCmd(hostInfoScript, 15*time.Second)
-		hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
-		if hostInfo != "" {
-			hostInfoUpdater(hostInfo)
+	if hostInfoAutoEnabled && hostInfoScript != "" {
+		waited := checker.Wait(2 * time.Second)
+		if waited {
+			hostInfo, _ := ir.executeCmd(hostInfoScript, 15*time.Second)
+			hostInfo = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfo, "")
+			if hostInfo != "" {
+				hostInfoUpdater(hostInfo)
+			}
 		}
 	}
 

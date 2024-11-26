@@ -28,15 +28,15 @@ import (
 // run shell
 
 func (r *Run) shell() (err error) {
-	server := r.ServerList[0]
-	config, ok := r.Conf.Server[server]
+	serverID := r.ServerList[0]
+	config, ok := r.Conf.Server[serverID]
 	if !ok {
-		config = r.parseDirectServer(server)
+		config = r.parseDirectServer(serverID)
 	}
 
 	// check count AuthMethod
 	if len(r.serverAuthMethodMap[config.ID]) == 0 {
-		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", server)
+		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", serverID)
 
 		return errors.New(msg)
 	}
@@ -48,14 +48,14 @@ func (r *Run) shell() (err error) {
 	r.PrintSelectServer()
 	r.printPortForward(config.PortForwardMode, config.PortForwardLocal, config.PortForwardRemote)
 	r.printDynamicPortForward(config.DynamicPortForward)
-	r.printProxy(server)
+	r.printProxy(serverID)
 
 	if config.LocalRcUse == misc.Yes {
 		fmt.Fprintf(os.Stderr, "Information   :This connect use local bashrc.\n")
 	}
 
 	// Create sshlib.Connect (Connect Proxy loop)
-	connect, err := r.CreateSSHConnect(&config, server)
+	connect, err := r.CreateSSHConnect(&config, serverID)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	if config.DirectServer {
-		r.Conf.WriteTempHosts(config.ID, server, config.Pass)
+		r.Conf.WriteTempHosts(config.ID, serverID, config.Pass)
 	}
 
 	r.sshAgent(&config, connect, session)
@@ -114,7 +114,7 @@ func (r *Run) shell() (err error) {
 		// if terminal log enable
 		logConf := r.Conf.Log
 		if logConf.Enable {
-			logPath := r.getLogPath(server)
+			logPath := r.getLogPath(serverID)
 			fmt.Printf("logging to %s\n", logPath)
 			connect.SetLog(logPath, logConf.Timestamp)
 		}
@@ -136,19 +136,24 @@ func (r *Run) shell() (err error) {
 					log.Fatalf("read %q error: %v", scriptFile, err)
 				}
 				hostInfoScript = string(script)
-
 			}
-			hostInfoScript = strings.TrimRight(strings.TrimSpace(hostInfoScript), ";")
-			hostInfoScript = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfoScript, "")
+
+			existsHostInfo := r.Conf.HostInfo[serverID]
+			if existsHostInfo.Info != "" {
+				hostInfoScript = ""
+			} else {
+				hostInfoScript = strings.TrimRight(strings.TrimSpace(hostInfoScript), ";")
+				hostInfoScript = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfoScript, "")
+			}
 
 			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd), config.InitialCmdSleep.Duration,
 				r.webPort, hostInfoAutoEnabled, hostInfoScript,
 				func(hostInfo string) {
-					if r.Conf.HostInfo[server].Info == hostInfo {
+					if existsHostInfo.Info == hostInfo {
 						return
 					}
 
-					r.Conf.HostInfo[server] = conf.HostInfo{
+					r.Conf.HostInfo[serverID] = conf.HostInfo{
 						Info:   hostInfo,
 						Update: time.Now().Format("2006-01-02 15:04:05"),
 					}
