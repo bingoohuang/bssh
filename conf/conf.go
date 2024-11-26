@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/bingoohuang/bssh/sshlib"
 	"log"
 	"os"
 	"path/filepath"
@@ -734,6 +735,12 @@ func (cf *Config) WriteTempHosts(serverID, tempHost, pass string) {
 	}
 
 	tempHost += " id=" + serverID
+
+	brgEnv := sshlib.Getenv("BRG", "B")
+	if brgEnv == "0" {
+		tempHost += " brg=0"
+	}
+
 	note, _ := gum.Input("新增临时主机信息，加点注释说明用途呗: ", "e.g. 测试用")
 	if note != "" {
 		tempHost += " # " + note
