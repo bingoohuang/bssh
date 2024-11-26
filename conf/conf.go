@@ -727,7 +727,7 @@ func (cf *Config) WriteTempHosts(serverID, tempHost, pass string) {
 
 	cf.tempHosts[tempHost] = true
 
-	if pass != "" {
+	if pass != "" && !strings.HasPrefix(pass, "{PBE}") {
 		if pbePwd := viper.GetString(ss.PbePwd); pbePwd != "" {
 			pbePass, _ := ss.PbeEncode(pass)
 			tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
