@@ -53,7 +53,7 @@ func (cf *Config) addGroup(group, name string, v ServerConfig) {
 
 // FilterNamesByGroup  filter server names by group.
 func (cf *Config) FilterNamesByGroup(group string, names []string) []string {
-	if cf.Extra.DisableGrouping {
+	if !cf.Extra.Grouping.Get() {
 		return names
 	}
 

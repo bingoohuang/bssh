@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/bingoohuang/bssh/sshlib"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,6 +18,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/bssh/common"
+	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/gum"
 	"github.com/bingoohuang/ngg/ss"
@@ -66,9 +66,9 @@ type Config struct {
 type ExtraConfig struct {
 	// Passphrase used to decrypt {PBE}xxx
 	Passphrase string
-	// DisableGrouping disable server names grouping
-	DisableGrouping bool
-	// AutoEncryptPwd disable auto PBE passwords in config file.
+	// Grouping enables server names grouping
+	Grouping DefaultTrue
+	// AutoEncryptPwd disables auto PBE passwords in config file.
 	AutoEncryptPwd DefaultTrue
 }
 
