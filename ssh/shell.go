@@ -139,11 +139,11 @@ func (r *Run) shell() (err error) {
 			}
 
 			existsHostInfo := r.Conf.HostInfo[serverID]
+
+			hostInfoScript = strings.TrimRight(strings.TrimSpace(hostInfoScript), ";")
+			hostInfoScript = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfoScript, "")
 			if existsHostInfo.Info != "" {
-				hostInfoScript = ""
-			} else {
-				hostInfoScript = strings.TrimRight(strings.TrimSpace(hostInfoScript), ";")
-				hostInfoScript = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfoScript, "")
+				hostInfoAutoEnabled = false
 			}
 
 			err = connect.ShellInitial(session, ConvertKeys(config.InitialCmd), config.InitialCmdSleep.Duration,

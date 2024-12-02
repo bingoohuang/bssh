@@ -76,7 +76,7 @@ type interruptWriter struct {
 
 func (i *interruptWriter) Read(p []byte) (n int, err error) {
 	n, err = i.r.Read(p)
-	if n == 0 {
+	if n == 0 || err != nil {
 		return 0, err
 	}
 
@@ -94,7 +94,8 @@ func (i *interruptWriter) Read(p []byte) (n int, err error) {
 				i.notifyTag = ""
 			}
 		}
-		return 0, err
+
+		return 0, nil
 	}
 
 	select {
@@ -103,11 +104,11 @@ func (i *interruptWriter) Read(p []byte) (n int, err error) {
 		i.notifyTime = time.Now()
 		i.buf.Reset()
 		i.buf.Write(p[:n])
-		return 0, err
+		return 0, nil
 	default:
 	}
 
-	return n, err
+	return n, nil
 }
 
 func clearTag(tag string, b []byte) (string, bool) {
