@@ -433,6 +433,7 @@ func (cf *Config) parseConfigServers(configServers map[string]ServerConfig, setC
 
 	for key, value := range configServers {
 		setValue := ServerConfigDeduct(setCommon, value)
+		setValue.ID = key
 		cf.Server[key] = setValue
 
 		if value.Tmpl != "" {
