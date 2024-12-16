@@ -46,6 +46,8 @@ type Config struct {
 	HostInfoEnabled    DefaultTrue
 	HostInfoScriptFile string
 
+	ProcessInfoScriptFile string
+
 	ConfPath         string              `toml:"-"`
 	HostInfo         map[string]HostInfo `toml:"-"`
 	HostInfoJsonFile string              `toml:"-"`

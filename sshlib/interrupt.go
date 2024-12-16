@@ -9,15 +9,18 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/bingoohuang/bssh/internal/util"
 	"github.com/bingoohuang/ngg/gossh/pkg/gossh"
 	"github.com/bingoohuang/ngg/ss"
+	"github.com/bingoohuang/ngg/tsid"
 	"golang.org/x/term"
 )
 
-func (c *Connect) interruptInput(webPort int, hostInfoScript string, hostInfoUpdater func(hostInfo string), shellReader func(p []byte)) (stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
+func (c *Connect) interruptInput(webPort int, hostInfoScript string, hostInfoUpdater func(hostInfo string), shellReader func(p []byte), processInfoScript string) (
+	stdin *io.PipeReader, stdout *io.PipeWriter, pipeToStdin *io.PipeWriter, ir *interruptReader) {
 	r1, w1 := io.Pipe()
 	r2, w2 := io.Pipe()
 
@@ -31,7 +34,7 @@ func (c *Connect) interruptInput(webPort int, hostInfoScript string, hostInfoUpd
 		}
 	}()
 
-	ir = newInterruptReader(webPort, notifyC, notifyRspC, w1, c, hostInfoScript, hostInfoUpdater)
+	ir = newInterruptReader(webPort, notifyC, notifyRspC, w1, c, hostInfoScript, hostInfoUpdater, processInfoScript)
 	go func() {
 		if _, err := io.Copy(w1, ir); err != nil && errors.Is(err, io.EOF) {
 			return
@@ -42,16 +45,17 @@ func (c *Connect) interruptInput(webPort int, hostInfoScript string, hostInfoUpd
 }
 
 func newInterruptReader(port int, notifyC chan NotifyCmd, notifyRspC chan string,
-	directWriter *io.PipeWriter, connect *Connect, hostInfoScript string, hostInfoUpdater func(hostInfo string)) *interruptReader {
+	directWriter *io.PipeWriter, connect *Connect, hostInfoScript string, hostInfoUpdater func(hostInfo string), processInfoScript string) *interruptReader {
 	return &interruptReader{
-		r:               GetStdin(),
-		port:            port,
-		directWriter:    directWriter,
-		notifyC:         notifyC,
-		notifyRspC:      notifyRspC,
-		connect:         connect,
-		hostInfoScript:  hostInfoScript,
-		hostInfoUpdater: hostInfoUpdater,
+		r:                 GetStdin(),
+		port:              port,
+		directWriter:      directWriter,
+		notifyC:           notifyC,
+		notifyRspC:        notifyRspC,
+		connect:           connect,
+		hostInfoScript:    hostInfoScript,
+		hostInfoUpdater:   hostInfoUpdater,
+		processInfoScript: processInfoScript,
 	}
 }
 
@@ -147,10 +151,11 @@ type interruptReader struct {
 	notifyRspC   chan string
 	connect      *Connect
 
-	LastKeyCtrK     bool
-	LastKeyCtrKTime time.Time
-	hostInfoScript  string
-	hostInfoUpdater func(hostInfo string)
+	LastKeyCtrK       bool
+	LastKeyCtrKTime   time.Time
+	hostInfoScript    string
+	hostInfoUpdater   func(hostInfo string)
+	processInfoScript string
 }
 
 func (i *interruptReader) Read(p []byte) (n int, err error) {
@@ -203,8 +208,9 @@ Next:
 			"2) .web          : to open the file explorer in browser\r\n"+
 			"3) .up localfile : to upload the local file to the remote\r\n"+
 			"4) .dl remotefile: to download the remote file to the local\r\n",
-			"5) .hostinfo:    : to show host info\r\n",
+			"5) .hostinfo     : to show host info\r\n",
 			"6) .exit         : to exit the current bssh connection\r\n",
+			"7) .ps {pid}     : to print process info\r\n",
 		)
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, ".hostinfo") {
 		if i.hostInfoScript == "" {
@@ -219,6 +225,30 @@ Next:
 				if i.hostInfoUpdater != nil {
 					i.hostInfoUpdater(hostInfo)
 				}
+			}
+		}
+	} else if len(cmdFields) == 2 && ss.AnyOf(cmd, ".ps") {
+		if i.processInfoScript == "" {
+			log.Printf("processInfoScript is empty")
+		} else {
+			t, err1 := template.New("ps").Parse(i.processInfoScript)
+			if err1 != nil {
+				log.Printf("E! parse processInfoScript error: %v")
+				return 0, err
+			}
+
+			sep := tsid.Fast().ToString()
+			var b bytes.Buffer
+			if err1 := t.Execute(&b, map[string]any{
+				"Pid":     cmdFields[1],
+				"NewLine": sep,
+			}); err1 != nil {
+				log.Printf("E! execute processInfoScript error: %v")
+				return 0, err
+			}
+			for _, cmd := range ss.Split(b.String(), sep) {
+				i.directWriter.Write([]byte(cmd + "\r\r"))
+				time.Sleep(time.Millisecond * 500)
 			}
 		}
 	} else if len(cmdFields) == 1 && ss.AnyOf(cmd, ".dash") {

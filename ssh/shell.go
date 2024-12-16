@@ -123,25 +123,12 @@ func (r *Run) shell() (err error) {
 		if config.LocalRcUse == misc.Yes {
 			err = localrcShell(connect, session, config.LocalRcPath, config.LocalRcDecodeCmd)
 		} else {
-			hostInfoScript := defaultHostInfoScript
 			hostInfoAutoEnabled := r.Conf.HostInfoEnabled.Get()
-
-			scriptFile := r.Conf.HostInfoScriptFile
-			if scriptFile != "" {
-				if !strings.HasPrefix(scriptFile, "/") {
-					scriptFile = filepath.Clean(filepath.Join(filepath.Dir(r.Conf.ConfPath), scriptFile))
-				}
-				script, err := os.ReadFile(scriptFile)
-				if err != nil {
-					log.Fatalf("read %q error: %v", scriptFile, err)
-				}
-				hostInfoScript = string(script)
-			}
+			hostInfoScript := readScriptFile(r.Conf.ConfPath, r.Conf.HostInfoScriptFile, defaultHostInfoScript)
+			processInfoScript := readScriptFile(r.Conf.ConfPath, r.Conf.ProcessInfoScriptFile, defaultProcessInfoScript)
 
 			existsHostInfo := r.Conf.HostInfo[serverID]
 
-			hostInfoScript = strings.TrimRight(strings.TrimSpace(hostInfoScript), ";")
-			hostInfoScript = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(hostInfoScript, "")
 			if existsHostInfo.Info != "" {
 				hostInfoAutoEnabled = false
 			}
@@ -163,11 +150,29 @@ func (r *Run) shell() (err error) {
 							log.Printf("write %q error: %v", r.Conf.HostInfoJsonFile, err)
 						}
 					}
-				})
+				}, processInfoScript)
 		}
 	}
 
 	return err
+}
+
+func readScriptFile(confPath, scriptFile, defaultScript string) string {
+	script := []byte(defaultScript)
+	if scriptFile != "" {
+		if !strings.HasPrefix(scriptFile, "/") {
+			scriptFile = filepath.Clean(filepath.Join(filepath.Dir(confPath), scriptFile))
+		}
+		var err error
+		script, err = os.ReadFile(scriptFile)
+		if err != nil {
+			log.Fatalf("read %q error: %v", scriptFile, err)
+		}
+	}
+	scriptRet := string(script)
+	scriptRet = strings.TrimRight(strings.TrimSpace(scriptRet), ";")
+	scriptRet = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(scriptRet, "")
+	return scriptRet
 }
 
 const defaultHostInfoScript = `uname -m; ` +
@@ -180,6 +185,18 @@ const defaultHostInfoScript = `uname -m; ` +
 	`lscpu | grep -E "^Model name" | awk -F ':' '{print $2}' | sed 's/^\s*//' | sed -E 's/[[:space:]]+/_/g'; ` +
 	`echo -n " "; cat /etc/os-release | grep ^PRETTY_NAME= | cut -d '"' -f2 | sed -E 's/[[:space:]]+/_/g';` +
 	`echo -n " "; hostname -I | awk '{print $1};'`
+
+// 按 pid 展示进程信息的脚本
+const defaultProcessInfoScript = `echo -n "### 1. 当前时间: ";date +"%Y-%m-%dT%H:%M:%S%z";{{.NewLine}}` +
+	`echo "### 2. 进程信息:"; ps -ef | grep  {{.Pid}} | grep -v grep; {{.NewLine}} ` +
+	`echo "### 3. 进程启动时间:"; ps -o lstart,etime -p {{.Pid}};{{.NewLine}}` +
+	`echo "### 4. 进程TOP:"; top -b -n 1 -p  {{.Pid}};{{.NewLine}}` +
+	`echo "### 5. 网络信息:"; netstat -atnpl  2>/dev/null | grep -v TIME_WAIT | grep {{.Pid}};{{.NewLine}}` +
+	`PORTS=$(netstat -atnpl 2>/dev/null | grep  {{.Pid}} | grep -v TIME_WAIT | awk '/LISTEN/ {split($4, addr, ":"); ports[addr[2]]} END {for (p in ports) printf sep p; sep="|"; print ""}');{{.NewLine}}` +
+	`echo "### 6. 网络状态统计:"; netstat -atnpl 2>/dev/null| grep -e $PORTS | awk '/^tcp/ {++state[$6]} END {for (s in state) print s, state[s]}' | sort -k2 -nr;{{.NewLine}}` +
+	`echo "### 7. LSOF 信息:"; lsof -p  {{.Pid}};{{.NewLine}}` +
+	`echo "### 8. pidstat 行数:"; pidstat -t -p {{.Pid}} | wc -l;{{.NewLine}}` +
+	`echo "### 9. pidstat 详情:"; pidstat -t -p  {{.Pid}};{{.NewLine}}`
 
 func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
 	session, err := connect.CreateSession()

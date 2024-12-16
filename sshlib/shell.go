@@ -69,7 +69,8 @@ func BytesHasSuffix(p []byte, suffixes ...string) bool {
 // ShellInitial connect login shell over ssh.
 func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 	initialCmdSleep time.Duration, webPort int, hostInfoAutoEnabled bool,
-	hostInfoScript string, hostInfoUpdater func(hostInfo string)) (err error) {
+	hostInfoScript string, hostInfoUpdater func(hostInfo string),
+	processInfoScript string) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
 	state, err := term.MakeRaw(fd)
@@ -80,7 +81,7 @@ func (c *Connect) ShellInitial(session *ssh.Session, initialInput [][]byte,
 
 	// setup
 	checker := NewInitialPromptReadyChecker()
-	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript, hostInfoUpdater, checker.Read)
+	pipeToStdin, ir, err := c.setupShell(session, webPort, hostInfoScript, hostInfoUpdater, checker.Read, processInfoScript)
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func (c *Connect) Shell(session *ssh.Session) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	if _, _, err := c.setupShell(session, 0, "", nil, nil); err != nil {
+	if _, _, err := c.setupShell(session, 0, "", nil, nil, ""); err != nil {
 		return err
 	}
 
@@ -160,7 +161,7 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 	defer term.Restore(fd, state)
 
 	// setup
-	if _, _, err := c.setupShell(session, 0, "", nil, nil); err != nil {
+	if _, _, err := c.setupShell(session, 0, "", nil, nil, ""); err != nil {
 		return err
 	}
 
@@ -237,9 +238,9 @@ func (c *Connect) CmdShell(session *ssh.Session, command string) (err error) {
 //	return
 //}
 
-func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string, hostInfoUpdater func(hostInfo string), shellReader func(p []byte)) (
+func (c *Connect) setupShell(session *ssh.Session, webPort int, hostInfoScript string, hostInfoUpdater func(hostInfo string), shellReader func(p []byte), processInfoScript string) (
 	pipeToStdin *io.PipeWriter, ir *interruptReader, err error) {
-	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript, hostInfoUpdater, shellReader)
+	session.Stdin, session.Stdout, pipeToStdin, ir = c.interruptInput(webPort, hostInfoScript, hostInfoUpdater, shellReader, processInfoScript)
 	session.Stderr = os.Stderr
 
 	if c.logging {
