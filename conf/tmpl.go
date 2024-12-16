@@ -80,7 +80,7 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 	}
 
 	if v := t.Props["brg"]; len(v) > 0 {
-		c.Brg.Set(ss.Pick1(ss.ParseBool(v[0])))
+		c.Brg = v[0]
 	}
 
 	c.InitialCmd = substituteProps(c.InitialCmd, t.Props)

@@ -14,7 +14,7 @@ import (
 	"github.com/bingoohuang/ngg/ss"
 )
 
-func CreateTargetInfo(uri string, useBrg bool) (targetInfo []string, newUri string) {
+func CreateTargetInfo(uri string, confBrg string) (targetInfo []string, newUri string) {
 	host, _, _ := net.SplitHostPort(uri)
 	if ss.AnyOf(host, "127.0.0.1", "localhost") {
 		return nil, uri
@@ -25,7 +25,14 @@ func CreateTargetInfo(uri string, useBrg bool) (targetInfo []string, newUri stri
 		proxy = " proxy=" + proxy
 	}
 
-	if useBrg && len(brg) > 0 {
+	var localBrg = brg
+	if confBrg == "0" {
+		localBrg = nil
+	} else if confBrg != "" {
+		localBrg = createBrgProxies(confBrg)
+	}
+
+	if len(localBrg) > 0 {
 		for _, p := range brg[1:] {
 			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", p, proxy))
 		}
@@ -85,7 +92,11 @@ var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
 	var state brgState
 	_, _ = tmpjson.Read(brgJsonFile, &state)
 	targets = state.BsshTargets
+	proxies = createBrgProxies(brgEnv)
+	return
+}()
 
+func createBrgProxies(brgEnv string) (proxies []string) {
 	parts := strings.Split(brgEnv, ",")
 	for _, part := range parts {
 		if len(part) == 1 {
@@ -112,8 +123,8 @@ var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
 		proxies = append(proxies, fmt.Sprintf("%s:%s", host, port))
 	}
 
-	return
-}()
+	return proxies
+}
 
 func parseHashedPort(port string) uint16 {
 	h := sha1.New()

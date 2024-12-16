@@ -52,7 +52,7 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 		default:
 			c, name := findServer(config.Server, p.Name)
 			pxy := &sshlib.Connect{ProxyDialer: dialer}
-			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[name], c.Brg.Get())
+			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[name], c.Brg)
 			if err != nil {
 				return connect, err
 			}
@@ -74,7 +74,7 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 		SendKeepAliveMax: serverConfig.ServerAliveCountMax, SendKeepAliveInterval: serverConfig.ServerAliveCountInterval,
 	}
 
-	if err = connect.CreateClient(serverConfig.Addr, serverConfig.Port, serverConfig.User, r.serverAuthMethodMap[serverConfig.ID], serverConfig.Brg.Get()); err != nil && serverConfig.DirectServer {
+	if err = connect.CreateClient(serverConfig.Addr, serverConfig.Port, serverConfig.User, r.serverAuthMethodMap[serverConfig.ID], serverConfig.Brg); err != nil && serverConfig.DirectServer {
 		r.Conf.WriteTempHosts(serverConfig.ID, server, serverConfig.Pass)
 	}
 

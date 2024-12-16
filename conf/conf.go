@@ -197,7 +197,7 @@ type ServerConfig struct {
 
 	Host *hostparse.Host `toml:"-"` // hostparse.Host
 
-	Brg DefaultTrue `toml:"brg"` // 是否关闭 BRG 代理
+	Brg string `toml:"brg"` // brg=0 关闭 brg 代理 brg=:6001 指定代理
 
 	DirectServer bool `toml:"-"`
 }
