@@ -188,15 +188,15 @@ const defaultHostInfoScript = `uname -m; ` +
 
 // 按 pid 展示进程信息的脚本
 const defaultProcessInfoScript = `echo -n "### 1. 当前时间: ";date +"%Y-%m-%dT%H:%M:%S%z";{{.NewLine}}` +
-	`echo "### 2. 进程信息:"; ps -ef | grep  {{.Pid}} | grep -v grep; {{.NewLine}} ` +
-	`echo "### 3. 进程启动时间:"; ps -o lstart,etime -p {{.Pid}};{{.NewLine}}` +
-	`echo "### 4. 进程TOP:"; top -b -n 1 -p  {{.Pid}};{{.NewLine}}` +
-	`echo "### 5. 网络信息:"; netstat -atnpl  2>/dev/null | grep -v TIME_WAIT | grep {{.Pid}};{{.NewLine}}` +
+	`echo "### 2. 进程信息:"; ps -o pid,user,%cpu,%mem,vsz,rss,etime,cmd -p {{.Pid}};{{.NewLine}}` +
+	`echo "### 3. 进程TOP:"; top -b -n 1 -p  {{.Pid}};{{.NewLine}}` +
+	`echo "### 4. 网络信息:"; netstat -atnpl  2>/dev/null | grep -v TIME_WAIT | grep {{.Pid}};{{.NewLine}}` +
 	`PORTS=$(netstat -atnpl 2>/dev/null | grep  {{.Pid}} | grep -v TIME_WAIT | awk '/LISTEN/ {split($4, addr, ":"); ports[addr[2]]} END {for (p in ports) printf sep p; sep="|"; print ""}');{{.NewLine}}` +
-	`echo "### 6. 网络状态统计:"; netstat -atnpl 2>/dev/null| grep -e $PORTS | awk '/^tcp/ {++state[$6]} END {for (s in state) print s, state[s]}' | sort -k2 -nr;{{.NewLine}}` +
-	`echo "### 7. LSOF 信息:"; lsof -p  {{.Pid}};{{.NewLine}}` +
-	`echo "### 8. pidstat 行数:"; pidstat -t -p {{.Pid}} | wc -l;{{.NewLine}}` +
-	`echo "### 9. pidstat 详情:"; pidstat -t -p  {{.Pid}};{{.NewLine}}`
+	`echo "### 5. 网络状态统计:"; netstat -atnpl 2>/dev/null| grep -e $PORTS | awk '/^tcp/ {++state[$6]} END {for (s in state) print s, state[s]}' | sort -k2 -nr;{{.NewLine}}` +
+	`echo "### 6. LSOF 信息:"; lsof -p  {{.Pid}};{{.NewLine}}` +
+	`echo "### 7. 线程行数:"; pidstat -t -p {{.Pid}} | wc -l;{{.NewLine}}` +
+	`echo "### 8. 线程详情:"; pidstat -t -p  {{.Pid}};{{.NewLine}}` +
+	`echo "### 9. 进程状态:"; cat /proc/{{.Pid}}/status;{{.NewLine}}`
 
 func execCmd(connect *sshlib.Connect, cmd string) ([]byte, error) {
 	session, err := connect.CreateSession()
