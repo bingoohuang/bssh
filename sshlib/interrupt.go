@@ -233,17 +233,18 @@ Next:
 		} else {
 			t, err1 := template.New("ps").Parse(i.processInfoScript)
 			if err1 != nil {
-				log.Printf("E! parse processInfoScript error: %v")
+				log.Printf("E! parse processInfoScript error: %v", err1)
 				return 0, err
 			}
 
 			sep := tsid.Fast().ToString()
 			var b bytes.Buffer
 			if err1 := t.Execute(&b, map[string]any{
-				"Pid":     cmdFields[1],
-				"NewLine": sep,
+				"Pid":       cmdFields[1],
+				"NewLine":   sep,
+				"LocalTime": time.Now().Format("2006-01-02T15:04:05Z0700"),
 			}); err1 != nil {
-				log.Printf("E! execute processInfoScript error: %v")
+				log.Printf("E! execute processInfoScript error: %v", err1)
 				return 0, err
 			}
 			for _, cmd := range ss.Split(b.String(), sep) {
