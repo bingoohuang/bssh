@@ -188,7 +188,7 @@ const defaultHostInfoScript = `uname -m; ` +
 
 // 按 pid 展示进程信息的脚本
 const defaultProcessInfoScript = `echo -n "### 1. 当前时间: ";date +"%Y-%m-%dT%H:%M:%S%z";{{.NewLine}}` +
-	`echo "### 2. 进程信息:"; ps -o pid,user,%cpu,%mem,vsz,rss,lstart,etime,cmd -p {{.Pid}};{{.NewLine}}` +
+	`echo "### 2. 进程信息:"; ps -o pid,user,%cpu,%mem,vsz,rss,lstart,etime,stat,cmd -p {{.Pid}};{{.NewLine}}` +
 	`echo "### 3. 进程TOP:"; top -b -n 1 -p  {{.Pid}};{{.NewLine}}` +
 	`echo "### 4. 网络信息:"; netstat -atnpl  2>/dev/null | grep -v TIME_WAIT | grep {{.Pid}};{{.NewLine}}` +
 	`PORTS=$(netstat -atnpl 2>/dev/null | grep  {{.Pid}} | grep -v TIME_WAIT | awk '/LISTEN/ {split($4, addr, ":"); ports[addr[2]]} END {for (p in ports) printf sep p; sep="|"; print ""}');{{.NewLine}}` +
