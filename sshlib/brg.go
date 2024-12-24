@@ -14,13 +14,13 @@ import (
 	"github.com/bingoohuang/ngg/ss"
 )
 
-func CreateTargetInfo(uri string, confBrg string) (targetInfo []string, newUri string) {
+func CreateTargetInfo(uri, confBrg string) (targetInfo []string, newUri string) {
 	host, _, _ := net.SplitHostPort(uri)
 	if ss.AnyOf(host, "127.0.0.1", "localhost") {
 		return nil, uri
 	}
 
-	proxy := Getenv("PROXY", "P")
+	proxy := Getenv("BRG_PROXY") // 使用 BRG_PROXY 指示 brg 优先使用改名字的代理
 	if proxy != "" {
 		proxy = " proxy=" + proxy
 	}
@@ -84,7 +84,12 @@ func Getenv(keys ...string) string {
 }
 
 var brg, brgTargets = func() (proxies []string, targets map[string]Target) {
-	brgEnv := Getenv("BRG", "B")
+	// 在显示指定 PROXY 时，不使用 BRG
+	// 例如：export PROXY=socks5://127.0.0.1:6000
+	if env := Getenv("PROXY"); env != "" {
+		return nil, nil
+	}
+	brgEnv := Getenv("BRG")
 	if brgEnv == "" || brgEnv == "0" {
 		return nil, nil
 	}

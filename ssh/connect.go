@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -58,6 +59,25 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 			}
 
 			dialer = pxy.Client
+		}
+	}
+
+	if len(proxyRoute) == 0 {
+		// 配置文件中，如果没有配置，查看环境变量 PROXY 是否指定配置
+		// 例如：export PROXY=socks5://127.0.0.1:6000
+		if proxyEnv := sshlib.Getenv("PROXY"); proxyEnv != "" {
+			log.Printf("use env PROXY: %s", proxyEnv)
+			p, err := url.Parse(proxyEnv)
+			if err != nil {
+				return nil, fmt.Errorf("parse $PROXY's value %q error: %w", proxyEnv, err)
+			}
+
+			pxy := &sshlib.Proxy{Type: p.Scheme, Forwarder: dialer, Addr: p.Hostname(), Port: p.Port()}
+			if p.User != nil {
+				pxy.User = p.User.Username()
+				pxy.Password, _ = p.User.Password()
+			}
+			dialer, err = pxy.CreateProxyDialer()
 		}
 	}
 
