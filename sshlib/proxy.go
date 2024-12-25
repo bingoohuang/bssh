@@ -93,8 +93,7 @@ func (p *Proxy) CreateSocks5ProxyDialer() (proxyDialer proxy.Dialer, err error) 
 	var proxyAuth *proxy.Auth
 
 	if p.User != "" && p.Password != "" {
-		proxyAuth.User = p.User
-		proxyAuth.Password = p.Password
+		proxyAuth = &proxy.Auth{User: p.User, Password: p.Password}
 	}
 
 	var forwarder proxy.Dialer
