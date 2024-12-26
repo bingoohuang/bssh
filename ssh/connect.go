@@ -67,17 +67,30 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 		// 例如：export PROXY=socks5://127.0.0.1:6000
 		if proxyEnv := sshlib.Getenv("PROXY"); proxyEnv != "" {
 			log.Printf("use env PROXY: %s", proxyEnv)
-			p, err := url.Parse(proxyEnv)
-			if err != nil {
-				return nil, fmt.Errorf("parse $PROXY's value %q error: %w", proxyEnv, err)
-			}
 
-			pxy := &sshlib.Proxy{Type: p.Scheme, Forwarder: dialer, Addr: p.Hostname(), Port: p.Port()}
-			if p.User != nil {
-				pxy.User = p.User.Username()
-				pxy.Password, _ = p.User.Password()
+			if strings.HasPrefix(proxyEnv, "command://") {
+				val := strings.TrimPrefix(proxyEnv, "command://")
+				val = expandProxyCommand(val, *serverConfig)
+				dialer, err = (&sshlib.Proxy{Type: misc.Command, Command: val}).CreateProxyDialer()
+				if err != nil {
+					return nil, fmt.Errorf("create command proxy %q dialer error: %w", val, err)
+				}
+			} else {
+				p, err := url.Parse(proxyEnv)
+				if err != nil {
+					return nil, fmt.Errorf("parse $PROXY's value %q error: %w", proxyEnv, err)
+				}
+
+				pxy := &sshlib.Proxy{Type: p.Scheme, Forwarder: dialer, Addr: p.Hostname(), Port: p.Port()}
+				if p.User != nil {
+					pxy.User = p.User.Username()
+					pxy.Password, _ = p.User.Password()
+				}
+				dialer, err = pxy.CreateProxyDialer()
+				if err != nil {
+					return nil, fmt.Errorf("create proxy dialer %q error: %w", proxyEnv, err)
+				}
 			}
-			dialer, err = pxy.CreateProxyDialer()
 		}
 	}
 
