@@ -744,7 +744,7 @@ func (cf *Config) WriteTempHosts(serverID, tempHost, pass string) {
 		tempHost += " brg=0"
 	}
 
-	note, _ := gum.Input("新增临时主机信息，加点注释说明用途呗: ", "e.g. 测试用")
+	note, _ := gum.Input("新增临时主机，注释一下用途呗: ", gum.InputPlaceholder("e.g. 测试用"))
 	if note != "" {
 		tempHost += " # " + note
 	}

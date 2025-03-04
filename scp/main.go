@@ -191,11 +191,7 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 
 		defer lf.Close()
 
-		// get file size
-		lstat, _ := os.Lstat(path)
-		size := lstat.Size()
-
-		if err := cp.pushFile(lf, ftp, output, rpath, size); err != nil {
+		if err := cp.pushFile(lf, ftp, output, rpath, fInfo); err != nil {
 			fmt.Fprintf(ow, "cp.pushFile %s->%s error %v\n", path, rpath, err)
 			return err
 		}
@@ -205,7 +201,7 @@ func (cp *Scp) pushPath(ftp *sftp.Client, ow io.Writer, output *output.Output, b
 }
 
 // pushfile put file to path.
-func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, path string, size int64) (err error) {
+func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, path string, fInfo os.FileInfo) (err error) {
 	ow := output.NewWriter()
 
 	dir := filepath.Dir(path)
@@ -228,7 +224,9 @@ func (cp *Scp) pushFile(lf io.Reader, ftp *sftp.Client, output *output.Output, p
 
 	// copy to data
 	cp.ProgressWG.Add(1)
-	return output.ProgressPrinter(size, rd, path)
+
+	size := fInfo.Size()
+	return output.ProgressPrinter(size, rd, path+" ("+ss.IBytes(uint64(size))+", "+fInfo.ModTime().Format("2006-01-02 15:04:05")+")")
 }
 
 func (cp *Scp) viaPush() {
@@ -294,8 +292,6 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 				}
 				defer file.Close()
 
-				size := stat.Size()
-
 				exit := make(chan bool)
 				for _, tc := range tclients {
 					tclient := tc
@@ -305,7 +301,7 @@ func (cp *Scp) viaPushPath(path string, fclient *Connect, tclients []*Connect) {
 
 						tclient.Output.Create(tclient.Server)
 
-						_ = cp.pushFile(file, tclient.Connect, tclient.Output, p, size)
+						_ = cp.pushFile(file, tclient.Connect, tclient.Output, p, stat)
 					}()
 				}
 
