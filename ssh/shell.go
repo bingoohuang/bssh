@@ -25,10 +25,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// run shell
-
-func (r *Run) shell() (err error) {
-	serverID := r.ServerList[0]
+func (r *Run) getServerConfig(serverID string) (*conf.ServerConfig, error) {
 	config, ok := r.Conf.Server[serverID]
 	if !ok {
 		config = r.parseDirectServer(serverID)
@@ -36,13 +33,26 @@ func (r *Run) shell() (err error) {
 
 	// check count AuthMethod
 	if len(r.serverAuthMethodMap[config.ID]) == 0 {
-		msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", serverID)
-
-		return errors.New(msg)
+		password, err := common.GetPassPhrase(config.User + "'s password:")
+		if err != nil {
+			msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", serverID)
+			return nil, errors.New(msg)
+		}
+		config.Pass = password
+		r.serverAuthMethodMap[config.ID] = append(r.serverAuthMethodMap[config.ID], sshlib.CreateAuthMethodPassword(password))
 	}
 
-	r.overwritePortForwardConfig(&config)
-	r.overwriteBashrcConfig(&config)
+	return &config, nil
+}
+
+// run shell
+
+func (r *Run) shell() (err error) {
+	serverID := r.ServerList[0]
+	config, err := r.getServerConfig(serverID)
+
+	r.overwritePortForwardConfig(config)
+	r.overwriteBashrcConfig(config)
 
 	// header
 	r.PrintSelectServer()
@@ -55,7 +65,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	// Create sshlib.Connect (Connect Proxy loop)
-	connect, err := r.CreateSSHConnect(&config, serverID)
+	connect, err := r.CreateSSHConnect(config, serverID)
 	if err != nil {
 		return err
 	}
@@ -82,9 +92,9 @@ func (r *Run) shell() (err error) {
 		r.Conf.WriteTempHosts(config.ID, serverID, config.Pass)
 	}
 
-	r.sshAgent(&config, connect, session)
+	r.sshAgent(config, connect, session)
 
-	err = r.portForwarding(&config, connect)
+	err = r.portForwarding(config, connect)
 
 	if config.DynamicPortForward != "" { // Dynamic Port Forwarding
 		go func() {

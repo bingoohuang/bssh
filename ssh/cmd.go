@@ -99,15 +99,13 @@ func (r *Run) createConnMap() map[string]*sshlib.Connect {
 
 	// Create sshlib.Connect to connMap
 	for _, server := range r.ServerList {
-		cf := r.parseDirectServer(server)
-
-		// check count AuthMethod
-		if len(r.serverAuthMethodMap[server]) == 0 {
-			fmt.Fprintf(os.Stderr, "Error: %s is No AuthMethod.\n", server)
+		cf, err := r.getServerConfig(server)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			continue
 		}
 
-		conn, err := r.CreateSSHConnect(&cf, server)
+		conn, err := r.CreateSSHConnect(cf, server)
 		if err != nil {
 			log.Printf("Error: %s:%s\n", server, err)
 			continue

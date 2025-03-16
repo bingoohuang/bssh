@@ -18,11 +18,10 @@ import (
 // this vaule in ssh.Client with proxy.
 func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (connect *sshlib.Connect, err error) {
 	if serverConfig == nil {
-		config, ok := r.Conf.Server[server]
-		if !ok {
-			config = r.parseDirectServer(server)
+		serverConfig, err = r.getServerConfig(server)
+		if err != nil {
+			return nil, err
 		}
-		serverConfig = &config
 	}
 
 	// create proxyRoute

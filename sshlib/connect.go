@@ -2,7 +2,6 @@ package sshlib
 
 import (
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -10,11 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bingoohuang/ngg/ss"
 	"go.uber.org/atomic"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/net/proxy"
+	"golang.org/x/term"
 )
 
 // Connect structure to store contents about ssh connection.
@@ -133,14 +131,14 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		sc.KeyExchanges = strings.Split(env, ",")
 	}
 
-	if len(sc.KeyExchanges) == 0 {
-		sc.KeyExchanges = ssh.DefinedKexAlgos()
-	}
-	if verbose := os.Getenv("VERBOSE"); verbose == "1" {
-		sc.AlgorithmsCallback = func(algorithms ssh.Algorithms) {
-			log.Printf("algorithms: %s", ss.Json(algorithms))
-		}
-	}
+	// if len(sc.KeyExchanges) == 0 {
+	// 	sc.KeyExchanges = ssh.DefinedKexAlgos()
+	// }
+	// if verbose := os.Getenv("VERBOSE"); verbose == "1" {
+	// 	sc.AlgorithmsCallback = func(algorithms ssh.Algorithms) {
+	// 		log.Printf("algorithms: %s", ss.Json(algorithms))
+	// 	}
+	// }
 
 	// check Dialer
 	if c.ProxyDialer == nil {
@@ -244,18 +242,18 @@ func RequestTty(session *ssh.Session) (err error) {
 
 	// Get terminal window size
 	fd := int(os.Stdout.Fd())
-	width, hight, err := terminal.GetSize(fd)
+	width, hight, err := term.GetSize(fd)
 	if err != nil {
 		return
 	}
 
 	// Get env `TERM`
-	term := os.Getenv("TERM")
-	if len(term) == 0 {
-		term = "xterm"
+	termValue := os.Getenv("TERM")
+	if len(termValue) == 0 {
+		termValue = "xterm"
 	}
 
-	if err = session.RequestPty(term, hight, width, modes); err != nil {
+	if err = session.RequestPty(termValue, hight, width, modes); err != nil {
 		session.Close()
 		return
 	}
@@ -270,7 +268,7 @@ func RequestTty(session *ssh.Session) (err error) {
 			switch s {
 			case winch:
 				fd := int(os.Stdout.Fd())
-				width, hight, _ = terminal.GetSize(fd)
+				width, hight, _ = term.GetSize(fd)
 				session.WindowChange(hight, width)
 			}
 		}
