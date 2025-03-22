@@ -62,34 +62,12 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 	}
 
 	if len(proxyRoute) == 0 {
-		// 配置文件中，如果没有配置，查看环境变量 PROXY 是否指定配置
-		// 例如：export PROXY=socks5://127.0.0.1:6000
-		if proxyEnv := sshlib.Getenv("PROXY"); proxyEnv != "" {
-			log.Printf("use env PROXY: %s", proxyEnv)
-
-			if strings.HasPrefix(proxyEnv, "command://") {
-				val := strings.TrimPrefix(proxyEnv, "command://")
-				val = expandProxyCommand(val, *serverConfig)
-				dialer, err = (&sshlib.Proxy{Type: misc.Command, Command: val}).CreateProxyDialer()
-				if err != nil {
-					return nil, fmt.Errorf("create command proxy %q dialer error: %w", val, err)
-				}
-			} else {
-				p, err := url.Parse(proxyEnv)
-				if err != nil {
-					return nil, fmt.Errorf("parse $PROXY's value %q error: %w", proxyEnv, err)
-				}
-
-				pxy := &sshlib.Proxy{Type: p.Scheme, Forwarder: dialer, Addr: p.Hostname(), Port: p.Port()}
-				if p.User != nil {
-					pxy.User = p.User.Username()
-					pxy.Password, _ = p.User.Password()
-				}
-				dialer, err = pxy.CreateProxyDialer()
-				if err != nil {
-					return nil, fmt.Errorf("create proxy dialer %q error: %w", proxyEnv, err)
-				}
-			}
+		proxyDialer, err := proxyByEnv(serverConfig, dialer)
+		if err != nil {
+			return nil, err
+		}
+		if proxyDialer != nil {
+			dialer = proxyDialer
 		}
 	}
 
@@ -111,6 +89,50 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 	}
 
 	return connect, err
+}
+
+func proxyByEnv(serverConfig *conf.ServerConfig, forwarder proxy.Dialer) (proxy.Dialer, error) {
+	// 按优先级顺序检查代理环境变量
+	name, env := "PROXY", sshlib.Getenv("PROXY")
+	if env == "" {
+		name, env = "https_proxy", sshlib.Getenv("https_proxy")
+	}
+	if env == "" {
+		name, env = "http_proxy", sshlib.Getenv("http_proxy")
+	}
+
+	if env == "" {
+		return nil, nil
+	}
+
+	log.Printf("proxy by $%s = %s", name, env)
+
+	if strings.HasPrefix(env, "command://") {
+		val := strings.TrimPrefix(env, "command://")
+		val = expandProxyCommand(val, *serverConfig)
+		dialer, err := (&sshlib.Proxy{Type: misc.Command, Command: val}).CreateProxyDialer()
+		if err != nil {
+			return nil, fmt.Errorf("create command proxy %q dialer: %w", val, err)
+		}
+		return dialer, nil
+	}
+
+	p, err := url.Parse(env)
+	if err != nil {
+		return nil, fmt.Errorf("url parse %q: %w", env, err)
+	}
+
+	pxy := &sshlib.Proxy{Type: p.Scheme, Forwarder: forwarder, Addr: p.Hostname(), Port: p.Port()}
+	if p.User != nil {
+		pxy.User = p.User.Username()
+		pxy.Password, _ = p.User.Password()
+	}
+	dialer, err := pxy.CreateProxyDialer()
+	if err != nil {
+		return nil, fmt.Errorf("create proxy dialer %q: %w", env, err)
+	}
+
+	return dialer, nil
 }
 
 func findServer(servers map[string]conf.ServerConfig, name string) (conf.ServerConfig, string) {
