@@ -30,6 +30,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/miekg/pkcs11 v1.1.1
 	github.com/moby/term v0.5.2
+	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/nsf/termbox-go v1.1.1
 	github.com/pkg/sftp v1.13.8
 	github.com/spf13/pflag v1.0.6
