@@ -33,11 +33,11 @@ func CreateTargetInfo(uri, confBrg string) (targetInfo []string, newUri string) 
 	}
 
 	if len(localBrg) > 0 {
-		for _, p := range brg[1:] {
+		for _, p := range localBrg[1:] {
 			targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", p, proxy))
 		}
 		targetInfo = append(targetInfo, fmt.Sprintf("TARGET %s%s;", uri, proxy))
-		return targetInfo, brg[0]
+		return targetInfo, localBrg[0]
 	}
 
 	if target, ok := brgTargets[uri]; ok {
