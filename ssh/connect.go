@@ -86,11 +86,25 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 	}
 
 	addr := serverConfig.Addr
+	port := serverConfig.Port
+	// // 应对场景，金良小主机 IP 经常发生变化，可以通过 IP2 环境变量来重置配置中的 IP
 	if ip2 := os.Getenv("IP2"); ip2 != "" {
-		log.Printf("replace %s by $IP2: %s", addr, ip2)
-		addr = ip2 // 应对场景，金良小主机 IP 经常发生变化，可以通过 IP2 环境变量来重置配置中的 IP
+		if strings.HasPrefix(ip2, ":") {
+			port = ip2[1:]
+			log.Printf("replace port %s by $IP2: %s", serverConfig.Port, ip2)
+		} else if strings.Contains(ip2, ":") {
+			idx := strings.LastIndex(ip2, ":")
+			addr = ip2[:idx]
+			port = ip2[idx+1:]
+			log.Printf("replace %s:%s by $IP2: %s", serverConfig.Addr, serverConfig.Port, ip2)
+		} else {
+			addr = ip2
+			log.Printf("replace %s by $IP2: %s", addr, ip2)
+		}
 	}
-	if err = connect.CreateClient(addr, serverConfig.Port, serverConfig.User, r.serverAuthMethodMap[serverConfig.ID], serverConfig.Brg); err != nil && serverConfig.DirectServer {
+	authMethods := r.serverAuthMethodMap[serverConfig.ID]
+	err = connect.CreateClient(addr, port, serverConfig.User, authMethods, serverConfig.Brg)
+	if err != nil && serverConfig.DirectServer {
 		r.Conf.WriteTempHosts(serverConfig.ID, server, serverConfig.Pass)
 	}
 
