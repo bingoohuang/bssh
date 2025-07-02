@@ -179,7 +179,7 @@ func (r *Run) Start() {
 // use ssh login header.
 func (r *Run) PrintSelectServer() {
 	serverListStr := strings.Join(r.ServerList, ",")
-	fmt.Fprintf(os.Stderr, "Select Server :%s\n", serverListStr)
+	fmt.Fprintf(os.Stderr, "Select Server: %s\n", serverListStr)
 }
 
 // printRunCommand is printout run command.

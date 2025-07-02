@@ -32,9 +32,12 @@ func (r *Run) getServerConfig(serverID string) (*conf.ServerConfig, error) {
 	}
 
 	// check count AuthMethod
-	if len(r.serverAuthMethodMap[config.ID]) == 0 {
+	if len(r.serverAuthMethodMap[config.ID]) == 0 && os.Getenv("INPUT_PWD") != "0" {
 		password, err := common.GetPassPhrase(config.User + "'s password:")
 		if err != nil {
+			if strings.Contains(err.Error(), "input is empty") {
+				return &config, nil
+			}
 			msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", serverID)
 			return nil, errors.New(msg)
 		}
@@ -50,7 +53,9 @@ func (r *Run) getServerConfig(serverID string) (*conf.ServerConfig, error) {
 func (r *Run) shell() (err error) {
 	serverID := r.ServerList[0]
 	config, err := r.getServerConfig(serverID)
-
+	if err != nil {
+		return err
+	}
 	r.overwritePortForwardConfig(config)
 	r.overwriteBashrcConfig(config)
 

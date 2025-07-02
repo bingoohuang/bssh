@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -84,7 +85,12 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 		SendKeepAliveMax: serverConfig.ServerAliveCountMax, SendKeepAliveInterval: serverConfig.ServerAliveCountInterval,
 	}
 
-	if err = connect.CreateClient(serverConfig.Addr, serverConfig.Port, serverConfig.User, r.serverAuthMethodMap[serverConfig.ID], serverConfig.Brg); err != nil && serverConfig.DirectServer {
+	addr := serverConfig.Addr
+	if ip2 := os.Getenv("IP2"); ip2 != "" {
+		log.Printf("replace %s by $IP2: %s", addr, ip2)
+		addr = ip2 // 应对场景，金良小主机 IP 经常发生变化，可以通过 IP2 环境变量来重置配置中的 IP
+	}
+	if err = connect.CreateClient(addr, serverConfig.Port, serverConfig.User, r.serverAuthMethodMap[serverConfig.ID], serverConfig.Brg); err != nil && serverConfig.DirectServer {
 		r.Conf.WriteTempHosts(serverConfig.ID, server, serverConfig.Pass)
 	}
 

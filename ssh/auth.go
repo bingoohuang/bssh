@@ -1,6 +1,8 @@
 package ssh
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -90,6 +92,10 @@ func (r *Run) decodePassword(password, rawTemplLine string) string {
 	if pwd, err := ss.PbeDecode(password); err != nil {
 		panic(err)
 	} else {
+		if os.Getenv("ECHO_PWD") == "1" {
+			fmt.Println(pwd)
+			os.Exit(0)
+		}
 		r.registerAutoEncryptPwd(password)
 		return pwd
 	}
