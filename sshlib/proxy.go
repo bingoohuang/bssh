@@ -176,7 +176,6 @@ func (s *httpProxy) Dial(network, addr string) (net.Conn, error) {
 
 	resp, err := http.ReadResponse(bufio.NewReader(c), req)
 	if err != nil {
-		resp.Body.Close()
 		c.Close()
 		return nil, err
 	}
