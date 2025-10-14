@@ -178,8 +178,15 @@ func (r *Run) Start() {
 // PrintSelectServer is printout select server.
 // use ssh login header.
 func (r *Run) PrintSelectServer() {
-	serverListStr := strings.Join(r.ServerList, ",")
-	fmt.Fprintf(os.Stderr, "Select Server: %s\n", serverListStr)
+	for _, server := range r.ServerList {
+		conf := r.Conf.Server[server]
+		fmt.Fprintf(os.Stderr, "Select Server: %s %s %s\n", server, conf.User+"@"+conf.Addr+":"+conf.Port, conf.Note)
+		hostInfo := r.Conf.HostInfo[server]
+		if hostInfo.Info != "" {
+			fmt.Fprintf(os.Stderr, "Host Info: %s\n", hostInfo.Info)
+		}
+	}
+
 }
 
 // printRunCommand is printout run command.
