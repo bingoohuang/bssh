@@ -105,7 +105,7 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 	authMethods := r.serverAuthMethodMap[serverConfig.ID]
 	err = connect.CreateClient(addr, port, serverConfig.User, authMethods, serverConfig.Brg)
 	if err != nil && serverConfig.DirectServer {
-		r.Conf.WriteTempHosts(serverConfig.ID, server, serverConfig.Pass)
+		r.Conf.WriteTempHosts(server, serverConfig)
 	}
 
 	return connect, err

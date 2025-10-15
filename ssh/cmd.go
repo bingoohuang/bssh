@@ -112,7 +112,7 @@ func (r *Run) createConnMap() map[string]*sshlib.Connect {
 		}
 
 		if cf.DirectServer {
-			r.Conf.WriteTempHosts(cf.ID, server, cf.Pass)
+			r.Conf.WriteTempHosts(server, cf)
 		}
 
 		connMap[cf.ID] = conn

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bingoohuang/bssh/internal/util"
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
 	"github.com/bingoohuang/ngg/ss"
 )
@@ -68,7 +69,7 @@ func createServerConfigFromHost(t hostparse.Host, c *ServerConfig) {
 	}
 
 	if v := t.Props["key"]; len(v) > 0 && c.Key == "" {
-		c.Key = v[0]
+		c.Key = util.ExpandFile(v[0])
 	}
 
 	if v := t.Props["initial_cmd"]; len(v) > 0 && c.InitialCmd == "" {

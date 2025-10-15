@@ -135,6 +135,7 @@ type ServerConfig struct {
 	Pass           string
 	Passes         []string
 	Key            string
+	OriginalKey    string   `toml:"-"` // 记录原始的 key 路径
 	KeyCommand     string   `toml:"keycmd"`
 	KeyCommandPass string   `toml:"keycmdpass"`
 	KeyPass        string   `toml:"keypass"`
@@ -713,7 +714,9 @@ func removePBEStrings(input string) string {
 }
 
 // WriteTempHosts writes a new host to temporary file.
-func (cf *Config) WriteTempHosts(serverID, tempHost, pass string) {
+func (cf *Config) WriteTempHosts(tempHost string, config *ServerConfig) {
+	serverID := config.ID
+	pass := config.Pass
 	// 排除密码，查找是否已经存储过临时 hosts 文件
 	ch := strings.ReplaceAll(tempHost, pass, "")
 	for k := range cf.tempHosts {
@@ -748,6 +751,10 @@ func (cf *Config) WriteTempHosts(serverID, tempHost, pass string) {
 	brgEnv := sshlib.Getenv("BRG", "B")
 	if brgEnv == "0" {
 		tempHost += " brg=0"
+	}
+
+	if config.OriginalKey != "" {
+		tempHost += " key=" + config.OriginalKey
 	}
 
 	note, _ := gum.Input("新增临时主机，注释一下用途呗: ", gum.InputPlaceholder("e.g. 测试用"))

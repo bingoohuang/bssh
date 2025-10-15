@@ -16,6 +16,7 @@ import (
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
 	"github.com/bingoohuang/bssh/internal/stash"
+	"github.com/bingoohuang/bssh/internal/util"
 	"github.com/bingoohuang/bssh/misc"
 	"github.com/bingoohuang/bssh/sshlib"
 	"github.com/bingoohuang/ngg/gossh/pkg/hostparse"
@@ -32,17 +33,24 @@ func (r *Run) getServerConfig(serverID string) (*conf.ServerConfig, error) {
 	}
 
 	// check count AuthMethod
-	if len(r.serverAuthMethodMap[config.ID]) == 0 && os.Getenv("INPUT_PWD") != "0" {
-		password, err := common.GetPassPhrase(config.User + "'s password:")
-		if err != nil {
-			if strings.Contains(err.Error(), "input is empty") {
-				return &config, nil
+	methods := r.serverAuthMethodMap[config.ID]
+	if len(methods) == 0 {
+		if config.Key != "" {
+			if err := r.registerAuthMapPublicKey(config.ID, config.Key, config.KeyPass); err != nil {
+				fmt.Fprintln(os.Stderr, err)
 			}
-			msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", serverID)
-			return nil, errors.New(msg)
+		} else if os.Getenv("INPUT_PWD") != "0" {
+			password, err := common.GetPassPhrase(config.User + "'s password:")
+			if err != nil {
+				if strings.Contains(err.Error(), "input is empty") {
+					return &config, nil
+				}
+				msg := fmt.Sprintf("Error: %s has No AuthMethod.\n", serverID)
+				return nil, errors.New(msg)
+			}
+			config.Pass = password
+			r.registerAuthMapPassword(config.ID, config.Pass, config.Raw)
 		}
-		config.Pass = password
-		r.serverAuthMethodMap[config.ID] = append(r.serverAuthMethodMap[config.ID], sshlib.CreateAuthMethodPassword(password))
 	}
 
 	return &config, nil
@@ -94,7 +102,7 @@ func (r *Run) shell() (err error) {
 	}
 
 	if config.DirectServer {
-		r.Conf.WriteTempHosts(config.ID, serverID, config.Pass)
+		r.Conf.WriteTempHosts(serverID, config)
 	}
 
 	r.sshAgent(config, connect, session)
@@ -275,6 +283,11 @@ func (r *Run) parseDirectServer(server string) (cs conf.ServerConfig) {
 			ID:           autoID,
 			DirectServer: true,
 		}
+		if keyPath := os.Getenv("KEY"); keyPath != "" {
+			serverConfig.Key = util.ExpandFile(keyPath)
+			serverConfig.OriginalKey = keyPath
+		}
+
 		r.Conf.Server[autoID] = serverConfig
 		r.registerAuthMapPassword(autoID, sc.Pass, "")
 		return serverConfig
