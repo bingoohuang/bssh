@@ -51,7 +51,7 @@ func Lsftp() (app *cli.App) {
 	app.Flags = []cli.Flag{
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},
 		cli.StringFlag{
-			Name: "cnf,c", Value: ss.ExpandHome("~/.bssh.toml"),
+			Name: "cnf,c", Value: ss.ExpandHome("~/.bssh/.bssh.toml"),
 			Usage: "config file path",
 		},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},

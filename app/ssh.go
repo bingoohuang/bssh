@@ -76,7 +76,7 @@ func Lssh() (app *cli.App) {
 		// common option
 		cli.StringSliceFlag{Name: "host,H", Usage: "connect `servername`.", Value: &envHosts},
 		cli.StringFlag{
-			Name: "cnf,c", Value: ss.ExpandHome("~/.bssh.toml"),
+			Name: "cnf,c", Value: ss.ExpandHome("~/.bssh/.bssh.toml"),
 			Usage: "config `filepath`.",
 		},
 

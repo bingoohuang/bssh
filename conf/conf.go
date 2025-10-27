@@ -1,4 +1,4 @@
-// Package conf is a package used to read configuration file (~/.bssh.toml).
+// Package conf is a package used to read configuration file (~/.bssh/.bssh.toml).
 package conf
 
 import (

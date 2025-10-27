@@ -62,12 +62,12 @@ Include config file settings and path. (only common,server config)
 
 ```
 # [include.include1] # When writing individually
-# path = "~/.bssh.toml.include1"
+# path = "~/.bssh/.bssh.toml.include1"
 
 [includes]
 path = [
-     "~/.bssh.toml.include1"
-    ,"~/.bssh.toml.include2"
+     "~/.bssh/.bssh.toml.include1"
+    ,"~/.bssh/.bssh.toml.include2"
 ]
 ```
 

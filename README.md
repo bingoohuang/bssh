@@ -34,8 +34,8 @@ compile go file(tested go1.12.4).
 
     go get -u github.com/bingoohuang/bssh/cmd/bssh
 
-    # copy sample config. create `~/.bssh.toml`.
-    test -f ~/.bssh.toml||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.toml
+    # copy sample config. create `~/.bssh/.bssh.toml`.
+    test -f ~/.bssh/.bssh.toml||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh/.bssh.toml
 
 or
 
@@ -43,12 +43,12 @@ or
     cd bssh
     make && sudo make install
 
-    # copy sample config. create `~/.bssh.toml`.
-    test -f ~/.bssh.toml||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh.toml
+    # copy sample config. create `~/.bssh/.bssh.toml`.
+    test -f ~/.bssh/.bssh.toml||curl -s https://raw.githubusercontent.com/bingoohuang/bssh/master/example/config.toml -o ~/.bssh/.bssh.toml
 
 ## Config
 
-Please edit "~/.bssh.toml".\
+Please edit "~/.bssh/.bssh.toml".\
 For details see [Config](doc/Config.md).
 
 ## Usage
@@ -204,7 +204,7 @@ You can connect using a local bashrc file (if ssh login shell is bash).
 <img src="./images/1-2.gif" />
 </p>
 
-`~/.bssh.toml` example.
+`~/.bssh/.bssh.toml` example.
 
     [server.localrc]
 	addr = "192.168.100.104"
@@ -227,7 +227,7 @@ if iTerm2, you can also change the profile.
 
 
 
-`~/.bssh.toml` example.
+`~/.bssh/.bssh.toml` example.
 
     [server.iTerm2_sample]
 	addr = "192.168.100.103"
@@ -248,7 +248,7 @@ if iTerm2, you can also change the profile.
 
 A terminal log can be recorded by writing a configuration file.
 
-`~/.bssh.toml` example.
+`~/.bssh/.bssh.toml` example.
 
 	[log]
 	enable = true
@@ -374,7 +374,7 @@ Alternatively, you can specify and read the path as follows: In addition to the 
 You can include server settings in another file.\
 `common` settings can be specified for each file that you went out.
 
-`~/.bssh.toml` example.
+`~/.bssh/.bssh.toml` example.
 
 	[includes]
 	path = [
@@ -405,7 +405,7 @@ You can include server settings in another file.\
 
 The priority of setting values ​​is as follows.
 
-`[server.hogehoge]` > `[common] at Include file` > `[common] at ~/.bssh.toml`
+`[server.hogehoge]` > `[common] at Include file` > `[common] at ~/.bssh/.bssh.toml`
 
 
 </details>
