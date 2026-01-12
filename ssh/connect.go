@@ -85,23 +85,7 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 		SendKeepAliveMax: serverConfig.ServerAliveCountMax, SendKeepAliveInterval: serverConfig.ServerAliveCountInterval,
 	}
 
-	addr := serverConfig.Addr
-	port := serverConfig.Port
-	// // 应对场景，金良小主机 IP 经常发生变化，可以通过 IP2 环境变量来重置配置中的 IP
-	if ip2 := os.Getenv("IP2"); ip2 != "" {
-		if strings.HasPrefix(ip2, ":") {
-			port = ip2[1:]
-			log.Printf("replace port %s by $IP2: %s", serverConfig.Port, ip2)
-		} else if strings.Contains(ip2, ":") {
-			idx := strings.LastIndex(ip2, ":")
-			addr = ip2[:idx]
-			port = ip2[idx+1:]
-			log.Printf("replace %s:%s by $IP2: %s", serverConfig.Addr, serverConfig.Port, ip2)
-		} else {
-			addr = ip2
-			log.Printf("replace %s by $IP2: %s", addr, ip2)
-		}
-	}
+	addr, port := resolveIP2Override(serverConfig.Addr, serverConfig.Port)
 	authMethods := r.serverAuthMethodMap[serverConfig.ID]
 	err = connect.CreateClient(addr, port, serverConfig.User, authMethods, serverConfig.Brg)
 	if err != nil && serverConfig.DirectServer {
@@ -239,4 +223,65 @@ func expandProxyCommand(proxyCommand string, config conf.ServerConfig) string {
 	proxyCommand = strings.Replace(proxyCommand, "%r", config.User, -1)
 
 	return proxyCommand
+}
+
+// resolveIP2Override 处理 IP2 环境变量来覆盖配置中的地址和端口。
+// 应对场景：金良小主机 IP 经常发生变化，可以通过 IP2 环境变量来重置配置中的 IP。
+// 支持以下格式：
+//   - ":port" - 仅覆盖端口
+//   - "addr:port" - 覆盖地址和端口
+//   - "full.ip.address" - 完整 IP 地址，覆盖地址
+//   - "partial.ip" - 部分 IP，与原始地址合并（例如：IP2=34 或 IP2=230.34，原始 addr=192.168.230.33 -> 192.168.230.34）
+func resolveIP2Override(addr, port string) (string, string) {
+	ip2 := os.Getenv("IP2")
+	if ip2 == "" {
+		return addr, port
+	}
+
+	newAddr := ip2
+	newPort := port
+	if strings.HasPrefix(ip2, ":") { // 情况1：仅覆盖端口 (格式: :port)
+		newAddr = addr
+		newPort = ip2[1:]
+	} else if strings.Contains(ip2, ":") { // 情况2：完整地址和端口 (格式: addr:port)
+		idx := strings.LastIndex(ip2, ":")
+		newAddr = ip2[:idx]
+		newPort = ip2[idx+1:]
+	}
+
+	// 检查是否为部分 IP (不包含3个点，即少于4段)
+	if dots := strings.Count(newAddr, "."); dots < 3 {
+		// 部分 IP，需要与原始地址合并
+		newAddr = mergePartialIP(addr, newAddr)
+	}
+
+	// 完整 IP 地址
+	log.Printf("replace %s:%s by $IP2: %s:%s", addr, port, newAddr, newPort)
+	return newAddr, newPort
+}
+
+// mergePartialIP 将部分 IP 与原始地址合并。
+// 例如：mergePartialIP("192.168.230.33", "34") -> "192.168.230.34"
+// 例如：mergePartialIP("192.168.230.33", "230.34") -> "192.168.230.34"
+func mergePartialIP(originalAddr, partialIP string) string {
+	// 将原始地址和部分 IP 按 '.' 分割
+	originalParts := strings.Split(originalAddr, ".")
+	partialParts := strings.Split(partialIP, ".")
+
+	// 如果原始地址不是有效的 IPv4 格式，直接返回部分 IP
+	if len(originalParts) != 4 {
+		return partialIP
+	}
+
+	// 从右向左替换：部分 IP 的最后一段替换原始地址的最后一段
+	// 例如：partialParts = ["34"] -> 替换 originalParts[3]
+	// 例如：partialParts = ["230", "34"] -> 替换 originalParts[2] 和 originalParts[3]
+	for i := 0; i < len(partialParts); i++ {
+		idx := 4 - len(partialParts) + i
+		if idx >= 0 && idx < 4 {
+			originalParts[idx] = partialParts[i]
+		}
+	}
+
+	return strings.Join(originalParts, ".")
 }
