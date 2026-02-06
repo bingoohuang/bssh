@@ -93,6 +93,17 @@ type Run struct {
 	decodedPasswordMap map[string]bool
 	confFile           string
 	webPort            int
+
+	// echoHostAuths 当 ECHO=1 时收集各主机的用户名、密码等信息，用于打印后退出
+	echoHostAuths map[string]*echoHostAuth
+}
+
+// echoHostAuth 用于 ECHO=1 时打印的主机认证信息
+type echoHostAuth struct {
+	User string
+	Addr string
+	Port string
+	Pass string
 }
 
 // NewRun news a Run struct.
@@ -159,6 +170,10 @@ func (r *Run) Start() {
 
 	r.CreateAuthMethodMap()
 
+	if os.Getenv("ECHO") == "1" {
+		r.printEchoHostAuthAndExit()
+	}
+
 	switch {
 	case len(r.ExecCmd) > 0 && r.Mode == "cmd":
 		r.cmd()
@@ -173,6 +188,22 @@ func (r *Run) Start() {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+// printEchoHostAuthAndExit 当 ECHO=1 时打印所有主机的 SSH 用户名、密码信息后退出，不进行实际连接。
+func (r *Run) printEchoHostAuthAndExit() {
+	for _, server := range r.ServerList {
+		config, ok := r.Conf.Server[server]
+		if !ok {
+			config = r.parseDirectServer(server)
+		}
+		pass := "-"
+		if a := r.echoHostAuths[server]; a != nil {
+			pass = a.Pass
+		}
+		fmt.Printf("host=%s user=%s addr=%s port=%s password=%s\n", server, config.User, config.Addr, config.Port, pass)
+	}
+	os.Exit(0)
 }
 
 // PrintSelectServer is printout select server.
@@ -371,11 +402,12 @@ func (r *Run) createAuthMethodMapForServer(server string) {
 	}
 
 	// Password
-	r.registerAuthMapPassword(server, config.Pass, config.Raw)
+	authInfo := &echoHostAuth{User: config.User, Addr: config.Addr, Port: config.Port}
+	r.registerAuthMapPassword(server, config.Pass, config.Raw, authInfo)
 
-	// Multiple Password
+	// Multiple Password（ECHO 模式只收集主密码，此处不传 authInfo 避免覆盖）
 	for _, pass := range config.Passes {
-		r.registerAuthMapPassword(server, pass, config.Raw)
+		r.registerAuthMapPassword(server, pass, config.Raw, nil)
 	}
 
 	// PublicKey

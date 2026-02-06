@@ -49,7 +49,7 @@ func (r *Run) getServerConfig(serverID string) (*conf.ServerConfig, error) {
 				return nil, errors.New(msg)
 			}
 			config.Pass = password
-			r.registerAuthMapPassword(config.ID, config.Pass, config.Raw)
+			r.registerAuthMapPassword(config.ID, config.Pass, config.Raw, nil)
 		}
 	}
 
@@ -268,7 +268,7 @@ func (r *Run) parseDirectServer(server string) (cs conf.ServerConfig) {
 
 	exists, ok := r.Conf.Server[autoID]
 	if ok {
-		r.registerAuthMapPassword(autoID, exists.Pass, "")
+		r.registerAuthMapPassword(autoID, exists.Pass, "", nil)
 		return exists
 	}
 
@@ -289,7 +289,7 @@ func (r *Run) parseDirectServer(server string) (cs conf.ServerConfig) {
 		}
 
 		r.Conf.Server[autoID] = serverConfig
-		r.registerAuthMapPassword(autoID, sc.Pass, "")
+		r.registerAuthMapPassword(autoID, sc.Pass, "", nil)
 		return serverConfig
 	}
 

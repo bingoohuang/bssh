@@ -21,6 +21,9 @@ func (r *Run) CreateAuthMethodMap() {
 	// Init r.AuthMethodMap
 	r.authMethodMap = map[AuthKey][]ssh.AuthMethod{}
 	r.serverAuthMethodMap = map[string][]ssh.AuthMethod{}
+	if os.Getenv("ECHO") == "1" {
+		r.echoHostAuths = make(map[string]*echoHostAuth)
+	}
 
 	defer r.autoEncryptPwd()
 
@@ -52,12 +55,19 @@ func (r *Run) SetupSSHAgent() {
 }
 
 // registerAuthMapPassword ...
-func (r *Run) registerAuthMapPassword(serverID, password, rawTemplLine string) {
+// authInfo 非 nil 时用于 ECHO=1 模式下收集主机认证信息（仅需填 User/Addr/Port，Pass 由内部填充）
+func (r *Run) registerAuthMapPassword(serverID, password, rawTemplLine string, authInfo *echoHostAuth) {
 	if password == "" {
 		return
 	}
 
 	password = r.decodePassword(password, rawTemplLine)
+
+	if os.Getenv("ECHO") == "1" && authInfo != nil && r.echoHostAuths != nil {
+		authInfo.Pass = password
+		r.echoHostAuths[serverID] = authInfo
+		return
+	}
 
 	authKey := AuthKey{AuthKeyPassword, password}
 	if _, ok := r.authMethodMap[authKey]; !ok {
