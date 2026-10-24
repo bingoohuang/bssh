@@ -702,6 +702,30 @@ func (cf *Config) loadTempHosts(confPath string) {
 
 var re = regexp.MustCompile(`\{PBE}.*?@`)
 
+func replacePasswordOnly(tempHost, pass, replacement string) (string, bool) {
+	if pass == "" {
+		return tempHost, false
+	}
+
+	at := strings.LastIndex(tempHost, "@")
+	if at == -1 {
+		return tempHost, false
+	}
+
+	credentials := tempHost[:at]
+	for _, sep := range []string{":", "/"} {
+		if i := strings.LastIndex(credentials, sep); i >= 0 {
+			if credentials[i+1:] != pass {
+				return tempHost, false
+			}
+
+			return credentials[:i+1] + replacement + tempHost[at:], true
+		}
+	}
+
+	return tempHost, false
+}
+
 func removePBEStrings(input string) string {
 	if commentIndex := strings.Index(input, "#"); commentIndex > 0 {
 		input = strings.TrimSpace(input[:commentIndex])
@@ -718,7 +742,7 @@ func (cf *Config) WriteTempHosts(tempHost string, config *ServerConfig) {
 	serverID := config.ID
 	pass := config.Pass
 	// 排除密码，查找是否已经存储过临时 hosts 文件
-	ch := strings.ReplaceAll(tempHost, pass, "")
+	ch, _ := replacePasswordOnly(tempHost, pass, "")
 	for k := range cf.tempHosts {
 		if removePBEStrings(k) == ch {
 			return
@@ -736,8 +760,8 @@ func (cf *Config) WriteTempHosts(tempHost string, config *ServerConfig) {
 	if pass != "" && !strings.HasPrefix(pass, "{PBE}") {
 		if pbePwd := viper.GetString(ss.PbePwd); pbePwd != "" {
 			pbePass, _ := ss.PbeEncode(pass)
-			if strings.Contains(tempHost, pass) {
-				tempHost = strings.ReplaceAll(tempHost, pass, pbePass)
+			if replaced, ok := replacePasswordOnly(tempHost, pass, pbePass); ok {
+				tempHost = replaced
 			} else {
 				if p := strings.LastIndex(tempHost, "@"); p != -1 {
 					tempHost = tempHost[:p] + ":" + pbePass + tempHost[p:]
