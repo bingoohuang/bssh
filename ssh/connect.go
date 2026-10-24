@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"strings"
@@ -37,7 +38,7 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 	}
 
 	// setup dialer
-	var dialer proxy.Dialer = gnet.DialerTimeoutBean{ConnTimeout: 10 * time.Second}
+	var dialer proxy.Dialer = gnet.DialerTimeoutBean{ConnTimeout: r.dialTimeout()}
 
 	// Connect loop proxy server
 	for _, p := range proxyRoute {
@@ -52,7 +53,7 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 			dialer, err = (&sshlib.Proxy{Type: p.Type, Command: p.Name}).CreateProxyDialer()
 		default:
 			c, name := findServer(config.Server, p.Name)
-			pxy := &sshlib.Connect{ProxyDialer: dialer}
+			pxy := &sshlib.Connect{ProxyDialer: dialer, HandshakeTimeout: r.handshakeTimeout()}
 			err := pxy.CreateClient(c.Addr, c.Port, c.User, r.serverAuthMethodMap[name], c.Brg)
 			if err != nil {
 				return connect, err
@@ -76,12 +77,18 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 		return nil, err
 	}
 
+	// --check --check-mode tcp: 只探测端口，不做 SSH 握手与认证。
+	if r.CheckMode == CheckModeTCP {
+		return nil, r.dialTCPOnly(dialer, serverConfig)
+	}
+
 	x11 := serverConfig.X11 || r.X11 // set x11
 
 	// connect target server
 	connect = &sshlib.Connect{
 		ProxyDialer: dialer, ForwardAgent: serverConfig.SSHAgentUse,
-		Agent: r.agent, ForwardX11: x11, TTY: r.IsTerm, ConnectTimeout: serverConfig.ConnectTimeout,
+		Agent: r.agent, ForwardX11: x11, TTY: r.IsTerm, ConnectTimeout: r.connectTimeout(serverConfig),
+		HandshakeTimeout: r.handshakeTimeout(),
 		SendKeepAliveMax: serverConfig.ServerAliveCountMax, SendKeepAliveInterval: serverConfig.ServerAliveCountInterval,
 	}
 
@@ -93,6 +100,56 @@ func (r *Run) CreateSSHConnect(serverConfig *conf.ServerConfig, server string) (
 	}
 
 	return connect, err
+}
+
+// dialTimeout returns the TCP dial timeout.
+func (r *Run) dialTimeout() time.Duration {
+	if r.CheckTimeoutSeconds > 0 {
+		return time.Duration(r.CheckTimeoutSeconds) * time.Second
+	}
+
+	return 10 * time.Second
+}
+
+// handshakeTimeout bounds the ssh handshake, only set in check mode.
+func (r *Run) handshakeTimeout() time.Duration {
+	if r.CheckTimeoutSeconds > 0 {
+		return time.Duration(r.CheckTimeoutSeconds) * time.Second
+	}
+
+	return 0
+}
+
+// connectTimeout returns the ssh handshake timeout in seconds.
+func (r *Run) connectTimeout(serverConfig *conf.ServerConfig) int {
+	if r.CheckTimeoutSeconds > 0 {
+		return r.CheckTimeoutSeconds
+	}
+
+	return serverConfig.ConnectTimeout
+}
+
+// dialTCPOnly 只用已建好的代理链探测目标端口，随即关闭连接（--check --check-mode tcp）。
+func (r *Run) dialTCPOnly(dialer proxy.Dialer, serverConfig *conf.ServerConfig) error {
+	addr, port := resolveIP2Override(serverConfig.Addr, serverConfig.Port)
+
+	uri := net.JoinHostPort(addr, port)
+	targetInfo, uri := sshlib.CreateTargetInfo(uri, serverConfig.Brg)
+
+	conn, err := dialer.Dial("tcp", uri)
+	if err != nil {
+		return err
+	}
+
+	defer conn.Close()
+
+	for _, target := range targetInfo {
+		if _, err := conn.Write([]byte(target)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func proxyByEnv(serverConfig *conf.ServerConfig, forwarder proxy.Dialer) (proxy.Dialer, error) {

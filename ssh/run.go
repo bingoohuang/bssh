@@ -90,6 +90,12 @@ type Run struct {
 	// Map of AuthMethod used by target server
 	serverAuthMethodMap map[string][]ssh.AuthMethod
 
+	// CheckMode 连通性检查模式（ssh.CheckModeSSH / ssh.CheckModeTCP）。
+	// 非空时表示处于 --check 模式：不交互、不回写配置，并按 CheckTimeoutSeconds 覆盖连接超时。
+	CheckMode string
+	// CheckTimeoutSeconds 覆盖单台连接超时（秒），<=0 时沿用各主机的 connect_timeout。
+	CheckTimeoutSeconds int
+
 	decodedPasswordMap map[string]bool
 	confFile           string
 	webPort            int
@@ -353,6 +359,10 @@ func (r *Run) updatePromptPwd(promptTag, password, rawTemplLine string) {
 }
 
 func (r *Run) autoEncryptPwd() {
+	if r.CheckMode != "" { // --check 模式不回写配置文件
+		return
+	}
+
 	if !r.Conf.IsAutoEncryptPwd() || len(r.decodedPasswordMap) == 0 {
 		return
 	}

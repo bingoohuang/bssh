@@ -1,5 +1,36 @@
 # 变更日志
 
+## 2026-10-24
+
+### 新增 `--check` 连通性检查
+
+**文件**: `ssh/check.go`(新)、`ssh/connect.go`、`ssh/run.go`、`ssh/auth.go`、`sshlib/connect.go`、`app/ssh.go`
+
+#### 用法
+
+```bash
+bssh --check                         # 检查全部登记主机，输出可达列表
+bssh --check -H host-1,host-2        # 只检查指定主机
+bssh --check --check-all             # 不可达主机也一并输出
+bssh --check --check-timeout 1       # 单台超时（默认 3s）
+bssh --check --check-parallel 50     # 并发度（默认 32）
+bssh --check --check-mode tcp        # 只探测端口，不做 SSH 认证
+bssh --check --check-strict          # 存在不可达主机时退出码为 1
+```
+
+结果表列出 `SERVER NAME / CONNECT INFO / STATUS / LATENCY / REASON / NOTE`，
+末尾给出可直接复制的 `bssh -H <可达主机...> <command>`。
+
+#### 实现要点
+
+1. **并发探测**：`Run.CheckHosts` 用 `WaitGroup` + 信号量并发，结果按输入顺序输出。
+   认证方式（`CreateAuthMethodMap`）与 ssh-agent（`SetupSSHAgent`）都在并发前准备好，避免 data race。
+2. **只做连接**：不创建 session、不执行远程命令，成功后立即关闭连接。
+3. **超时必须双覆盖**：`ssh.ClientConfig.Timeout` 只作用于 `ssh.Dial`，`NewClientConn` 路径下不约束握手，
+   因此在 `sshlib.Connect` 上新增 `HandshakeTimeout`，握手期间设置 conn deadline，成功后清除。
+   同时 `--check-timeout` 覆盖 TCP 拨号超时（原固定 10s）。
+4. **无副作用**：`{Prompt}` 密码在 check 模式下不再交互式输入；`autoEncryptPwd` 在 check 模式下不回写配置文件。
+
 ## 2026-01-12
 
 ### 重构 IP2 环境变量处理逻辑

@@ -82,6 +82,11 @@ func (r *Run) registerAuthMapPassword(serverID, password, rawTemplLine string, a
 }
 
 func (r *Run) decodePassword(password, rawTemplLine string) string {
+	if r.CheckMode != "" && strings.EqualFold(password, "{Prompt}") {
+		// --check 模式不做交互式输入，该主机将因缺少认证方式而判定为 auth failed。
+		return ""
+	}
+
 	if strings.EqualFold(password, "{Prompt}") {
 		prompt := promptui.Prompt{
 			Label:       "Password",

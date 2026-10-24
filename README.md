@@ -72,6 +72,42 @@ bssh Server List:
 +---+-------------------------------+--------------------------------------+--------------------+
 ```
 
+### bssh check connectivity
+
+对配置中登记的全部主机（含 `~/.ssh/config`、include 文件、临时直连主机）做并发连通性探测，
+输出可达主机列表。只做连接，不执行任何远程命令，也不会交互式要密码、不会回写配置文件。
+
+```bash
+# 检查全部登记主机，只列出可达的
+$ bssh --check
+
+# 只检查指定主机，并把不可达的一并输出
+$ bssh --check -H host-1,host-2 --check-all
+
+# 只探测端口（不做 SSH 认证），1 秒超时，50 并发；有不可达时退出码为 1（便于脚本判断）
+$ bssh --check --check-mode tcp --check-timeout 1 --check-parallel 50 --check-strict
+```
+
+```bash
+$ bssh --check --check-all
+bssh Check Result: 6 hosts, 2 reachable, 4 unreachable, mode=ssh, elapsed 1.0s
+
++----+-------------+---------------------+--------+---------+-------------+----------+
+|  # | SERVER NAME | CONNECT INFO        | STATUS | LATENCY | REASON      | NOTE     |
++----+-------------+---------------------+--------+---------+-------------+----------+
+|  1 | host-1      | root@192.168.1.10   | OK     | 120ms   | ok          | 机房A    |
+|  2 | host-2      | root@192.168.1.11   | NG     | 1.0s    | timeout     | 机房A    |
+|  3 | host-3      | root@192.168.1.12   | NG     | 1ms     | refused     | 机房B    |
+|  4 | host-4      | root@192.168.1.13   | NG     | 30ms    | auth failed | 机房B    |
++----+-------------+---------------------+--------+---------+-------------+----------+
+
+Reachable(1): host-1
+Use: bssh -H host-1 <command>
+```
+
+`REASON` 取值：`ok`（可连通）/ `timeout`（超时）/ `refused`（端口拒绝）/ `dns`（无法解析）/
+`auth failed`（SSH 握手通但认证失败，说明机器还活着）/ `error`（其他，如端口不是 SSH）。
+
 ### bssh ssh
 
 run command.
@@ -101,6 +137,12 @@ option(bssh)
 	    --not-localrc                               not use local bashrc shell.
 	    --pshell, -s                                use parallel-shell(pshell) (alpha).
 	    --list, -l                                  print server list from config.
+	    --check, -k                                 check connectivity of the servers, and print the reachable ones.
+	    --check-timeout timeout                     connect timeout seconds per server in check mode. (default: 3)
+	    --check-parallel num                        concurrent num in check mode. (default: 32)
+	    --check-all                                 print unreachable servers in the result table too.
+	    --check-mode mode                           check mode: ssh(handshake and auth) or tcp(port only). (default: "ssh")
+	    --check-strict                              exit with code 1 if any server is unreachable.
 	    --help, -h                                  print this help
 	    --version, -v                               print the version
 

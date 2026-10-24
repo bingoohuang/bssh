@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bingoohuang/bssh/common"
 	"github.com/bingoohuang/bssh/conf"
@@ -44,6 +45,9 @@ USAGE:
 
     # parallel run command in select server over ssh, do it interactively.
     {{.Name}} -s
+
+    # check connectivity of all registered servers, print the reachable ones
+    {{.Name}} --check
 `
 
 // Lssh ssh ...
@@ -101,6 +105,14 @@ func Lssh() (app *cli.App) {
 		cli.BoolFlag{Name: "pshell,s", Usage: "use parallel-shell(pshell) (alpha)."},
 		cli.BoolFlag{Name: "list,l", Usage: "print server list from config."},
 		cli.BoolFlag{Name: "help,h", Usage: "print this help"},
+
+		// connectivity check option
+		cli.BoolFlag{Name: "check,k", Usage: "check connectivity of the servers, and print the reachable ones."},
+		cli.IntFlag{Name: "check-timeout", Value: 3, Usage: "connect `timeout` seconds per server in check mode."},
+		cli.IntFlag{Name: "check-parallel", Value: 32, Usage: "concurrent `num` in check mode."},
+		cli.BoolFlag{Name: "check-all", Usage: "print unreachable servers in the result table too."},
+		cli.StringFlag{Name: "check-mode", Value: "ssh", Usage: "check `mode`: ssh(handshake and auth) or tcp(port only)."},
+		cli.BoolFlag{Name: "check-strict", Usage: "exit with code 1 if any server is unreachable."},
 	}
 	app.EnableBashCompletion = true
 	app.HideHelp = true
@@ -124,6 +136,7 @@ func lsshAction(c *cli.Context) error {
 	}
 
 	processListFlag(c, names, data)
+	processCheckFlag(c, hosts, names, data, confpath)
 
 	r := sshcmd.NewRun(confpath)
 	r.ServerList = parseSelected("bssh>>", hosts, names, data, isMulti)
@@ -194,6 +207,49 @@ func processListFlag(c *cli.Context, names []string, cnf conf.Config) {
 
 	cnf.PrintServerList(names, true)
 	os.Exit(0)
+}
+
+// processCheckFlag 处理 --check: 探测全部（或 -H 指定的）主机连通性，输出可达列表后退出。
+func processCheckFlag(c *cli.Context, hosts, names []string, cnf conf.Config, confpath string) {
+	if !c.Bool("check") {
+		return
+	}
+
+	servers := names
+	if h := nonEmptyHosts(hosts); len(h) > 0 {
+		servers = h
+	}
+
+	r := sshcmd.NewRun(confpath)
+	r.Conf = cnf
+
+	results := r.CheckHosts(servers, sshcmd.CheckOptions{
+		Timeout:  time.Duration(c.Int("check-timeout")) * time.Second,
+		Parallel: c.Int("check-parallel"),
+		ShowAll:  c.Bool("check-all"),
+		Mode:     c.String("check-mode"),
+	})
+
+	if c.Bool("check-strict") {
+		for _, v := range results {
+			if !v.OK {
+				os.Exit(1)
+			}
+		}
+	}
+
+	os.Exit(0)
+}
+
+func nonEmptyHosts(hosts []string) []string {
+	result := make([]string, 0, len(hosts))
+	for _, h := range hosts {
+		if strings.TrimSpace(h) != "" {
+			result = append(result, h)
+		}
+	}
+
+	return result
 }
 
 func parseMode(c *cli.Context) string {

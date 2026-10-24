@@ -34,6 +34,11 @@ type Connect struct {
 	// Connect timeout second.
 	ConnectTimeout int
 
+	// HandshakeTimeout bounds the ssh handshake (banner exchange + auth).
+	// It is needed because ssh.ClientConfig.Timeout only applies to ssh.Dial,
+	// not to NewClientConn. <=0 means no limit.
+	HandshakeTimeout time.Duration
+
 	// SendKeepAliveMax and SendKeepAliveInterval
 	SendKeepAliveMax      int
 	SendKeepAliveInterval int
@@ -162,10 +167,18 @@ func (c *Connect) CreateClient(host, port, user string, authMethods []ssh.AuthMe
 		}
 	}
 
+	if c.HandshakeTimeout > 0 {
+		_ = netConn.SetDeadline(time.Now().Add(c.HandshakeTimeout))
+	}
+
 	// Create new ssh connect
 	sshCon, channel, req, err := ssh.NewClientConn(netConn, uri, sc)
 	if err != nil {
 		return
+	}
+
+	if c.HandshakeTimeout > 0 {
+		_ = netConn.SetDeadline(time.Time{})
 	}
 
 	// Create *ssh.Client
